@@ -1,0 +1,6 @@
+# Ignore VIM backups.
+*~
+
+# Ignore Intelli-J developer-specific files.
+**/workspace.xml
+**/tasks.xml
