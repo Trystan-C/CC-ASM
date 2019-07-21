@@ -4,6 +4,3 @@
 # Ignore Intelli-J developer-specific files.
 **/workspace.xml
 **/tasks.xml
-
-# Ignore Computer Craft emulator dependencies.
-ccemux-launcher.jar
