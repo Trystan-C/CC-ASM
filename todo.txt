@@ -1,6 +1,5 @@
-- Test the test_runner.
-- Create separate file system API that jus wraps CC's fs API.
-    - This should allow the code to be moved out of CC and
-      into another Lua environment.
-    - Small separation of concerns.
-- Refactor test_runner to use wrapper fs API.
+- Add source file parsing.
+- Add object code generation.
+- Add object file linking, i.e., "include."
+- Build debugger and memory viewer.
+- Add examples and tutorial/documentation.
