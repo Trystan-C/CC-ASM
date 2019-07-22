@@ -1,6 +1,5 @@
 $repoPath = "F:\Code\GitHub\CC-ASM";
-$srcDirPath = "$repoPath\src";
-$testDirPath = "$repoPath\test";
+$codePath = "$repoPath\ccasm";
 $ccemuDirPath = "C:\Users\Trystan\AppData\Roaming\ccemux\computer\0";
 
 function Delete-DirectoryIfExists($dirPath) {
@@ -22,5 +21,4 @@ function Copy-DirectoryToPath($fromPath, $toPath) {
     Copy-Item $fromPath $toPath -Recurse;
 }
 
-Copy-DirectoryToPath $srcDirPath $ccemuDirPath;
-Copy-DirectoryToPath $testDirPath $ccemuDirPath;
+Copy-DirectoryToPath $codePath $ccemuDirPath;

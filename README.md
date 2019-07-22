@@ -45,13 +45,13 @@ CC-ASM can be installed in two different scopes: locally and globally.
 ### Local Installation
 
 To install CC-ASM locally, clone this repository and copy the contents
-of the `src` to your computer's local directory. This location varies
+of the `ccasm` folder to your computer's local directory. This location varies
 between operating systems.
 
 ### Global Installation
 
-To install CC-ASM globally, clone this repository and copy the `src` directory
+To install CC-ASM globally, clone this repository and copy the `ccasm` directory
 into your Computer Craft installation's `rom` directory.
 
-Then, move the `assemble.lua` file from the `src` directory into the root
+Then, move the `assemble.lua` file from the `ccasm/src` directory into the root
 `rom` directory.
