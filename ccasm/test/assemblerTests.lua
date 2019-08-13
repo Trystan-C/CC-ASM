@@ -1,7 +1,12 @@
 os.loadAPI("/ccasm/src/assembler.lua");
 
-local objectCode = {};
-local binaryCodePtr = 1;
+local objectCode = nil;
+local binaryCodePtr = nil;
+
+local function clearAssembleOutput()
+    objectCode = {};
+    binaryCodePtr = 1;
+end
 
 local function assemble(code)
     objectCode = assembler.assemble(code);
@@ -11,12 +16,17 @@ local function getNextByteFromBinaryOutput()
     local nextByte = objectCode.binaryOutput[binaryCodePtr];
     binaryCodePtr = binaryCodePtr + 1;
 
+    if nextByte == nil then
+        local tooFewBytesMessage = "Ran out of bytes. Are some data not being appended?";
+        error(tooFewBytesMessage);
+    end
+
     return nextByte;
 end
 
-local function nextInstructionShouldBe(instruction)
+local function nextInstructionShouldBe(definition)
     local nextByte = getNextByteFromBinaryOutput();
-    local byteMatchesInstruction = nextByte == instruction;
+    local byteMatchesInstruction = nextByte == definition.byteValue;
     assert(byteMatchesInstruction, "Unexpected instruction.");
 end
 
@@ -40,13 +50,17 @@ end
 
 local testSuite = {
 
+    beforeEach = function()
+        clearAssembleOutput();
+    end,
+
     assembleMoveByteFromDataRegisterToDataRegister = function()
         assemble("moveByte d0, d1");
         nextInstructionShouldBe(instructions.moveByte);
-        nextOperandTypeShouldBe(operandTypes.dataRegister.id);
+        nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
         nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
         nextOperandShouldBe(cpu.dataRegisters[0].id);
-        nextOperandTypeShouldBe(operandTypes.dataRegister.id);
+        nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
         nextOperandSizeInBytesShouldBe(1);
         nextOperandShouldBe(cpu.dataRegisters[1].id);
     end

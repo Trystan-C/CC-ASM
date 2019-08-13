@@ -1,10 +1,26 @@
-os.loadAPI("/ccasm/src/instructions.lua");
-os.loadAPI("/ccasm/src/operandTypes.lua");
-os.loadAPI("/ccasm/src/cpu.lua");
+assert(os.loadAPI("/ccasm/src/instructions.lua"));
+assert(os.loadAPI("/ccasm/src/operandTypes.lua"));
+assert(os.loadAPI("/ccasm/src/cpu.lua"));
 
+local objectCode = {};
 local tokens = nil;
-local tokenIndex = 0;
+local tokenIndex = 1;
 local numTokens = 0;
+
+local function assertIsByte(byte)
+    assert(type(byte) == "number");
+    assert(math.floor(byte) == byte);
+    assert(byte >= 0 and byte <= 255);
+end
+
+local function appendBytesToBinaryOutput(...)
+    local bytes = { ... };
+
+    for _, byte in ipairs(bytes) do
+        assertIsByte(byte);
+        table.insert(objectCode.binaryOutput, byte);
+    end
+end
 
 local function parseTokensFromCode(code)
     local tokens = {};
@@ -46,53 +62,74 @@ local function isNextTokenAnInstruction()
 end
 
 local function isNextTokenAnOperand()
-    local nextToken = peekNextToken();
-    local operandType = operandTypes.getTypeFromToken(nextToken);
-
-    return operandType ~= operandTypes.invalidType;
+    return operandTypes.getType(peekNextToken()) ~= operandTypes.invalidType;
 end
 
-local function assembleNextTokenAsOperand(objectCode)
+local function appendOperandAsBinary(typeByte, sizeByte, valueBytes)
+    appendBytesToBinaryOutput(typeByte, sizeByte, unpack(valueBytes));
+end
+
+local function assembleNextTokenAsOperand()
     if not isNextTokenAnOperand() then
         throwUnexpectedSymbolError(token);
     end
+
+    local token = dequeueNextToken();
+    local definition = operandTypes[operandTypes.getType(token)]
+    local typeByte = definition.typeByte;
+    local value = definition.parseValueAsBytes(token);
+    local size = definition.sizeInBytes;
+
+    appendOperandAsBinary(typeByte, size, value);
 end
 
-local function assembleNextTokenAsInstruction(objectCode)
+local function appendInstructionAsBinary(instructionByte)
+    appendBytesToBinaryOutput(instructionByte);
+end
+
+local function assembleNextTokenAsInstruction()
     local definition = instructions[dequeueNextToken()];
     local numOperands = definition.numOperands;
 
+    appendInstructionAsBinary(definition.byteValue);
+
     for i = 1, numOperands do
-        assembleNextTokenAsOperand(objectCode);
+        assembleNextTokenAsOperand();
     end
 end
 
-local function assembleSymbol(objectCode)
+local function assembleSymbol()
 end
 
 local function isNextTokenAnUnusedSymbol()
     return false;
 end
 
-function assemble(code)
-    local objectCode = {
+local function clearObjectCode()
+    objectCode = {
         origin = nil,
         symbols = {},
         binaryOutput = {}
     };
+end
+
+function assemble(code)
+    clearObjectCode();
 
     tokens = parseTokensFromCode(code);
     numTokens = #tokens;
 
-    for i = 1, numTokens do
+    while tokenIndex <= numTokens do
         if isNextTokenAnInstruction() then
-            assembleNextTokenAsInstruction(objectCode);
+            assembleNextTokenAsInstruction();
         elseif not isNextTokenAnUnusedSymbol() then
-            assembleSymbol(objectCode);
+            assembleSymbol();
         else
+            local token = dequeueNextToken();
             throwUnexpectedSymbolError(token);
         end
     end
 
+    -- TODO: Create a deep copy of the object code table.
     return objectCode;
 end

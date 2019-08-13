@@ -1,1 +1,4 @@
-moveByte = 0;
+moveByte = {
+    byteValue = 0;
+    numOperands = 2;
+};
