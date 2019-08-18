@@ -57,6 +57,11 @@ local function throwUnexpectedSymbolError(token)
     error(message);
 end
 
+local function throwUnrecognizedOperandTypeError(token)
+    local message = "Unrecognized operand type for token: " .. tostring(token);
+    error(message);
+end
+
 local function isNextTokenAnInstruction()
     return instructions[peekNextToken()] ~= nil;
 end
@@ -76,9 +81,14 @@ local function assembleNextTokenAsOperand()
 
     local token = dequeueNextToken();
     local definition = operandTypes[operandTypes.getType(token)]
+
+    if definition == nil then
+        throwUnrecognizedOperandTypeError(token);
+    end
+
     local typeByte = definition.typeByte;
     local value = definition.parseValueAsBytes(token);
-    local size = definition.sizeInBytes;
+    local size = #value
 
     appendOperandAsBinary(typeByte, size, value);
 end
@@ -93,7 +103,7 @@ local function assembleNextTokenAsInstruction()
 
     appendInstructionAsBinary(definition.byteValue);
 
-    for i = 1, numOperands do
+    for _ = 1, numOperands do
         assembleNextTokenAsOperand();
     end
 end
@@ -105,7 +115,9 @@ local function isNextTokenAnUnusedSymbol()
     return false;
 end
 
-local function clearObjectCode()
+local function reset()
+    tokenIndex = 1;
+
     objectCode = {
         origin = nil,
         symbols = {},
@@ -113,8 +125,23 @@ local function clearObjectCode()
     };
 end
 
+-- NOTE: Does not support table keys or metatables.
+local function deepCopy(tbl)
+    local copy = {};
+
+    for key, value in pairs(tbl) do
+        if type(value) == "table" then
+            copy[key] = deepCopy(value);
+        else
+            copy[key] = value;
+        end
+    end
+
+    return copy;
+end
+
 function assemble(code)
-    clearObjectCode();
+    reset();
 
     tokens = parseTokensFromCode(code);
     numTokens = #tokens;
@@ -131,5 +158,5 @@ function assemble(code)
     end
 
     -- TODO: Create a deep copy of the object code table.
-    return objectCode;
+    return deepCopy(objectCode);
 end

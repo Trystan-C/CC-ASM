@@ -1,68 +1,61 @@
 os.loadAPI("/ccasm/src/assembler.lua");
-
-local objectCode = nil;
-local binaryCodePtr = nil;
-
-local function clearAssembleOutput()
-    objectCode = {};
-    binaryCodePtr = 1;
-end
-
-local function assemble(code)
-    objectCode = assembler.assemble(code);
-end
-
-local function getNextByteFromBinaryOutput()
-    local nextByte = objectCode.binaryOutput[binaryCodePtr];
-    binaryCodePtr = binaryCodePtr + 1;
-
-    if nextByte == nil then
-        local tooFewBytesMessage = "Ran out of bytes. Are some data not being appended?";
-        error(tooFewBytesMessage);
-    end
-
-    return nextByte;
-end
-
-local function nextInstructionShouldBe(definition)
-    local nextByte = getNextByteFromBinaryOutput();
-    local byteMatchesInstruction = nextByte == definition.byteValue;
-    assert(byteMatchesInstruction, "Unexpected instruction.");
-end
-
-local function nextOperandTypeShouldBe(operandType)
-    local nextByte = getNextByteFromBinaryOutput();
-    local byteMatchesOperandType = nextByte == operandType;
-    assert(byteMatchesOperandType, "Unexpected operand type.");
-end
-
-local function nextOperandSizeInBytesShouldBe(sizeInBytes)
-    local nextByte = getNextByteFromBinaryOutput();
-    local byteMatchesOperandSize = nextByte == sizeInBytes;
-    assert(byteMatchesOperandSize, "Unexpected operand size.");
-end
-
-local function nextOperandShouldBe(operand)
-    local nextByte = getNextByteFromBinaryOutput();
-    local byteMatchesOperand = nextByte == operand;
-    assert(byteMatchesOperand, "Unexpected operand value.");
-end
+os.loadAPI("/ccasm/test/fixtures/assemblerTestFixture.lua");
 
 local testSuite = {
 
-    beforeEach = function()
-        clearAssembleOutput();
+    assembleMoveByteFromDataRegisterToDataRegister = function()
+        assemblerTestFixture.assemble("moveByte d0, d1");
+        assemblerTestFixture.nextInstructionShouldBe(instructions.moveByte);
+        assemblerTestFixture.nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
+        assemblerTestFixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
+        assemblerTestFixture.nextOperandShouldBe(cpu.dataRegisters[0].id);
+        assemblerTestFixture.nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
+        assemblerTestFixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
+        assemblerTestFixture.nextOperandShouldBe(cpu.dataRegisters[1].id);
     end,
 
-    assembleMoveByteFromDataRegisterToDataRegister = function()
-        assemble("moveByte d0, d1");
-        nextInstructionShouldBe(instructions.moveByte);
-        nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
-        nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
-        nextOperandShouldBe(cpu.dataRegisters[0].id);
-        nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
-        nextOperandSizeInBytesShouldBe(1);
-        nextOperandShouldBe(cpu.dataRegisters[1].id);
+    assembleMoveByteFromAddressRegisterToAddressRegister = function()
+        assemblerTestFixture.assemble("moveByte A5, a0")
+        assemblerTestFixture.nextInstructionShouldBe(instructions.moveByte)
+        assemblerTestFixture.nextOperandTypeShouldBe(operandTypes.addressRegister.typeByte)
+        assemblerTestFixture.nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes)
+        assemblerTestFixture.nextOperandShouldBe(cpu.addressRegisters[5].id)
+        assemblerTestFixture.nextOperandTypeShouldBe(operandTypes.addressRegister.typeByte)
+        assemblerTestFixture.nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes)
+        assemblerTestFixture.nextOperandShouldBe(cpu.addressRegisters[0].id)
+    end,
+
+    assembleMoveByteImmediateDecimalToDataRegister = function()
+        assemblerTestFixture.assemble("moveByte #15, D3");
+        assemblerTestFixture.nextInstructionShouldBe(instructions.moveByte);
+        assemblerTestFixture.nextOperandTypeShouldBe(operandTypes.immediateData.typeByte);
+        assemblerTestFixture.nextOperandSizeInBytesShouldBe(1);
+        assemblerTestFixture.nextOperandShouldBe(15);
+        assemblerTestFixture.nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
+        assemblerTestFixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
+        assemblerTestFixture.nextOperandShouldBe(cpu.dataRegisters[3].id);
+    end,
+
+    assembleMoveByteImmediateHexToDataRegister = function()
+        assemblerTestFixture.assemble("moveByte #h0F, D3");
+        assemblerTestFixture.nextInstructionShouldBe(instructions.moveByte);
+        assemblerTestFixture.nextOperandTypeShouldBe(operandTypes.immediateData.typeByte);
+        assemblerTestFixture.nextOperandSizeInBytesShouldBe(1);
+        assemblerTestFixture.nextOperandShouldBe(15);
+        assemblerTestFixture.nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
+        assemblerTestFixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
+        assemblerTestFixture.nextOperandShouldBe(cpu.dataRegisters[3].id);
+    end,
+
+    assembleMoveByteImmediateBinaryToDataRegister = function()
+        assemblerTestFixture.assemble("moveByte #b101, D3");
+        assemblerTestFixture.nextInstructionShouldBe(instructions.moveByte);
+        assemblerTestFixture.nextOperandTypeShouldBe(operandTypes.immediateData.typeByte);
+        assemblerTestFixture.nextOperandSizeInBytesShouldBe(1);
+        assemblerTestFixture.nextOperandShouldBe(5);
+        assemblerTestFixture.nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
+        assemblerTestFixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
+        assemblerTestFixture.nextOperandShouldBe(cpu.dataRegisters[3].id);
     end
 
 };

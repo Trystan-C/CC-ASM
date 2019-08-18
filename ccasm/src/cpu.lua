@@ -1,9 +1,10 @@
 dataRegisters = {};
-
-dataRegisters[0] = {
-    id = 0
-};
-
-dataRegisters[1] = {
-    id = 1
-};
+addressRegisters = {};
+for i = 0, 7 do
+    dataRegisters[i] = {
+        id = i;
+    };
+    addressRegisters[i] = {
+        id = i;
+    };
+end
