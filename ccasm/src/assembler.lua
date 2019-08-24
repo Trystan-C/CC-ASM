@@ -74,7 +74,7 @@ local function appendOperandAsBinary(typeByte, sizeByte, valueBytes)
     appendBytesToBinaryOutput(typeByte, sizeByte, unpack(valueBytes));
 end
 
-local function assembleNextTokenAsOperand()
+local function assembleNextTokenAsOperand(verifiers)
     if not isNextTokenAnOperand() then
         throwUnexpectedSymbolError(token);
     end
@@ -90,6 +90,10 @@ local function assembleNextTokenAsOperand()
     local value = definition.parseValueAsBytes(token);
     local size = #value
 
+    for _, verifier in pairs(verifiers) do
+        verifier(definition, value, size);
+    end
+
     appendOperandAsBinary(typeByte, size, value);
 end
 
@@ -104,11 +108,13 @@ local function assembleNextTokenAsInstruction()
     appendInstructionAsBinary(definition.byteValue);
 
     for _ = 1, numOperands do
-        assembleNextTokenAsOperand();
+        local verifiers = definition.operandVerifiers or {};
+        assembleNextTokenAsOperand(verifiers);
     end
 end
 
 local function assembleSymbol()
+    error("Not implemented.");
 end
 
 local function isNextTokenAnUnusedSymbol()
@@ -157,6 +163,5 @@ function assemble(code)
         end
     end
 
-    -- TODO: Create a deep copy of the object code table.
     return deepCopy(objectCode);
 end

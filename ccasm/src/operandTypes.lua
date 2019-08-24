@@ -2,7 +2,7 @@ assert(os.loadAPI("/ccasm/src/cpu.lua"));
 
 local function assertValueIsInteger(value)
     local isInt = type(value) == "number" and math.floor(value) == value;
-    local errorMessage = "Cannot calculate size of non-integer value: " .. tostring(value);
+    local errorMessage = "Illegal non-integer value: " .. tostring(value);
     assert(isInt, errorMessage);
 end
 
@@ -75,7 +75,7 @@ end
 
 immediateData = {
     typeByte = 2,
-    pattern = "#([hb]?)(%w+)",
+    pattern = "#([hb]?)(%w+%.?%w*)",
     formats = {
         hex = "h",
         binary = "b"
@@ -92,7 +92,10 @@ immediateData.parseValueAsInt = function(token)
         base = 16;
     end
 
-    return tonumber(rawValue, base);
+    local parsedValue = tonumber(rawValue, base);
+    assertValueIsInteger(parsedValue);
+
+    return parsedValue;
 end
 
 immediateData.getSizeInBytes = function(token)

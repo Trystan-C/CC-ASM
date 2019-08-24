@@ -44,6 +44,11 @@ local function runTestSuite(testSuite)
     local afterEach = getAndRemoveFunctionEntry(testSuite, "afterEach");
     local afterAll = getAndRemoveFunctionEntry(testSuite, "afterAll");
 
+    if testSuite["only"] ~= nil then
+        print("->Running 'only' sub-suite<-");
+        return runTestSuite(testSuite["only"]);
+    end
+
     local passCount = 0;
     local failCount = 0;
 
