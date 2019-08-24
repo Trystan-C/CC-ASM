@@ -9,3 +9,8 @@ moveByte = {
         end
     };
 };
+
+moveWord = {
+    byteValue = 1;
+    numOperands = 2;
+};

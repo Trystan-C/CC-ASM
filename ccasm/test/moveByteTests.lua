@@ -9,10 +9,10 @@ local testSuite = {
     assembleMoveByteFromDataRegisterToDataRegister = function()
         fixture.assemble("moveByte d0, d1");
         fixture.nextInstructionShouldBe(instructions.moveByte);
-        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister);
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
         fixture.nextOperandShouldBe(cpu.dataRegisters[0].id);
-        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister);
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
         fixture.nextOperandShouldBe(cpu.dataRegisters[1].id);
     end,
@@ -20,21 +20,43 @@ local testSuite = {
     assembleMoveByteFromAddressRegisterToAddressRegister = function()
         fixture.assemble("moveByte A5, a0")
         fixture.nextInstructionShouldBe(instructions.moveByte)
-        fixture.nextOperandTypeShouldBe(operandTypes.addressRegister.typeByte)
+        fixture.nextOperandTypeShouldBe(operandTypes.addressRegister)
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes)
         fixture.nextOperandShouldBe(cpu.addressRegisters[5].id)
-        fixture.nextOperandTypeShouldBe(operandTypes.addressRegister.typeByte)
+        fixture.nextOperandTypeShouldBe(operandTypes.addressRegister)
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes)
         fixture.nextOperandShouldBe(cpu.addressRegisters[0].id)
+    end,
+
+    assembleMoveByteFromDataRegisterToAddressRegister = function()
+        fixture.assemble("moveByte d3, a6");
+        fixture.nextInstructionShouldBe(instructions.moveByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister);
+        fixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
+        fixture.nextOperandShouldBe(cpu.dataRegisters[3].id);
+        fixture.nextOperandTypeShouldBe(operandTypes.addressRegister);
+        fixture.nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes);
+        fixture.nextOperandShouldBe(cpu.addressRegisters[6].id);
+    end,
+
+    assembleMoveByteFromAddressRegisterToDataRegister = function()
+        fixture.assemble("moveByte A3, d0");
+        fixture.nextInstructionShouldBe(instructions.moveByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.addressRegister);
+        fixture.nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes);
+        fixture.nextOperandShouldBe(cpu.addressRegisters[3].id);
+        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister);
+        fixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
+        fixture.nextOperandShouldBe(cpu.dataRegisters[0].id);
     end,
 
     assembleMoveByteImmediateDecimalToDataRegister = function()
         fixture.assemble("moveByte #15, D3");
         fixture.nextInstructionShouldBe(instructions.moveByte);
-        fixture.nextOperandTypeShouldBe(operandTypes.immediateData.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.immediateData);
         fixture.nextOperandSizeInBytesShouldBe(1);
         fixture.nextOperandShouldBe(15);
-        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister);
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
         fixture.nextOperandShouldBe(cpu.dataRegisters[3].id);
     end,
@@ -42,10 +64,10 @@ local testSuite = {
     assembleMoveByteImmediateHexToDataRegister = function()
         fixture.assemble("moveByte #h0F, D3");
         fixture.nextInstructionShouldBe(instructions.moveByte);
-        fixture.nextOperandTypeShouldBe(operandTypes.immediateData.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.immediateData);
         fixture.nextOperandSizeInBytesShouldBe(1);
         fixture.nextOperandShouldBe(15);
-        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister);
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
         fixture.nextOperandShouldBe(cpu.dataRegisters[3].id);
     end,
@@ -53,10 +75,10 @@ local testSuite = {
     assembleMoveByteImmediateBinaryToDataRegister = function()
         fixture.assemble("moveByte #b101, D3");
         fixture.nextInstructionShouldBe(instructions.moveByte);
-        fixture.nextOperandTypeShouldBe(operandTypes.immediateData.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.immediateData);
         fixture.nextOperandSizeInBytesShouldBe(1);
         fixture.nextOperandShouldBe(5);
-        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.dataRegister);
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
         fixture.nextOperandShouldBe(cpu.dataRegisters[3].id);
     end,
@@ -64,10 +86,10 @@ local testSuite = {
     assembleMoveByteImmediateDecimalToAddressRegister = function()
         fixture.assemble("moveByte #20, a0");
         fixture.nextInstructionShouldBe(instructions.moveByte);
-        fixture.nextOperandTypeShouldBe(operandTypes.immediateData.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.immediateData);
         fixture.nextOperandSizeInBytesShouldBe(1);
         fixture.nextOperandShouldBe(20);
-        fixture.nextOperandTypeShouldBe(operandTypes.addressRegister.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.addressRegister);
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes);
         fixture.nextOperandShouldBe(cpu.addressRegisters[0].id);
     end,
@@ -75,10 +97,10 @@ local testSuite = {
     assembleMoveByteImmediateHexToAddressRegister = function()
         fixture.assemble("moveByte #h0A, A6");
         fixture.nextInstructionShouldBe(instructions.moveByte);
-        fixture.nextOperandTypeShouldBe(operandTypes.immediateData.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.immediateData);
         fixture.nextOperandSizeInBytesShouldBe(1);
         fixture.nextOperandShouldBe(10);
-        fixture.nextOperandTypeShouldBe(operandTypes.addressRegister.typeByte);
+        fixture.nextOperandTypeShouldBe(operandTypes.addressRegister);
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes);
         fixture.nextOperandShouldBe(cpu.addressRegisters[6].id);
     end,
@@ -105,7 +127,7 @@ local testSuite = {
         expect.errorToBeThrown(function()
             fixture.assemble("moveByte #1.5, d3");
         end);
-    end
+    end,
 
 };
 

@@ -29,7 +29,7 @@ local function runTest(testName, testFunc)
     local testPassed = false;
 
     if not success then
-        print("- Fail: " .. errorMessage);
+        print("- Fail: " .. tostring(errorMessage));
     else
         print("- Pass");
         testPassed = true;
