@@ -1,9 +1,10 @@
 assert(os.loadAPI("/ccasm/src/instructions.lua"));
+assert(os.loadAPI("/ccasm/src/macros.lua"));
 assert(os.loadAPI("/ccasm/src/operandTypes.lua"));
 assert(os.loadAPI("/ccasm/src/cpu.lua"));
 
 local objectCode = {};
-local tokens = nil;
+local tokens;
 local tokenIndex = 1;
 local numTokens = 0;
 
@@ -22,14 +23,23 @@ local function appendBytesToBinaryOutput(...)
     end
 end
 
+local function insertBytesIntoBinaryOutputAt(index, ...)
+    local bytes = { ... };
+
+    for offset, byte in ipairs(bytes) do
+        assertIsByte(byte);
+        objectCode.binaryOutput[index + offset - 1] = byte;
+    end
+end
+
 local function parseTokensFromCode(code)
-    local tokens = {};
+    local parsedTokens = {};
 
     for token in code:gmatch("[^%s\r\n\t,]+") do
-        table.insert(tokens, token);
+        table.insert(parsedTokens, token);
     end
 
-    return tokens;
+    return parsedTokens;
 end
 
 local function peekNextToken()
@@ -57,8 +67,13 @@ local function throwUnexpectedSymbolError(token)
     error(message);
 end
 
-local function throwUnrecognizedOperandTypeError(token)
-    local message = "Unrecognized operand type for token: " .. tostring(token);
+local function throwSymbolRedefinitionError(symbol)
+    local message = "Symbol cannot be defined more than once: " .. tostring(symbol) .. ".";
+    error(message);
+end
+
+local function throwSymbolUndeclaredError(symbol)
+    local message = "Symbol is used but never declared: " .. tostring(symbol) .. ".";
     error(message);
 end
 
@@ -74,7 +89,33 @@ local function appendOperandAsBinary(typeByte, sizeByte, valueBytes)
     appendBytesToBinaryOutput(typeByte, sizeByte, unpack(valueBytes));
 end
 
-local function assembleNextTokenAsOperand(verifiers)
+local function defineSymbol(symbol)
+    objectCode.symbols[symbol] = {
+        indexInBinaryOutput = nil;
+        fillIndices = {};
+    };
+end
+
+local function symbolExists(symbol)
+    return objectCode.symbols[symbol] ~= nil;
+end
+
+local function symbolIsDeclared(symbol)
+    return symbolExists(symbol) and objectCode.symbols[symbol].indexInBinaryOutput ~= nil;
+end
+
+local function markSymbolicAddressFillIndex(symbol)
+    if not symbolExists(symbol) then
+        defineSymbol(symbol)
+    end
+
+    -- Operand offset:
+    -- 1 (next entry) + 1 (type byte) + 1 (size byte)
+    local fillIndex = #objectCode.binaryOutput + 3;
+    table.insert(objectCode.symbols[symbol].fillIndices, fillIndex);
+end
+
+local function parseOperandFromNextToken(verifiers)
     if not isNextTokenAnOperand() then
         throwUnexpectedSymbolError(token);
     end
@@ -82,19 +123,33 @@ local function assembleNextTokenAsOperand(verifiers)
     local token = dequeueNextToken();
     local definition = operandTypes[operandTypes.getType(token)]
 
-    if definition == nil then
-        throwUnrecognizedOperandTypeError(token);
+    if definition == operandTypes.symbolicAddress then
+        markSymbolicAddressFillIndex(token);
     end
 
     local typeByte = definition.typeByte;
     local value = definition.parseValueAsBytes(token);
-    local size = #value
+    local size = #value;
 
     for _, verifier in pairs(verifiers) do
         verifier(definition, value, size);
     end
 
-    appendOperandAsBinary(typeByte, size, value);
+    return {
+        typeByte = typeByte;
+        valueBytes = value;
+        sizeInBytes = size;
+    };
+end
+
+local function assembleNextTokenAsInstructionOperand(verifiers)
+    local operand = parseOperandFromNextToken(verifiers);
+    appendOperandAsBinary(operand.typeByte, operand.sizeInBytes, operand.valueBytes);
+end
+
+local function assembleNextTokenAsMacroOperand(verifiers)
+    local operand = parseOperandFromNextToken(verifiers);
+    appendBytesToBinaryOutput(unpack(operand.valueBytes));
 end
 
 local function appendInstructionAsBinary(instructionByte)
@@ -109,16 +164,62 @@ local function assembleNextTokenAsInstruction()
 
     for _ = 1, numOperands do
         local verifiers = definition.operandVerifiers or {};
-        assembleNextTokenAsOperand(verifiers);
+        assembleNextTokenAsInstructionOperand(verifiers);
     end
 end
 
-local function assembleSymbol()
-    error("Not implemented.");
+local function assembleNextTokenAsMacro()
+    local definition = macros[dequeueNextToken()];
+
+    for _ = 1, definition.numOperands do
+        assembleNextTokenAsMacroOperand(definition.operandVerifiers);
+    end
 end
 
-local function isNextTokenAnUnusedSymbol()
-    return false;
+local function isNextTokenMacro()
+    return macros[peekNextToken()] ~= nil;
+end
+
+local function fillReferencesForSymbol(definition)
+    local indexInBinaryOutput = definition.indexInBinaryOutput;
+    local addressBytes = integer.getBytesForInteger(operandTypes.symbolicAddress.sizeInBytes, indexInBinaryOutput);
+
+    for _, fillIndex in ipairs(definition.fillIndices) do
+        insertBytesIntoBinaryOutputAt(fillIndex, unpack(addressBytes));
+    end
+end
+
+local function fillSymbolAddressReferences()
+    for symbol, definition in pairs(objectCode.symbols) do
+        if not symbolIsDeclared(symbol) then
+            throwSymbolUndeclaredError(symbol)
+        else
+            fillReferencesForSymbol(definition)
+        end
+    end
+end
+
+local function addSymbolicAddress(symbol)
+    if not symbolExists(symbol) then
+        defineSymbol(symbol);
+    end
+
+    objectCode.symbols[symbol].indexInBinaryOutput = #objectCode.binaryOutput + 1;
+end
+
+local function assembleNextTokenAsSymbol()
+    local symbol = dequeueNextToken();
+
+    if symbolIsDeclared(symbol) then
+        throwSymbolRedefinitionError(symbol);
+    end
+
+    addSymbolicAddress(symbol);
+end
+
+local function isNextTokenSymbol()
+    local token = peekNextToken();
+    return token:match("(%a[%w_]+)") == token;
 end
 
 local function reset()
@@ -155,13 +256,16 @@ function assemble(code)
     while tokenIndex <= numTokens do
         if isNextTokenAnInstruction() then
             assembleNextTokenAsInstruction();
-        elseif not isNextTokenAnUnusedSymbol() then
-            assembleSymbol();
+        elseif isNextTokenMacro() then
+            assembleNextTokenAsMacro();
+        elseif isNextTokenSymbol() then
+            assembleNextTokenAsSymbol();
         else
-            local token = dequeueNextToken();
-            throwUnexpectedSymbolError(token);
+            throwUnexpectedSymbolError(dequeueNextToken());
         end
     end
+
+    fillSymbolAddressReferences();
 
     return deepCopy(objectCode);
 end

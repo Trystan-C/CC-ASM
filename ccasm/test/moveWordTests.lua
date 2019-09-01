@@ -50,6 +50,57 @@ local testSuite = {
             .nextOperandShouldBe(cpu.dataRegisters[1].id);
     end,
 
+    assembleMoveWordImmediateDecimalToDataRegister = function()
+        fixture.assemble("moveWord #256, D2")
+            .nextInstructionShouldBe(instructions.moveWord)
+            .nextOperandTypeShouldBe(operandTypes.immediateData)
+            .nextOperandSizeInBytesShouldBe(2)
+            .nextOperandShouldBe(256)
+            .nextOperandTypeShouldBe(operandTypes.dataRegister)
+            .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
+            .nextOperandShouldBe(cpu.dataRegisters[2].id);
+    end,
+
+    assembleMoveWordImmediateHexToDataRegister = function()
+        fixture.assemble("moveWord #h0100, d4")
+            .nextInstructionShouldBe(instructions.moveWord)
+            .nextOperandTypeShouldBe(operandTypes.immediateData)
+            .nextOperandSizeInBytesShouldBe(2)
+            .nextOperandShouldBe(256)
+            .nextOperandTypeShouldBe(operandTypes.dataRegister)
+            .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
+            .nextOperandShouldBe(cpu.dataRegisters[4].id);
+    end,
+
+    assembleMoveWordImmediateBinaryToDataRegister = function()
+        fixture.assemble("moveWord #b0000000100000000, D5")
+            .nextInstructionShouldBe(instructions.moveWord)
+            .nextOperandTypeShouldBe(operandTypes.immediateData)
+            .nextOperandSizeInBytesShouldBe(2)
+            .nextOperandShouldBe(256)
+            .nextOperandTypeShouldBe(operandTypes.dataRegister)
+            .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
+            .nextOperandShouldBe(cpu.dataRegisters[5].id);
+    end,
+
+    assembleMoveWordWithDecimalOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("moveWord #65537, d0");
+        end);
+    end,
+
+    assembleMoveWordWithHexOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("moveWord #h010000, d0");
+        end);
+    end,
+
+    assembleMoveWordWithBinaryOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("moveWord #b000000010000000000000000, d0");
+        end);
+    end
+
 };
 
 return testSuite;

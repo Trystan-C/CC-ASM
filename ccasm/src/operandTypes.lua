@@ -1,41 +1,5 @@
-assert(os.loadAPI("/ccasm/src/cpu.lua"));
-
-local function assertValueIsInteger(value)
-    local isInt = type(value) == "number" and math.floor(value) == value;
-    local errorMessage = "Illegal non-integer value: " .. tostring(value);
-    assert(isInt, errorMessage);
-end
-
-local function getSizeInBytesForInteger(int)
-    assertValueIsInteger(int);
-    local power = 8;
-
-    while math.pow(2, power) - 1 < int do
-        power = power + 8;
-    end
-
-    return power / 8;
-end
-
--- NOTE: Big-endian order, e.g., 0x54 -> [1] = 00000101, [2] = 00000100
-local function getBytesForInteger(sizeInBytes, int)
-    local bytes = {};
-
-    -- Capture bytes in little-endian order.
-    for i = 1, sizeInBytes do
-        bytes[i] = bit.band(int, 0xFF);
-        bit.blogic_rshift(int, 8);
-    end
-
-    -- Reverse the order of the capture bytes.
-    for i = 1, sizeInBytes do
-        local tmp = bytes[i];
-        bytes[i] = bytes[sizeInBytes-i+1];
-        bytes[sizeInBytes-i+1] = tmp;
-    end
-
-    return bytes;
-end
+os.loadAPI("/ccasm/src/utils/integer.lua");
+os.loadAPI("/ccasm/src/cpu.lua");
 
 invalidType = {};
 
@@ -79,7 +43,7 @@ immediateData = {
     formats = {
         hex = "h",
         binary = "b"
-    }
+    };
 };
 
 immediateData.parseValueAsInt = function(token)
@@ -93,20 +57,41 @@ immediateData.parseValueAsInt = function(token)
     end
 
     local parsedValue = tonumber(rawValue, base);
-    assertValueIsInteger(parsedValue);
+    integer.assertValueIsInteger(parsedValue);
 
     return parsedValue;
 end
 
 immediateData.getSizeInBytes = function(token)
-    return getSizeInBytesForInteger(immediateData.parseValueAsInt(token));
+    return integer.getSizeInBytesForInteger(immediateData.parseValueAsInt(token));
 end
 
 immediateData.parseValueAsBytes = function(token)
     local size = immediateData.getSizeInBytes(token);
     local value = immediateData.parseValueAsInt(token);
 
-    return getBytesForInteger(size, value);
+    return integer.getBytesForInteger(size, value);
+end
+
+symbolicAddress = {
+    typeByte = 3;
+    pattern = "(%a[%w_]+)";
+    sizeInBytes = 4;
+};
+
+symbolicAddress.parseValueAsBytes = function(token)
+    local bytes = {};
+
+    for i = 1, symbolicAddress.sizeInBytes do
+        table.insert(bytes, 0);
+    end
+
+    return bytes;
+end
+
+local function throwUnrecognizedOperandTypeError(token)
+    local message = "Unrecognized operand type for token: " .. tostring(token);
+    error(message);
 end
 
 function getType(token)
@@ -120,5 +105,9 @@ function getType(token)
         return "addressRegister";
     elseif tokenTypeIs(immediateData) then
         return "immediateData";
+    elseif tokenTypeIs(symbolicAddress) then
+        return "symbolicAddress";
     end
+
+    throwUnrecognizedOperandTypeError(token);
 end

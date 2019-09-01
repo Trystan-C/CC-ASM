@@ -1,3 +1,4 @@
+os.loadAPI("/ccasm/src/utils/integer.lua");
 os.loadAPI("/ccasm/src/assembler.lua");
 
 local apiEnv = getfenv();
@@ -17,9 +18,31 @@ local function getNextByteFromBinaryOutput()
 end
 
 function nextOperandShouldBe(operand)
-    local nextByte = getNextByteFromBinaryOutput();
-    local byteMatchesOperand = nextByte == operand;
-    assert(byteMatchesOperand, "Unexpected operand value.");
+    local operandBytes = integer.getBytesForInteger(operand);
+
+    for _, operandByte in ipairs(operandBytes) do
+        local nextByte = getNextByteFromBinaryOutput();
+        local byteMatchesOperand = nextByte == operandByte;
+        assert(byteMatchesOperand, "Unexpected operand value.");
+    end
+
+    return {
+        nextInstructionShouldBe = apiEnv.nextInstructionShouldBe;
+        nextOperandTypeShouldBe = apiEnv.nextOperandTypeShouldBe;
+    };
+end
+
+function nextOperandShouldBeReferenceToSymbol(sizeInBytes, symbol)
+    apiEnv.symbolShouldExist(symbol);
+    local relativeAddress = objectCode.symbols[symbol].indexInBinaryOutput;
+    local addressBytes = integer.getBytesForInteger(sizeInBytes, relativeAddress);
+
+    for _, byte in ipairs(addressBytes) do
+        local nextByte = getNextByteFromBinaryOutput();
+        local condition = byte == nextByte;
+        local message = "Expected byte at " .. (binaryCodePtr - 1) .. " to equal " .. tostring(byte) .. ", but was " .. tostring(nextByte) .. ".";
+        assert(condition, message);
+    end
 
     return {
         nextInstructionShouldBe = apiEnv.nextInstructionShouldBe;
@@ -33,7 +56,10 @@ function nextOperandSizeInBytesShouldBe(sizeInBytes)
     assert(byteMatchesOperandSize, "Unexpected operand size.");
 
     return {
-        nextOperandShouldBe = nextOperandShouldBe;
+        nextOperandShouldBe = apiEnv.nextOperandShouldBe;
+        nextOperandShouldBeReferenceToSymbol = function(symbol)
+            return apiEnv.nextOperandShouldBeReferenceToSymbol(sizeInBytes, symbol);
+        end
     };
 end
 
@@ -44,7 +70,7 @@ function nextOperandTypeShouldBe(operandTypeDefinition)
     assert(byteMatchesOperandType, errorMessage);
 
     return {
-        nextOperandSizeInBytesShouldBe = nextOperandSizeInBytesShouldBe;
+        nextOperandSizeInBytesShouldBe = apiEnv.nextOperandSizeInBytesShouldBe;
     };
 end
 
@@ -54,7 +80,47 @@ function nextInstructionShouldBe(instructionDefinition)
     assert(byteMatchesInstruction, "Unexpected instruction.");
 
     return {
-        nextOperandTypeShouldBe = nextOperandTypeShouldBe;
+        nextOperandTypeShouldBe = apiEnv.nextOperandTypeShouldBe;
+    };
+end
+
+function offsetByBytes(numBytes)
+    binaryCodePtr = binaryCodePtr + numBytes;
+
+    return {
+        nextInstructionShouldBe = apiEnv.nextInstructionShouldBe;
+    };
+end
+
+function valueAtSymbolShouldBe(symbol, value)
+    local sizeInBytes = integer.getSizeInBytesForInteger(value);
+    local valueBytes = integer.getBytesForInteger(sizeInBytes, value);
+    local relativeAddress = objectCode.symbols[symbol].indexInBinaryOutput;
+    print("Relative address = " .. relativeAddress);
+
+    for offset, valueByte in ipairs(valueBytes) do
+        local nextByte = objectCode.binaryOutput[relativeAddress + offset - 1];
+        local condition = nextByte == valueByte;
+        local errorMessage = "Expected byte at symbol offset " .. (offset - 1) .. " to be " .. valueByte .. ", got " .. tostring(nextByte) .. ".";
+        assert(condition, errorMessage);
+    end
+
+    return {
+        nextInstructionShouldBe = apiEnv.nextInstructionShouldBe;
+        offsetByBytes = apiEnv.offsetByBytes;
+    };
+end
+
+function symbolShouldExist(symbol)
+    local symbolExists = objectCode.symbols[symbol] ~= nil;
+    local errorMessage = "Expected symbol '" .. symbol .. "' to exist.";
+    assert(symbolExists, errorMessage);
+
+    return {
+        nextInstructionShouldBe = apiEnv.nextInstructionShouldBe;
+        valueAtSymbolShouldBe = function(value)
+            return apiEnv.valueAtSymbolShouldBe(symbol, value);
+        end
     };
 end
 
@@ -68,6 +134,7 @@ function assemble(code)
     objectCode = assembler.assemble(code);
 
     return {
-        nextInstructionShouldBe = nextInstructionShouldBe;
+        nextInstructionShouldBe = apiEnv.nextInstructionShouldBe;
+        symbolShouldExist = apiEnv.symbolShouldExist;
     };
 end
