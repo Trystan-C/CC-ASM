@@ -99,6 +99,16 @@ local testSuite = {
         expect.errorToBeThrown(function()
             fixture.assemble("moveWord #b000000010000000000000000, d0");
         end);
+    end,
+
+    assembleMoveWordBetweenSymbolicAddressesThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                addr1 declareByte #12
+                moveWord addr1, addr2
+                addr2 declareByte #24
+            ]]);
+        end);
     end
 
 };

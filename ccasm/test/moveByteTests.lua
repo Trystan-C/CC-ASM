@@ -129,7 +129,7 @@ local testSuite = {
         end);
     end,
 
-    assembleMoveByteFromAddressToAddressThrowsError = function()
+    assembleMoveByteBetweenSymbolicAddressesThrowsError = function()
         expect.errorToBeThrown(function()
             fixture.assemble([[
                 addr1 declareByte #25

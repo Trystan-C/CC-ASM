@@ -173,7 +173,6 @@ local function assembleNextTokenAsInstruction()
         table.insert(operands, operand);
     end
 
-    print("#operands = " .. #operands);
     for _, groupVerifier in pairs((definition.groupOperandVerifiers or {})) do
         groupVerifier(unpack(operands));
     end

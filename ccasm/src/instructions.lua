@@ -34,5 +34,13 @@ moveWord = {
             end
         end
     };
+    groupOperandVerifiers = {
+      cannotMoveBetweenAddresses = function(operand1, operand2)
+            local condition = not (operand1.definition == operandTypes.symbolicAddress and
+                              operand2.definition == operandTypes.symbolicAddress);
+            local errorMessage = "moveWord: Cannot move directly between direct or indirect addresses addresses.";
+            assert(condition, errorMessage);
+        end
+    };
 };
 
