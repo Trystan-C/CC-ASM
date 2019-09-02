@@ -129,6 +129,16 @@ local testSuite = {
         end);
     end,
 
+    assembleMoveByteFromAddressToAddressThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                addr1 declareByte #25
+                addr2 declareByte #15
+                moveByte addr1, addr2
+            ]]);
+        end);
+    end
+
 };
 
 return testSuite;

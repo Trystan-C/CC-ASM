@@ -46,7 +46,7 @@ local testSuite = {
            .nextOperandTypeShouldBe(operandTypes.symbolicAddress)
            .nextOperandSizeInBytesShouldBe(operandTypes.symbolicAddress.sizeInBytes)
            .nextOperandShouldBeReferenceToSymbol("var");
-    end
+    end,
 
 };
 

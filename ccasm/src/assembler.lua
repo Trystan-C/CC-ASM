@@ -127,24 +127,28 @@ local function parseOperandFromNextToken(verifiers)
         markSymbolicAddressFillIndex(token);
     end
 
-    local typeByte = definition.typeByte;
-    local value = definition.parseValueAsBytes(token);
-    local size = #value;
+    local operand = {
+        definition = definition;
+        valueBytes = definition.parseValueAsBytes(token);
+    };
+    operand.sizeInBytes = #operand.valueBytes;
 
     for _, verifier in pairs(verifiers) do
-        verifier(definition, value, size);
+        verifier(operand);
     end
 
-    return {
-        typeByte = typeByte;
-        valueBytes = value;
-        sizeInBytes = size;
-    };
+    return operand;
 end
 
 local function assembleNextTokenAsInstructionOperand(verifiers)
     local operand = parseOperandFromNextToken(verifiers);
-    appendOperandAsBinary(operand.typeByte, operand.sizeInBytes, operand.valueBytes);
+    appendOperandAsBinary(
+            operand.definition.typeByte,
+            operand.sizeInBytes,
+            operand.valueBytes
+    );
+
+    return operand;
 end
 
 local function assembleNextTokenAsMacroOperand(verifiers)
@@ -159,12 +163,19 @@ end
 local function assembleNextTokenAsInstruction()
     local definition = instructions[dequeueNextToken()];
     local numOperands = definition.numOperands;
+    local operands = {};
 
     appendInstructionAsBinary(definition.byteValue);
 
     for _ = 1, numOperands do
-        local verifiers = definition.operandVerifiers or {};
-        assembleNextTokenAsInstructionOperand(verifiers);
+        local verifiers = definition.individualOperandVerifiers or {};
+        local operand = assembleNextTokenAsInstructionOperand(verifiers);
+        table.insert(operands, operand);
+    end
+
+    print("#operands = " .. #operands);
+    for _, groupVerifier in pairs((definition.groupOperandVerifiers or {})) do
+        groupVerifier(unpack(operands));
     end
 end
 
@@ -172,7 +183,7 @@ local function assembleNextTokenAsMacro()
     local definition = macros[dequeueNextToken()];
 
     for _ = 1, definition.numOperands do
-        assembleNextTokenAsMacroOperand(definition.operandVerifiers);
+        assembleNextTokenAsMacroOperand(definition.individualOperandVerifiers);
     end
 end
 
