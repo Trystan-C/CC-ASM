@@ -137,6 +137,18 @@ local testSuite = {
                 moveByte addr1, addr2
             ]]);
         end);
+    end,
+
+    assembleMoveByteWithMalformedImmediateDataThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("moveByte #FF, d0");
+        end);
+        expect.errorToBeThrown(function()
+            fixture.assemble("moveByte #hZZ, A3");
+        end);
+        expect.errorToBeThrown(function()
+            fixture.assemble("moveByte #b2");
+        end);
     end
 
 };

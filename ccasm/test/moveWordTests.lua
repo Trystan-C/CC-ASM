@@ -101,6 +101,39 @@ local testSuite = {
         end);
     end,
 
+    assembleMoveWordFromSymbolicAddressToDataRegister = function()
+        fixture.assemble([[
+            moveWord var, d0
+            var declareByte #255
+        ]])
+            .symbolShouldExist("var")
+            .valueAtSymbolShouldBe(255)
+            .nextInstructionShouldBe(instructions.moveWord)
+            .nextOperandTypeShouldBe(operandTypes.symbolicAddress)
+            .nextOperandSizeInBytesShouldBe(operandTypes.symbolicAddress.sizeInBytes)
+            .nextOperandShouldBeReferenceToSymbol("var")
+            .nextOperandTypeShouldBe(operandTypes.dataRegister)
+            .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
+            .nextOperandShouldBe(cpu.dataRegisters[0].id);
+    end,
+
+    assembleMoveWordFromDataRegisterToSymbolicAddress = function()
+        fixture.assemble([[
+            var declareByte #hA3
+            moveWord D5, var
+        ]])
+            .symbolShouldExist("var")
+            .valueAtSymbolShouldBe(0xA3)
+            .offsetByBytes(1)
+            .nextInstructionShouldBe(instructions.moveWord)
+            .nextOperandTypeShouldBe(operandTypes.dataRegister)
+            .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
+            .nextOperandShouldBe(cpu.dataRegisters[5].id)
+            .nextOperandTypeShouldBe(operandTypes.symbolicAddress)
+            .nextOperandSizeInBytesShouldBe(operandTypes.symbolicAddress.sizeInBytes)
+            .nextOperandShouldBeReferenceToSymbol("var");
+    end,
+
     assembleMoveWordBetweenSymbolicAddressesThrowsError = function()
         expect.errorToBeThrown(function()
             fixture.assemble([[

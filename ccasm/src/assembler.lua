@@ -236,9 +236,9 @@ local function reset()
     tokenIndex = 1;
 
     objectCode = {
-        origin = nil,
-        symbols = {},
-        binaryOutput = {}
+        origin = 0;
+        symbols = {};
+        binaryOutput = {};
     };
 end
 

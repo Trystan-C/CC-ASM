@@ -20,6 +20,9 @@ moveByte = {
             assert(condition, errorMessage);
         end
     };
+    execute = function(operands)
+        print("execute: moveByte");
+    end
 };
 
 moveWord = {
@@ -42,5 +45,20 @@ moveWord = {
             assert(condition, errorMessage);
         end
     };
+    execute = function(operands)
+        print("execute: moveWord");
+    end
 };
 
+local function isInstructionDefinition(definition)
+    return type(definition) == "table" and
+            definition.byteValue ~= nil and
+            definition.numOperands ~= nil;
+end
+
+byteToDefinitionMap = {};
+for name, definition in pairs(getfenv()) do
+    if isInstructionDefinition(definition) then
+        byteToDefinitionMap[definition.byteValue] = definition;
+    end
+end

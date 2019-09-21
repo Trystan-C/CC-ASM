@@ -1,5 +1,0 @@
-- Add source file parsing.
-- Add object code generation.
-- Add object file linking, i.e., "include."
-- Build debugger and memory viewer.
-- Add examples and tutorial/documentation.

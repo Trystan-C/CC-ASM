@@ -96,7 +96,6 @@ function valueAtSymbolShouldBe(symbol, value)
     local sizeInBytes = integer.getSizeInBytesForInteger(value);
     local valueBytes = integer.getBytesForInteger(sizeInBytes, value);
     local relativeAddress = objectCode.symbols[symbol].indexInBinaryOutput;
-    print("Relative address = " .. relativeAddress);
 
     for offset, valueByte in ipairs(valueBytes) do
         local nextByte = objectCode.binaryOutput[relativeAddress + offset - 1];

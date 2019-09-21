@@ -1,5 +1,4 @@
 os.loadAPI("/ccasm/src/utils/integer.lua");
-os.loadAPI("/ccasm/src/cpu.lua");
 
 invalidType = {};
 
@@ -17,13 +16,13 @@ dataRegister.parseValueAsBytes = function(token)
         error(errorMessage);
     end
 
-    return { cpu.dataRegisters[tonumber(registerId)].id };
+    return { tonumber(registerId) };
 end
 
 addressRegister = {
     typeByte = 1,
     sizeInBytes = 1,
-    pattern = "[aA](%d)"
+    pattern = "^[aA](%d)$"
 };
 
 addressRegister.parseValueAsBytes = function(token)
@@ -34,7 +33,7 @@ addressRegister.parseValueAsBytes = function(token)
         error(errorMessage);
     end
 
-    return { cpu.addressRegisters[tonumber(registerId)].id };
+    return { tonumber(registerId) };
 end
 
 immediateData = {
@@ -76,13 +75,16 @@ end
 symbolicAddress = {
     typeByte = 3;
     pattern = "(%a[%w_]+)";
-    sizeInBytes = 4;
+    sizeInBytes = 2;
 };
 
+-- Returns a zero array for use as a place-holder.
+-- References to this address will be filled after the
+-- entire source has been passed over.
 symbolicAddress.parseValueAsBytes = function(token)
     local bytes = {};
 
-    for i = 1, symbolicAddress.sizeInBytes do
+    for _ = 1, symbolicAddress.sizeInBytes do
         table.insert(bytes, 0);
     end
 
@@ -91,6 +93,11 @@ end
 
 local function throwUnrecognizedOperandTypeError(token)
     local message = "Unrecognized operand type for token: " .. tostring(token);
+    error(message);
+end
+
+local function throwUnrecognizedOperandTypeByteError(typeByte)
+    local message = "Unrecognized operand type for byte: " .. tostring(token);
     error(message);
 end
 
@@ -110,4 +117,19 @@ function getType(token)
     end
 
     throwUnrecognizedOperandTypeError(token);
+end
+
+local typeToDefinitionMap = {};
+for name, definition in pairs(getfenv()) do
+    if type(definition) == "table" and type(definition.typeByte) == "number" then
+        typeToDefinitionMap[definition.typeByte] = definition;
+    end
+end
+
+function getDefinition(typeByte)
+    if typeToDefinitionMap[typeByte] == nil then
+        throwUnrecognizedOperandTypeByteError(typeByte);
+    end
+
+    return typeToDefinitionMap[typeByte];
 end
