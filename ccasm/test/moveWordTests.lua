@@ -1,6 +1,7 @@
-os.loadAPI("/ccasm/src/assembler.lua");
-os.loadAPI("/ccasm/test/utils/expect.lua");
-os.loadAPI("/ccasm/test/fixtures/assemblerTestFixture.lua");
+assert(os.loadAPI("/ccasm/src/assembler.lua"));
+assert(os.loadAPI("/ccasm/src/registers.lua"));
+assert(os.loadAPI("/ccasm/test/utils/expect.lua"));
+assert(os.loadAPI("/ccasm/test/fixtures/assemblerTestFixture.lua"));
 
 local fixture = assemblerTestFixture;
 
@@ -11,10 +12,10 @@ local testSuite = {
         fixture.nextInstructionShouldBe(instructions.moveWord);
         fixture.nextOperandTypeShouldBe(operandTypes.dataRegister);
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
-        fixture.nextOperandShouldBe(cpu.dataRegisters[5].id);
+        fixture.nextOperandShouldBe(registers.dataRegisters[5].id);
         fixture.nextOperandTypeShouldBe(operandTypes.dataRegister);
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes);
-        fixture.nextOperandShouldBe(cpu.dataRegisters[2].id);
+        fixture.nextOperandShouldBe(registers.dataRegisters[2].id);
     end,
 
     assembleMoveWordFromAddressRegisterToAddressRegister = function()
@@ -22,10 +23,10 @@ local testSuite = {
         fixture.nextInstructionShouldBe(instructions.moveWord);
         fixture.nextOperandTypeShouldBe(operandTypes.addressRegister);
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes);
-        fixture.nextOperandShouldBe(cpu.dataRegisters[0].id);
+        fixture.nextOperandShouldBe(registers.dataRegisters[0].id);
         fixture.nextOperandTypeShouldBe(operandTypes.addressRegister);
         fixture.nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes);
-        fixture.nextOperandShouldBe(cpu.addressRegisters[4].id);
+        fixture.nextOperandShouldBe(registers.addressRegisters[4].id);
     end,
 
     assembleMoveWordFromDataRegisterToAddressRegister = function()
@@ -33,10 +34,10 @@ local testSuite = {
             .nextInstructionShouldBe(instructions.moveWord)
             .nextOperandTypeShouldBe(operandTypes.dataRegister)
             .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
-            .nextOperandShouldBe(cpu.dataRegisters[1].id)
+            .nextOperandShouldBe(registers.dataRegisters[1].id)
             .nextOperandTypeShouldBe(operandTypes.addressRegister)
             .nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes)
-            .nextOperandShouldBe(cpu.addressRegisters[1].id);
+            .nextOperandShouldBe(registers.addressRegisters[1].id);
     end,
 
     assembleMoveWordFromAddressRegisterToDataRegister = function()
@@ -44,10 +45,10 @@ local testSuite = {
             .nextInstructionShouldBe(instructions.moveWord)
             .nextOperandTypeShouldBe(operandTypes.addressRegister)
             .nextOperandSizeInBytesShouldBe(operandTypes.addressRegister.sizeInBytes)
-            .nextOperandShouldBe(cpu.addressRegisters[6].id)
+            .nextOperandShouldBe(registers.addressRegisters[6].id)
             .nextOperandTypeShouldBe(operandTypes.dataRegister)
             .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
-            .nextOperandShouldBe(cpu.dataRegisters[1].id);
+            .nextOperandShouldBe(registers.dataRegisters[1].id);
     end,
 
     assembleMoveWordImmediateDecimalToDataRegister = function()
@@ -58,7 +59,7 @@ local testSuite = {
             .nextOperandShouldBe(256)
             .nextOperandTypeShouldBe(operandTypes.dataRegister)
             .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
-            .nextOperandShouldBe(cpu.dataRegisters[2].id);
+            .nextOperandShouldBe(registers.dataRegisters[2].id);
     end,
 
     assembleMoveWordImmediateHexToDataRegister = function()
@@ -69,7 +70,7 @@ local testSuite = {
             .nextOperandShouldBe(256)
             .nextOperandTypeShouldBe(operandTypes.dataRegister)
             .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
-            .nextOperandShouldBe(cpu.dataRegisters[4].id);
+            .nextOperandShouldBe(registers.dataRegisters[4].id);
     end,
 
     assembleMoveWordImmediateBinaryToDataRegister = function()
@@ -80,7 +81,7 @@ local testSuite = {
             .nextOperandShouldBe(256)
             .nextOperandTypeShouldBe(operandTypes.dataRegister)
             .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
-            .nextOperandShouldBe(cpu.dataRegisters[5].id);
+            .nextOperandShouldBe(registers.dataRegisters[5].id);
     end,
 
     assembleMoveWordWithDecimalOperandTooLargeThrowsError = function()
@@ -114,7 +115,7 @@ local testSuite = {
             .nextOperandShouldBeReferenceToSymbol("var")
             .nextOperandTypeShouldBe(operandTypes.dataRegister)
             .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
-            .nextOperandShouldBe(cpu.dataRegisters[0].id);
+            .nextOperandShouldBe(registers.dataRegisters[0].id);
     end,
 
     assembleMoveWordFromDataRegisterToSymbolicAddress = function()
@@ -128,7 +129,7 @@ local testSuite = {
             .nextInstructionShouldBe(instructions.moveWord)
             .nextOperandTypeShouldBe(operandTypes.dataRegister)
             .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
-            .nextOperandShouldBe(cpu.dataRegisters[5].id)
+            .nextOperandShouldBe(registers.dataRegisters[5].id)
             .nextOperandTypeShouldBe(operandTypes.symbolicAddress)
             .nextOperandSizeInBytesShouldBe(operandTypes.symbolicAddress.sizeInBytes)
             .nextOperandShouldBeReferenceToSymbol("var");

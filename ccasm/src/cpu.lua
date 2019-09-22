@@ -1,19 +1,8 @@
 assert(os.loadAPI("/ccasm/src/memory.lua"));
+assert(os.loadAPI("/ccasm/src/registers.lua"));
 assert(os.loadAPI("/ccasm/src/instructions.lua"));
 
-dataRegisters = {};
-addressRegisters = {};
 programCounter = 0;
-for i = 0, 7 do
-    dataRegisters[i] = {
-        id = i;
-        value = 0;
-    };
-    addressRegisters[i] = {
-        id = i;
-        value = 0;
-    };
-end
 
 local function throwUnsupportedInstructionError(byte)
     local message = "Unsupported instruction byte: " .. tostring(byte) .. ".";
@@ -63,11 +52,11 @@ local function executeInstruction(definition)
 end
 
 function step()
-    dataRegisters[1].value = 10;
-    dataRegisters[5].value = 10;
-    addressRegisters[3].value = 256;
-    addressRegisters[0].value = 0xFFFF;
-    addressRegisters[2].value = 0xFF;
+    registers.dataRegisters[1].value = 10;
+    registers.dataRegisters[5].value = 10;
+    registers.addressRegisters[3].value = 256;
+    registers.addressRegisters[0].value = 0xFFFF;
+    registers.addressRegisters[2].value = 0xFF;
 
     executeInstruction(loadInstruction());
 end

@@ -1,12 +1,13 @@
 assert(os.loadAPI("/ccasm/src/assembler.lua"));
 assert(os.loadAPI("/ccasm/src/memory.lua"));
+assert(os.loadAPI("/ccasm/src/registers.lua"));
 assert(os.loadAPI("/ccasm/src/cpu.lua"));
 
 local objectCode;
 local apiEnv = {};
 
 apiEnv.assertAddressRegisterValueIs = function(id, value)
-    local actualValue = cpu.addressRegisters[id].value;
+    local actualValue = registers.addressRegisters[id].value;
     local condition = actualValue == value;
     local errorMessage = "Expected address register #" .. tostring(id) ..
             " to have value " .. tostring(value) .. " but was " ..
@@ -14,13 +15,14 @@ apiEnv.assertAddressRegisterValueIs = function(id, value)
     assert(condition, errorMessage);
 
     return {
+        step = apiEnv.step;
         dataRegister = apiEnv.dataRegister;
         addressRegister = apiEnv.addressRegister;
     };
 end
 
 apiEnv.assertDataRegisterValueIs = function(id, value)
-    local actualValue = cpu.dataRegisters[id].value;
+    local actualValue = registers.dataRegisters[id].value;
     local condition = actualValue == value;
     local errorMessage = "Expected data register #" .. tostring(id) ..
             " to have value " .. tostring(value) .. " but was " ..
@@ -28,7 +30,9 @@ apiEnv.assertDataRegisterValueIs = function(id, value)
     assert(condition, errorMessage);
 
     return {
+        step = apiEnv.step;
         dataRegister = apiEnv.dataRegister;
+        addressRegister = apiEnv.addressRegister;
     };
 end
 
@@ -48,7 +52,7 @@ apiEnv.dataRegister = function (id)
     };
 end
 
-local function step(steps)
+apiEnv.step = function(steps)
     if steps == nil then
         steps = 1;
     end
@@ -70,7 +74,7 @@ local function load()
     cpu.programCounter = objectCode.origin;
 
     return {
-        step = step;
+        step = apiEnv.step;
     };
 end
 

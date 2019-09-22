@@ -1,4 +1,5 @@
 assert(os.loadAPI("/ccasm/src/operandTypes.lua"));
+assert(os.loadAPI("/ccasm/src/registers.lua"));
 
 moveByte = {
     byteValue = 0;
@@ -21,7 +22,7 @@ moveByte = {
         end
     };
     execute = function(operands)
-        print("execute: moveByte");
+        registers.dataRegisters[0].value = 5;
     end
 };
 
@@ -46,7 +47,7 @@ moveWord = {
         end
     };
     execute = function(operands)
-        print("execute: moveWord");
+        print("TODO: execute--moveWord");
     end
 };
 

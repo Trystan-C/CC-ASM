@@ -1,5 +1,6 @@
 os.loadAPI("/ccasm/test/utils/expect.lua");
 os.loadAPI("/ccasm/test/fixtures/assemblerTestFixture.lua");
+os.loadAPI("/ccasm/src/registers.lua");
 
 local fixture = assemblerTestFixture;
 
@@ -19,7 +20,7 @@ local testSuite = {
             .nextOperandShouldBeReferenceToSymbol("var")
             .nextOperandTypeShouldBe(operandTypes.dataRegister)
             .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
-            .nextOperandShouldBe(cpu.dataRegisters[0].id);
+            .nextOperandShouldBe(registers.dataRegisters[0].id);
     end,
 
     assembleMoveByteFromDeferredSymbolicAddress = function()
@@ -27,12 +28,15 @@ local testSuite = {
             moveByte var, D3
             var declareByte #h0A
             ]])
-           .symbolShouldExist("var")
-           .valueAtSymbolShouldBe(10)
-           .nextInstructionShouldBe(instructions.moveByte)
-           .nextOperandTypeShouldBe(operandTypes.symbolicAddress)
-           .nextOperandSizeInBytesShouldBe(operandTypes.symbolicAddress.sizeInBytes)
-           .nextOperandShouldBeReferenceToSymbol("var");
+            .symbolShouldExist("var")
+            .valueAtSymbolShouldBe(10)
+            .nextInstructionShouldBe(instructions.moveByte)
+            .nextOperandTypeShouldBe(operandTypes.symbolicAddress)
+            .nextOperandSizeInBytesShouldBe(operandTypes.symbolicAddress.sizeInBytes)
+            .nextOperandShouldBeReferenceToSymbol("var")
+            .nextOperandTypeShouldBe(operandTypes.dataRegister)
+            .nextOperandSizeInBytesShouldBe(operandTypes.dataRegister.sizeInBytes)
+            .nextOperandShouldBe(registers.dataRegisters[3].id);
     end
 
 };
