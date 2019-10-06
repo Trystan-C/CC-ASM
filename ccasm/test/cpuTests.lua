@@ -33,14 +33,14 @@ local testSuite = {
 
     moveDataBetweenDataAndAddressRegisters = function()
         fixture.assemble([[
-        moveWord #hFFFF, D0
-        moveByte d0, a2
-    ]])
+            moveWord #hFFFF, D0
+            moveByte d0, a2
+        ]])
                .load()
                .step(2)
                .dataRegister(0).hasValue(0xFFFF)
                .addressRegister(2).hasValue(0xFF);
-    end
+    end,
 
 };
 

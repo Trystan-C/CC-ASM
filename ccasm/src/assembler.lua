@@ -153,11 +153,6 @@ local function assembleNextTokenAsInstructionOperand(verifiers)
     return operand;
 end
 
-local function assembleNextTokenAsMacroOperand(verifiers)
-    local operand = parseOperandFromNextToken(verifiers);
-    appendBytesToBinaryOutput(unpack(operand.valueBytes));
-end
-
 local function appendInstructionAsBinary(instructionByte)
     appendBytesToBinaryOutput(instructionByte);
 end
@@ -182,10 +177,14 @@ end
 
 local function assembleNextTokenAsMacro()
     local definition = macros[dequeueNextToken()];
+    local operands = {};
 
     for _ = 1, definition.numOperands do
-        assembleNextTokenAsMacroOperand(definition.individualOperandVerifiers);
+        table.insert(operands, parseOperandFromNextToken(definition.individualOperandVerifiers));
     end
+
+    local bytes = definition.assemble(objectCode, operands);
+    appendBytesToBinaryOutput(unpack(bytes));
 end
 
 local function isNextTokenMacro()

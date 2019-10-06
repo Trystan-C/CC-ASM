@@ -31,7 +31,21 @@ local testSuite = {
         expect.value(integer.getBytesForInteger(0)).toDeepEqual({ 0 });
         expect.value(integer.getBytesForInteger(256)).toDeepEqual({ 1, 0 });
         expect.value(integer.getBytesForInteger(0xFFFFFF)).toDeepEqual({ 255, 255, 255 });
-    end
+    end,
+
+    getIntegerFromBytes = function()
+        expect.value(integer.getIntegerFromBytes({})).toEqual(0);
+        expect.value(integer.getIntegerFromBytes({ 5 })).toEqual(5);
+        expect.value(integer.getIntegerFromBytes({ 0xFF, 0xFF })).toEqual(math.pow(2, 16) - 1);
+        expect.value(integer.getIntegerFromBytes({ 1, 0, 0 })).toEqual(math.pow(2, 16));
+        expect.value(integer.getIntegerFromBytes({ 0xA3, 0xB5, 0xC2, 3 })).toEqual(2746597891);
+    end,
+
+    getIntegerFromBytesWithTooManyBytesThrowsError = function()
+        expect.errorToBeThrown(function()
+            integer.getIntegerFromBytes({ 1, 2, 3, 4, 5});
+        end);
+    end,
 
 };
 

@@ -63,6 +63,16 @@ apiEnv.step = function(steps)
     };
 end
 
+apiEnv.programCounterIsAt = function(address)
+    local condition = address == cpu.getProgramCounter();
+    local message = "Expected program counter to be at address 0x" .. string.format("%X", address) .. " but was 0x" .. string.format("%X", cpu.getProgramCounter());
+    assert(condition, message);
+
+    return {
+        step = apiEnv.step;
+    };
+end
+
 local function load()
     registers.clear();
     memory.clear();
@@ -70,6 +80,7 @@ local function load()
     cpu.setProgramCounter(objectCode.origin);
 
     return {
+        programCounterIsAt = apiEnv.programCounterIsAt;
         step = apiEnv.step;
     };
 end

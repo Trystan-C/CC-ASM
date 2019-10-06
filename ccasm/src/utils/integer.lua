@@ -1,5 +1,3 @@
--- TODO: Rename this to integerUtils.lua
-
 local function assertValueIsInRangeInclusive(int, interval)
     local lowerBound, upperBound = unpack(interval);
     local message = "Expected " .. tostring(int) .. " to be in range [" .. lowerBound .. ", " .. upperBound .. "].";
@@ -54,4 +52,31 @@ function getBytesForInteger(sizeInBytes, int)
     end
 
     return reversedBytes;
+end
+
+local function intToBin(int)
+    local binary = "";
+    while int > 0 do
+        local r = int % 2;
+        int = int / 2;
+        binary = r .. binary;
+    end
+    return binary;
+end
+
+-- TODO: Limits on integer size? Byte table can arbitrarily long.
+function getIntegerFromBytes(bytes)
+    assert(type(bytes) == "table", "Expected byte table, got " .. tostring(bytes) .. ".");
+    assert(#bytes <= 4, "Expected byte table to be at most 4 bytes long, was " .. tostring(#bytes) .. ".");
+    local val = 0;
+    local i, bitShift = #bytes, 0;
+    while i >= 1 do
+        local byte = bytes[i];
+        assertValueIsByte(byte);
+        byte = bit.blshift(bytes[i], bitShift);
+        val = bit.bor(val, byte);
+        bitShift = bitShift + 8;
+        i = i - 1;
+    end
+    return val;
 end

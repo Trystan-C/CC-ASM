@@ -4,7 +4,11 @@ apiLoader.loadIfNotPresent("/ccasm/src/memory.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/instructions.lua");
 
-programCounter = 0;
+local programCounter = 0;
+
+function getProgramCounter()
+    return programCounter;
+end
 
 function setProgramCounter(address)
     if memory.isAddressValid(address) then
