@@ -1,5 +1,5 @@
 local function printUsage()
-    print("Usage: testRunner <directory-path>");
+    print("Usage: testRunner <directory-path> | <file-path>");
 end
 
 local function isFunction(value)
@@ -181,15 +181,16 @@ local function runTestsInFile(absoluteFilePath)
 end
 
 local function main(testsDirectoryPath)
-    local absoluteTestPath = shell.resolve(testsDirectoryPath);
+    if testsDirectoryPath ~= nil then
+        local absoluteTestPath = shell.resolve(testsDirectoryPath);
 
-    if isDirectoryPathValid(absoluteTestPath) then
-        runTestsInDirectory(absoluteTestPath);
-    elseif isFilePathValid(absoluteTestPath) then
-        runTestsInFile(absoluteTestPath);
-    else
-        printUsage()
+        if isDirectoryPathValid(absoluteTestPath) then
+            return runTestsInDirectory(absoluteTestPath);
+        elseif isFilePathValid(absoluteTestPath) then
+            return runTestsInFile(absoluteTestPath);
+        end
     end
+    printUsage();
 end
 
 local commandLineArgs = { ... };
