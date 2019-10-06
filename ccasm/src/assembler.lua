@@ -1,7 +1,9 @@
-assert(os.loadAPI("/ccasm/src/instructions.lua"));
-assert(os.loadAPI("/ccasm/src/macros.lua"));
-assert(os.loadAPI("/ccasm/src/operandTypes.lua"));
-assert(os.loadAPI("/ccasm/src/cpu.lua"));
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/instructions.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/macros.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/cpu.lua");
 
 local objectCode = {};
 local tokens;
@@ -242,21 +244,6 @@ local function reset()
     };
 end
 
--- NOTE: Does not support table keys or metatables.
-local function deepCopy(tbl)
-    local copy = {};
-
-    for key, value in pairs(tbl) do
-        if type(value) == "table" then
-            copy[key] = deepCopy(value);
-        else
-            copy[key] = value;
-        end
-    end
-
-    return copy;
-end
-
 function assemble(code)
     reset();
 
@@ -277,5 +264,5 @@ function assemble(code)
 
     fillSymbolAddressReferences();
 
-    return deepCopy(objectCode);
+    return tableUtils.deepCopy(objectCode);
 end

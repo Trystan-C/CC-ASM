@@ -1,8 +1,18 @@
-assert(os.loadAPI("/ccasm/src/memory.lua"));
-assert(os.loadAPI("/ccasm/src/registers.lua"));
-assert(os.loadAPI("/ccasm/src/instructions.lua"));
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/memory.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/instructions.lua");
 
 programCounter = 0;
+
+function setProgramCounter(address)
+    if memory.isAddressValid(address) then
+        programCounter = address;
+    else
+        error("Expected program counter to be a valid address, was " .. tostring(address));
+    end
+end
 
 local function throwUnsupportedInstructionError(byte)
     local message = "Unsupported instruction byte: " .. tostring(byte) .. ".";
@@ -48,15 +58,9 @@ local function executeInstruction(definition)
         table.insert(operands, loadOperand());
     end
 
-    definition.execute(operands);
+    definition.execute(unpack(operands));
 end
 
 function step()
-    registers.dataRegisters[1].value = 10;
-    registers.dataRegisters[5].value = 10;
-    registers.addressRegisters[3].value = 256;
-    registers.addressRegisters[0].value = 0xFFFF;
-    registers.addressRegisters[2].value = 0xFF;
-
     executeInstruction(loadInstruction());
 end

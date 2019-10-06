@@ -1,7 +1,24 @@
+-- TODO: Rename this to integerUtils.lua
+
+local function assertValueIsInRangeInclusive(int, interval)
+    local lowerBound, upperBound = unpack(interval);
+    local message = "Expected " .. tostring(int) .. " to be in range [" .. lowerBound .. ", " .. upperBound .. "].";
+    local isInBounds = int >= lowerBound and int <= upperBound;
+    assert(isInBounds, message);
+end
+
+function isInteger(value)
+    return type(value) == "number" and math.floor(value) == value;
+end
+
 function assertValueIsInteger(value)
-    local isInt = type(value) == "number" and math.floor(value) == value;
     local errorMessage = "Illegal non-integer value: " .. tostring(value);
-    assert(isInt, errorMessage);
+    assert(isInteger(value), errorMessage);
+end
+
+function assertValueIsByte(value)
+    assertValueIsInteger(value);
+    assertValueIsInRangeInclusive(value, { 0, 255 });
 end
 
 function getSizeInBytesForInteger(int)

@@ -1,5 +1,6 @@
-assert(os.loadAPI("/ccasm/src/cpu.lua"));
-assert(os.loadAPI("/ccasm/test/fixtures/cpuTestFixture.lua"));
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/cpu.lua");
+apiLoader.loadIfNotPresent("/ccasm/test/fixtures/cpuTestFixture.lua");
 
 local fixture = cpuTestFixture;
 
@@ -7,9 +8,9 @@ local testSuite = {
 
     moveImmediateDataToDataRegister = function()
         fixture.assemble("moveByte #5, d0")
-            .load()
-            .step()
-            .dataRegister(0).hasValue(5);
+           .load()
+           .step()
+           .dataRegister(0).hasValue(5);
     end,
 
     moveDataBetweenDataRegisters = function()
@@ -24,23 +25,21 @@ local testSuite = {
     end,
 
     moveImmediateDataToAddressRegister = function()
-        fixture.assemble([[
-            moveWord #256, A3
-        ]])
-            .load()
-            .step()
-            .addressRegister(3).hasValue(256);
+        fixture.assemble("moveWord #256, A3")
+               .load()
+               .step()
+               .addressRegister(3).hasValue(256);
     end,
 
     moveDataBetweenDataAndAddressRegisters = function()
         fixture.assemble([[
-            moveWord #hFFFF, A0
-            moveByte a0, a2
-        ]])
-            .load()
-            .step(2)
-            .addressRegister(0).hasValue(0xFFFF)
-            .addressRegister(2).hasValue(0xFF);
+        moveWord #hFFFF, D0
+        moveByte d0, a2
+    ]])
+               .load()
+               .step(2)
+               .dataRegister(0).hasValue(0xFFFF)
+               .addressRegister(2).hasValue(0xFF);
     end
 
 };

@@ -1,5 +1,6 @@
-assert(os.loadAPI("/ccasm/src/utils/integer.lua"));
-assert(os.loadAPI("/ccasm/test/utils/expect.lua"));
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
+apiLoader.loadIfNotPresent("/ccasm/test/utils/expect.lua");
 
 local testSuite = {
 

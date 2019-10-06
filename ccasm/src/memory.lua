@@ -1,12 +1,17 @@
-assert(os.loadAPI("/ccasm/src/operandTypes.lua"));
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 
+local addressSize = operandTypes.symbolicAddress.sizeInBytes;
+local totalMemoryInBytes = math.pow(math.pow(2, 8), addressSize);
 bytes = {};
 
-function clear()
-    local addressSize = operandTypes.symbolicAddress.sizeInBytes;
-    local numBytes = math.pow(math.pow(2, 8), addressSize);
+function isAddressValid(address)
+    return integer.isInteger(address) and address >= 0 and address < totalMemoryInBytes;
+end
 
-    for i = 1, numBytes do
+function clear()
+    for i = 1, totalMemoryInBytes do
         bytes[i - 1] = 0;
     end
 end

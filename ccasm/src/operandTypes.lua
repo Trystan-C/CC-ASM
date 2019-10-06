@@ -1,4 +1,5 @@
-os.loadAPI("/ccasm/src/utils/integer.lua");
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
 
 invalidType = {};
 

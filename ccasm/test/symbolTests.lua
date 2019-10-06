@@ -1,6 +1,7 @@
-os.loadAPI("/ccasm/test/utils/expect.lua");
-os.loadAPI("/ccasm/test/fixtures/assemblerTestFixture.lua");
-os.loadAPI("/ccasm/src/registers.lua");
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/test/utils/expect.lua");
+apiLoader.loadIfNotPresent("/ccasm/test/fixtures/assemblerTestFixture.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 
 local fixture = assemblerTestFixture;
 

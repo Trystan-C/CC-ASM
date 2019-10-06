@@ -1,5 +1,6 @@
-os.loadAPI("/ccasm/src/utils/integer.lua");
-os.loadAPI("/ccasm/src/assembler.lua");
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/assembler.lua");
 
 local apiEnv = getfenv();
 local objectCode = nil;

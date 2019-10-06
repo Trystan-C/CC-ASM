@@ -1,4 +1,5 @@
-assert(os.loadAPI("//ccasm/src/operandTypes.lua"));
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 
 declareByte = {
     numOperands = 1;

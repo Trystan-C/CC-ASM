@@ -1,18 +1,17 @@
-assert(os.loadAPI("/ccasm/src/assembler.lua"));
-assert(os.loadAPI("/ccasm/src/memory.lua"));
-assert(os.loadAPI("/ccasm/src/registers.lua"));
-assert(os.loadAPI("/ccasm/src/cpu.lua"));
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/assembler.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/memory.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/cpu.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
+apiLoader.loadIfNotPresent("/ccasm/test/utils/expect.lua");
 
 local objectCode;
 local apiEnv = {};
 
 apiEnv.assertAddressRegisterValueIs = function(id, value)
-    local actualValue = registers.addressRegisters[id].value;
-    local condition = actualValue == value;
-    local errorMessage = "Expected address register #" .. tostring(id) ..
-            " to have value " .. tostring(value) .. " but was " ..
-            tostring(actualValue) .. ".";
-    assert(condition, errorMessage);
+    expect.value(registers.addressRegisters[id].value)
+            .toDeepEqual(integer.getBytesForInteger(registers.registerWidthInBytes, value));
 
     return {
         step = apiEnv.step;
@@ -22,12 +21,8 @@ apiEnv.assertAddressRegisterValueIs = function(id, value)
 end
 
 apiEnv.assertDataRegisterValueIs = function(id, value)
-    local actualValue = registers.dataRegisters[id].value;
-    local condition = actualValue == value;
-    local errorMessage = "Expected data register #" .. tostring(id) ..
-            " to have value " .. tostring(value) .. " but was " ..
-            tostring(actualValue) .. ".";
-    assert(condition, errorMessage);
+    expect.value(registers.dataRegisters[id].value)
+        .toDeepEqual(integer.getBytesForInteger(registers.registerWidthInBytes, value));
 
     return {
         step = apiEnv.step;
@@ -69,9 +64,10 @@ apiEnv.step = function(steps)
 end
 
 local function load()
+    registers.clear();
     memory.clear();
     memory.load(objectCode.origin, objectCode.binaryOutput);
-    cpu.programCounter = objectCode.origin;
+    cpu.setProgramCounter(objectCode.origin);
 
     return {
         step = apiEnv.step;

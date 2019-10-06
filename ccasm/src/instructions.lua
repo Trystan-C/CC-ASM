@@ -1,5 +1,7 @@
-assert(os.loadAPI("/ccasm/src/operandTypes.lua"));
-assert(os.loadAPI("/ccasm/src/registers.lua"));
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
 moveByte = {
     byteValue = 0;
@@ -21,8 +23,42 @@ moveByte = {
             assert(condition, errorMessage);
         end
     };
-    execute = function(operands)
-        registers.dataRegisters[0].value = 5;
+    execute = function(from, to)
+        if from.definition == operandTypes.dataRegister then
+            local fromRegisterId = from.valueBytes[1];
+            if to.definition == operandTypes.dataRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.dataRegisters[toRegisterId].setByte(
+                        registers.dataRegisters[fromRegisterId].getByte()
+                );
+            elseif to.definition == operandTypes.addressRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.addressRegisters[toRegisterId].setByte(
+                        registers.dataRegisters[fromRegisterId].getByte()
+                );
+            end
+        elseif from.definition == operandTypes.addressRegister then
+            local fromRegisterId = from.valueBytes[1];
+            if to.definition == operandTypes.dataRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.dataRegisters[toRegisterId].setByte(
+                        registers.addressRegisters[fromRegisterId].getByte()
+                );
+            elseif to.definition == operandTypes.addressRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.addressRegisters[toRegisterId].setByte(
+                        registers.addressRegisters[fromRegisterId].getByte()
+                );
+            end
+        elseif from.definition == operandTypes.immediateData then
+            if to.definition == operandTypes.dataRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.dataRegisters[toRegisterId].setByte(from.valueBytes[1]); -- TODO: Change to just valueBytes.
+            elseif to.definition == operandTypes.addressRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.addressRegister[toRegisterId].setByte(from.valueBytes[1]);
+            end
+        end
     end
 };
 
@@ -46,8 +82,42 @@ moveWord = {
             assert(condition, errorMessage);
         end
     };
-    execute = function(operands)
-        print("TODO: execute--moveWord");
+    execute = function(from, to)
+        if from.definition == operandTypes.dataRegister then
+            local fromRegisterId = from.valueBytes[1];
+            if to.definition == operandTypes.dataRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.dataRegisters[toRegisterId].setWord(
+                        registers.dataRegisters[fromRegisterId].getWord()
+                );
+            elseif to.definition == operandTypes.addressRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.addressRegisters[toRegisterId].setWord(
+                        registers.dataRegisters[fromRegisterId].getWord()
+                );
+            end
+        elseif from.definition == operandTypes.addressRegister then
+            local fromRegisterId = from.valueBytes[1];
+            if to.definition == operandTypes.dataRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.dataRegisters[toRegisterId].setWord(
+                        registers.addressRegisters[fromRegisterId].getWord()
+                );
+            elseif to.definition == operandTypes.addressRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.addressRegisters[toRegisterId].setWord(
+                        registers.addressRegisters[fromRegisterId].getWord()
+                );
+            end
+        elseif from.definition == operandTypes.immediateData then
+            if to.definition == operandTypes.dataRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.dataRegisters[toRegisterId].setWord(from.valueBytes);
+            elseif to.definition == operandTypes.addressRegister then
+                local toRegisterId = to.valueBytes[1];
+                registers.addressRegisters[toRegisterId].setWord(from.valueBytes);
+            end
+        end
     end
 };
 
