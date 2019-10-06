@@ -26,7 +26,13 @@ local testSuite = {
 
     shellTest = function()
         assert(_G.shell ~= nil);
-    end
+    end,
+
+    only = {
+        isolatedTest = function()
+            print("'Only' sub-test-suite executed.");
+        end
+    };
 
 };
 

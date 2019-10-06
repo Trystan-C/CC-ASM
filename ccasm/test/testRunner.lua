@@ -29,7 +29,7 @@ local function runTest(testName, testFunc)
     local testPassed = false;
 
     if not success then
-        print("- Fail: " .. errorMessage);
+        print("- Fail: " .. tostring(errorMessage));
     else
         print("- Pass");
         testPassed = true;
@@ -43,6 +43,11 @@ local function runTestSuite(testSuite)
     local beforeEach = getAndRemoveFunctionEntry(testSuite, "beforeEach");
     local afterEach = getAndRemoveFunctionEntry(testSuite, "afterEach");
     local afterAll = getAndRemoveFunctionEntry(testSuite, "afterAll");
+
+    if testSuite["only"] ~= nil then
+        print("->Running 'only' sub-suite<-");
+        return runTestSuite(testSuite["only"]);
+    end
 
     local passCount = 0;
     local failCount = 0;
@@ -65,6 +70,12 @@ local function runTestSuite(testSuite)
     return passCount, failCount;
 end
 
+local function printTestReport(totalTestsRun, totalTestsPassed, totalTestsFailed)
+    local testReportMessage = totalTestsPassed .. " passed, " .. totalTestsFailed ..
+                              " failed of " .. totalTestsRun .. " tests run.";
+    print(testReportMessage);
+end
+
 local function runTestSuites(testSuites)
     local totalTestsPassed = 0;
     local totalTestsFailed = 0;
@@ -77,9 +88,7 @@ local function runTestSuites(testSuites)
     end
 
     local totalTestsRun = totalTestsPassed + totalTestsFailed;
-    local testReportMessage = totalTestsPassed .. " passed, " .. totalTestsFailed ..
-                              " failed of " .. totalTestsRun .. " tests run.";
-    print(testReportMessage);
+    printTestReport(totalTestsRun, totalTestsPassed, totalTestsFailed);
 end
 
 local function getFileNameFromAbsolutePath(absoluteFilePath)
@@ -151,14 +160,35 @@ local function isDirectoryPathValid(absolutePath)
     return fs.exists(absolutePath) and fs.isDir(absolutePath);
 end
 
-local function main(testsDirectoryPath)
-    local absoluteTestsDirectoryPath = shell.resolve(testsDirectoryPath);
+local function isFilePathValid(absolutePath)
+    if not isString(absolutePath) then
+        return false;
+    end
 
-    if isDirectoryPathValid(absoluteTestsDirectoryPath) then
-        local testSuites = loadTestSuitesFromDirectory(absoluteTestsDirectoryPath);
-        runTestSuites(testSuites);
+    return fs.exists(absolutePath) and not fs.isDir(absolutePath);
+end
+
+local function runTestsInDirectory(absoluteDirectoryPath)
+    local testSuites = loadTestSuitesFromDirectory(absoluteDirectoryPath);
+    runTestSuites(testSuites);
+end
+
+local function runTestsInFile(absoluteFilePath)
+    local testSuite = loadTestSuiteFromTestFile(absoluteFilePath);
+    local testsPassed, testsFailed = runTestSuite(testSuite);
+    local totalTests = testsPassed + testsFailed;
+    printTestReport(totalTests, testsPassed, testsFailed);
+end
+
+local function main(testsDirectoryPath)
+    local absoluteTestPath = shell.resolve(testsDirectoryPath);
+
+    if isDirectoryPathValid(absoluteTestPath) then
+        runTestsInDirectory(absoluteTestPath);
+    elseif isFilePathValid(absoluteTestPath) then
+        runTestsInFile(absoluteTestPath);
     else
-        printUsage();
+        printUsage()
     end
 end
 
