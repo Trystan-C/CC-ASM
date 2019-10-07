@@ -54,10 +54,10 @@ execute = function(from, to)
     elseif from.definition == operandTypes.immediateData then
         if to.definition == operandTypes.dataRegister then
             local toRegisterId = to.valueBytes[1];
-            registers.dataRegisters[toRegisterId].setByte(from.valueBytes[1]); -- TODO: Change to just valueBytes.
+            registers.dataRegisters[toRegisterId].setByte(from.valueBytes); -- TODO: Change to just valueBytes.
         elseif to.definition == operandTypes.addressRegister then
             local toRegisterId = to.valueBytes[1];
-            registers.addressRegister[toRegisterId].setByte(from.valueBytes[1]);
+            registers.addressRegister[toRegisterId].setByte(from.valueBytes);
         end
     end
 end

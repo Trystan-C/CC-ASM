@@ -2,14 +2,22 @@ assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
+local function assertByteTableSizeIs(byteTable, size)
+    local condition = #byteTable == size;
+    local message = "Expected byte table to have size " .. tostring(size) .. " but was " .. tostring(#byteTable) .. ".";
+    assert(condition, message);
+end
+
 local function setRegisterByte(register)
     return function(byte)
-        register.value[4] = byte;
+        assertByteTableSizeIs(byte, 1);
+        register.value[4] = byte[1];
     end
 end
 
 local function setRegisterWord(register)
     return function(word)
+        assertByteTableSizeIs(word, 2);
         register.value[3] = word[1];
         register.value[4] = word[2];
     end
@@ -17,6 +25,7 @@ end
 
 local function setRegisterLong(register)
     return function(longWord)
+        assertByteTableSizeIs(longWord, 4);
         register.value[4] = longWord[4];
         register.value[3] = longWord[3];
         register.value[2] = longWord[2];
@@ -26,7 +35,7 @@ end
 
 local function getRegisterByte(register)
     return function()
-        return register.value[4];
+        return { register.value[4] };
     end
 end
 
@@ -38,7 +47,7 @@ end
 
 local function getRegisterLong(register)
     return function()
-        return register.value;
+        return { register.value[1], register.value[2], register.value[3], register.value[4] };
     end
 end
 

@@ -42,6 +42,13 @@ local testSuite = {
                .addressRegister(2).hasValue(0xFF);
     end,
 
+    moveWordImmediateDecimalByteToDataRegister = function()
+        fixture.assemble("moveWord #15, d4")
+            .load()
+            .step()
+            .dataRegister(4).hasValue(15);
+    end,
+
 };
 
 return testSuite;

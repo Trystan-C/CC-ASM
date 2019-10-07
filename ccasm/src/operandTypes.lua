@@ -1,8 +1,6 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
 
-invalidType = {};
-
 dataRegister = {
     typeByte = 0,
     sizeInBytes = 1,

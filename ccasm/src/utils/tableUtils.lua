@@ -1,3 +1,9 @@
+function assertIsTable(tbl)
+    local condition = type(tbl) == "table";
+    local message = "Expected " .. tostring(tbl) .. " to be a table.";
+    assert(condition, message);
+end
+
 function countKeys(tbl)
     local count = 0;
     for _, __ in pairs(tbl) do
@@ -42,8 +48,9 @@ function zeros(n)
     return result;
 end
 
-function assertIsTable(tbl)
-    local condition = type(tbl) == "table";
-    local message = "Expected " .. tostring(tbl) .. " to be a table.";
-    assert(condition, message);
+function zeroPadFrontToSize(tbl, size)
+    assertIsTable(tbl);
+    while #tbl < size do
+        table.insert(tbl, 1, 0);
+    end
 end

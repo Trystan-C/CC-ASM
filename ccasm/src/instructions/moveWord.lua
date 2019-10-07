@@ -1,4 +1,5 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 
@@ -52,6 +53,7 @@ execute = function(from, to)
             );
         end
     elseif from.definition == operandTypes.immediateData then
+        tableUtils.zeroPadFrontToSize(from.valueBytes, 2); -- TODO: Codify word width, so we don't have to use inline constants.
         if to.definition == operandTypes.dataRegister then
             local toRegisterId = to.valueBytes[1];
             registers.dataRegisters[toRegisterId].setWord(from.valueBytes);

@@ -19,8 +19,9 @@ local testSuite = {
     end,
 
     getAndSetDataRegisterByte = function()
-        registers.dataRegisters[0].setByte(0xFF);
-        expect.value(registers.dataRegisters[0].getByte()).toEqual(0xFF);
+        local byte = { 0xFF };
+        registers.dataRegisters[0].setByte(byte);
+        expect.value(registers.dataRegisters[0].getByte()).toDeepEqual(byte);
     end,
 
     getAndSetDataRegisterWord  = function()
@@ -36,8 +37,9 @@ local testSuite = {
     end,
 
     getAndSetAddressRegisterByte = function()
-        registers.addressRegisters[1].setByte(0xB2);
-        expect.value(registers.addressRegisters[1].getByte()).toEqual(0xB2);
+        local byte = { 0xB2 };
+        registers.addressRegisters[1].setByte(byte);
+        expect.value(registers.addressRegisters[1].getByte()).toDeepEqual(byte);
     end,
 
     getAndSetAddressRegisterWord  = function()

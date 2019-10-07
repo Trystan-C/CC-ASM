@@ -54,7 +54,7 @@ end
 function nextOperandSizeInBytesShouldBe(sizeInBytes)
     local nextByte = getNextByteFromBinaryOutput();
     local byteMatchesOperandSize = nextByte == sizeInBytes;
-    assert(byteMatchesOperandSize, "Unexpected operand size.");
+    assert(byteMatchesOperandSize, "Expected operand size to be " .. tostring(sizeInBytes) .. " but was " .. tostring(nextByte) .. ".");
 
     return {
         nextOperandShouldBe = apiEnv.nextOperandShouldBe;
