@@ -1,6 +1,8 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/assembler.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
 local apiEnv = getfenv();
 local objectCode = nil;
@@ -35,15 +37,17 @@ end
 
 function nextOperandShouldBeReferenceToSymbol(sizeInBytes, symbol)
     apiEnv.symbolShouldExist(symbol);
-    local relativeAddress = objectCode.symbols[symbol].indexInBinaryOutput;
-    local addressBytes = integer.getBytesForInteger(sizeInBytes, relativeAddress);
-
-    for _, byte in ipairs(addressBytes) do
-        local nextByte = getNextByteFromBinaryOutput();
-        local condition = byte == nextByte;
-        local message = "Expected byte at " .. (binaryCodePtr - 1) .. " to equal " .. tostring(byte) .. ", but was " .. tostring(nextByte) .. ".";
-        assert(condition, message);
+    local startPtr = binaryCodePtr;
+    local offsetBytes = {};
+    for _ = 1, sizeInBytes do
+        table.insert(offsetBytes, getNextByteFromBinaryOutput());
     end
+
+    local symbolPtr = startPtr + integer.getSignedIntegerFromBytes(offsetBytes);
+    local symbolRelativeAddress = objectCode.symbols[symbol].indexInBinaryOutput;
+    local condition = symbolPtr == symbolRelativeAddress;
+    local message = "Expected operand to reference symbol at " .. tostring(symbolRelativeAddress) .. " but pointed to " .. tostring(symbolPtr) .. ".";
+    assert(condition, message);
 
     return {
         nextInstructionShouldBe = apiEnv.nextInstructionShouldBe;

@@ -31,7 +31,6 @@ local function runTest(testName, testFunc)
     if not success then
         print("- Fail: " .. tostring(errorMessage));
     else
-        print("- Pass");
         testPassed = true;
     end
 

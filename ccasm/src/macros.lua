@@ -1,5 +1,6 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 
 origin = {
     numOperands = 1;
@@ -39,5 +40,45 @@ declareByte = {
     };
     assemble = function(objectCode, operands)
         return operands[1].valueBytes;
+    end
+};
+
+declareWord = {
+    numOperands = 1;
+    individualOperandVerifiers = {
+        acceptsOnlyImmediateData = function(operand)
+            local condition = operand.definition == operandTypes.immediateData;
+            local errorMessage = "declareWord: Operand must be immediate data.";
+            assert(condition, errorMessage);
+        end,
+
+        sizeShouldBeOneByte = function(operand)
+            local condition = operand.sizeInBytes <= 2;
+            local errorMessage = "declareWord: Operand size should be at most 2 bytes, was: " .. tostring(operand.sizeInBytes);
+            assert(condition, errorMessage);
+        end
+    };
+    assemble = function(objectCode, operands)
+        return tableUtils.zeroPadFrontToSize(operands[1].valueBytes, 2);
+    end
+};
+
+declareLong = {
+    numOperands = 1;
+    individualOperandVerifiers = {
+        acceptsOnlyImmediateData = function(operand)
+            local condition = operand.definition == operandTypes.immediateData;
+            local errorMessage = "declareLong: Operand must be immediate data.";
+            assert(condition, errorMessage);
+        end,
+
+        sizeShouldBeOneByte = function(operand)
+            local condition = operand.sizeInBytes <= 4;
+            local errorMessage = "declareLong: Operand size should be at most 4 bytes, was: " .. tostring(operand.sizeInBytes);
+            assert(condition, errorMessage);
+        end
+    };
+    assemble = function(objectCode, operands)
+        return tableUtils.zeroPadFrontToSize(operands[1].valueBytes, 4);
     end
 };

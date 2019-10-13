@@ -27,6 +27,14 @@ local testSuite = {
         expect.value(integer.getBytesForInteger(4, 0xFFFF)).toDeepEqual({ 0, 0, 255, 255 });
     end,
 
+    getBytesForIntegerWithSizeSmallerThanInteger = function()
+        expect.value(integer.getBytesForInteger(2, 0xAABBFFEE)).toDeepEqual({ 0xFF, 0xEE });
+    end,
+
+    getBytesForNegativeInteger = function()
+        expect.value(integer.getBytesForInteger(2, -1)).toDeepEqual({ 0xFF, 0xFF });
+    end,
+
     getBytesForIntegerWithoutSize = function()
         expect.value(integer.getBytesForInteger(0)).toDeepEqual({ 0 });
         expect.value(integer.getBytesForInteger(256)).toDeepEqual({ 1, 0 });
@@ -41,10 +49,22 @@ local testSuite = {
         expect.value(integer.getIntegerFromBytes({ 0xA3, 0xB5, 0xC2, 3 })).toEqual(2746597891);
     end,
 
+    getSignedIntegerFromBytes = function()
+        expect.value(integer.getSignedIntegerFromBytes({ 0xFF })).toEqual(-1);
+        expect.value(integer.getSignedIntegerFromBytes({ 0xFF, 0xFF })).toEqual(-1);
+        expect.value(integer.getSignedIntegerFromBytes({ 0x80 })).toEqual(-128);
+        expect.value(integer.getSignedIntegerFromBytes({ 0x7F })).toEqual(127);
+    end,
+
     getIntegerFromBytesWithTooManyBytesThrowsError = function()
         expect.errorToBeThrown(function()
             integer.getIntegerFromBytes({ 1, 2, 3, 4, 5});
         end);
+    end,
+
+    addBytes = function()
+        expect.value(integer.addBytes({ 1 }, { 1 })).toDeepEqual({ 2 });
+        expect.value(integer.addBytes({ 0xFF }, { 0xFF })).toDeepEqual({ 1, 0xFE });
     end,
 
 };

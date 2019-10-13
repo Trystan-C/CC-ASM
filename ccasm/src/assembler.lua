@@ -193,10 +193,11 @@ end
 
 local function fillReferencesForSymbol(definition)
     local indexInBinaryOutput = definition.indexInBinaryOutput;
-    local addressBytes = integer.getBytesForInteger(operandTypes.symbolicAddress.sizeInBytes, indexInBinaryOutput);
 
     for _, fillIndex in ipairs(definition.fillIndices) do
-        insertBytesIntoBinaryOutputAt(fillIndex, unpack(addressBytes));
+        local offset = indexInBinaryOutput - fillIndex;
+        local offsetBytes = integer.getBytesForInteger(operandTypes.symbolicAddress.sizeInBytes, offset);
+        insertBytesIntoBinaryOutputAt(fillIndex, unpack(offsetBytes));
     end
 end
 

@@ -54,20 +54,14 @@ function getBytesForInteger(sizeInBytes, int)
     return reversedBytes;
 end
 
-local function intToBin(int)
-    local binary = "";
-    while int > 0 do
-        local r = int % 2;
-        int = int / 2;
-        binary = r .. binary;
-    end
-    return binary;
+local function assertIsValidByteTable(bytes)
+    assert(type(bytes) == "table", "Expected byte table, got " .. tostring(bytes) .. ".");
+    assert(#bytes <= 4, "Expected byte table to be at most 4 bytes long, was " .. tostring(#bytes) .. ".");
 end
 
 -- TODO: Limits on integer size? Byte table can arbitrarily long.
 function getIntegerFromBytes(bytes)
-    assert(type(bytes) == "table", "Expected byte table, got " .. tostring(bytes) .. ".");
-    assert(#bytes <= 4, "Expected byte table to be at most 4 bytes long, was " .. tostring(#bytes) .. ".");
+    assertIsValidByteTable(bytes);
     local val = 0;
     local i, bitShift = #bytes, 0;
     while i >= 1 do
@@ -79,4 +73,17 @@ function getIntegerFromBytes(bytes)
         i = i - 1;
     end
     return val;
+end
+
+function getSignedIntegerFromBytes(bytes)
+    assertIsValidByteTable(bytes);
+    local val = getIntegerFromBytes(bytes);
+    if val > 0 and bit.band(bytes[1], 0x80) ~= 0 then
+        val = val - math.pow(2, 8*#bytes);
+    end
+    return val;
+end
+
+function addBytes(byteTable1, byteTable2)
+    return getBytesForInteger(getIntegerFromBytes(byteTable1) + getIntegerFromBytes(byteTable2));
 end

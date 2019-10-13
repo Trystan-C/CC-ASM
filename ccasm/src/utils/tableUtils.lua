@@ -53,4 +53,5 @@ function zeroPadFrontToSize(tbl, size)
     while #tbl < size do
         table.insert(tbl, 1, 0);
     end
+    return tbl;
 end
