@@ -43,6 +43,7 @@ end
 local function loadOperand()
     local typeByte = readNextByte();
     local sizeInBytes = readNextByte();
+    local operandValueStartAddress = programCounter;
     local valueBytes = {};
     for i = 1, sizeInBytes do
         valueBytes[i] = readNextByte();
@@ -53,6 +54,7 @@ local function loadOperand()
         definition = definition;
         sizeInBytes = sizeInBytes;
         valueBytes = valueBytes;
+        valueStartAddress = operandValueStartAddress;
     };
 end
 

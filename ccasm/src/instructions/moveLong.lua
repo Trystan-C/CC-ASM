@@ -1,5 +1,7 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/memory.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
@@ -33,8 +35,12 @@ execute = function(from, to)
             registers.addressRegisters[toRegisterId].setLong(from.valueBytes);
         end
     elseif from.definition == operandTypes.symbolicAddress then
-        -- from.valueBytes contains the relative address in the objectCode binary output.
-        -- Start of data is going to be at programOrigin + relativeAddress. Do we have access to this?
-        -- Maybe instead set relative address bytes in operand when object code is loaded into memory.
+        local offset = integer.getSignedIntegerFromBytes(from.valueBytes);
+        local symbolStartAddress = from.valueStartAddress + offset;
+        local symbolValue = memory.readBytes(symbolStartAddress, 4);
+        if to.definition == operandTypes.dataRegister then
+            local toRegisterId = to.valueBytes[1];
+            registers.dataRegisters[toRegisterId].setLong(symbolValue);
+        end
     end
 end

@@ -10,6 +10,14 @@ function isAddressValid(address)
     return integer.isInteger(address) and address >= 0 and address < totalMemoryInBytes;
 end
 
+function readBytes(startAddress, numBytes)
+    local result = {};
+    for offset = 1, numBytes do
+        table.insert(result, bytes[startAddress + offset - 1]);
+    end
+    return result;
+end
+
 function clear()
     for i = 1, totalMemoryInBytes do
         bytes[i - 1] = 0;
