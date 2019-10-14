@@ -5,11 +5,13 @@ apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/instructions/moveByte.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/instructions/moveWord.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/instructions/moveLong.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/instructions/addByte.lua");
 
 local apiEnv = getfenv();
 apiEnv.moveByte = moveByte;
 apiEnv.moveWord = moveWord;
 apiEnv.moveLong = moveLong;
+apiEnv.addByte = addByte;
 
 local function isInstructionDefinition(definition)
     return type(definition) == "table" and

@@ -1,9 +1,4 @@
 # Items TODO
-* Update symbolic addresses to use an offset, not relative address.
-    * Do normal addition and use status register to check if offset
-      is above or below.
-    * Make relative address relative to the instruction using the
-      symbol as an operand.
 * Implement movement of byte/word/long from symbolic addresses.
 * Add execution tests for moveByte, possibly remove assembly tests.
 * Add execution tests for moveWord, possibly remove assembly tests.

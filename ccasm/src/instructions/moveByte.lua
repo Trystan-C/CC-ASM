@@ -57,7 +57,7 @@ execute = function(from, to)
             registers.dataRegisters[toRegisterId].setByte(from.valueBytes); -- TODO: Change to just valueBytes.
         elseif to.definition == operandTypes.addressRegister then
             local toRegisterId = to.valueBytes[1];
-            registers.addressRegister[toRegisterId].setByte(from.valueBytes);
+            registers.addressRegisters[toRegisterId].setByte(from.valueBytes);
         end
     end
 end

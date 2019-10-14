@@ -16,6 +16,25 @@ local testSuite = {
             .dataRegister(2).hasValue(10);
     end,
 
+    addAddressRegisterToDataRegister = function()
+        fixture.assemble([[
+            moveByte #hFF, a5
+            addByte a5, d3
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(3).hasValue(0xFF);
+    end,
+
+    addImmediateDataToDataRegister = function()
+        fixture.assemble([[
+            addByte #13, d6
+        ]])
+            .load()
+            .step()
+            .dataRegister(6).hasValue(13);
+    end,
+
 };
 
 return testSuite;

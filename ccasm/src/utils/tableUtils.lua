@@ -55,3 +55,12 @@ function zeroPadFrontToSize(tbl, size)
     end
     return tbl;
 end
+
+function trimToSize(tbl, size)
+    assertIsTable(tbl);
+    local result = {};
+    for i = 1, size do
+        result[i] = tbl[i];
+    end
+    return result;
+end
