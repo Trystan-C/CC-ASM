@@ -133,14 +133,14 @@ local function getTestFilePathsInDirectory(absoluteDirectoryPath)
     return absoluteTestFilePaths;
 end
 
-local function loadTestSuitesFromDirectory(absoluteDirectoryPath)
+local function loadTestSuitesFromDirectory(absoluteDirectoryPath, useLongSuiteNames)
     local testSuites = {};
     local testFilesInDirectory = getTestFilePathsInDirectory(absoluteDirectoryPath);
 
     for _, fileName in pairs(testFilesInDirectory) do
         local absoluteTestFilePath = absoluteDirectoryPath .. '/' .. fileName;
         local testSuite = loadTestSuiteFromTestFile(absoluteTestFilePath);
-        local suiteName = getFileNameFromAbsolutePath(absoluteTestFilePath);
+        local suiteName = useLongSuiteNames and absoluteTestFilePath or getFileNameFromAbsolutePath(absoluteTestFilePath);
         testSuites[suiteName] = testSuite;
     end
 
@@ -167,6 +167,42 @@ local function isFilePathValid(absolutePath)
     return fs.exists(absolutePath) and not fs.isDir(absolutePath);
 end
 
+local function populateDirectoryTree(directories)
+    local root = directories[#directories];
+    if root == nil or not fs.isDir(root) then
+        return;
+    end
+    for _, fileName in ipairs(fs.list(root)) do
+        local path = root .. "/" .. fileName;
+        if fs.isDir(path) then
+            table.insert(directories, path);
+            populateDirectoryTree(directories);
+        end
+    end
+end
+
+local function composeSuites(superSuites, subSuites)
+    for suiteName, suite in pairs(subSuites) do
+        if superSuites[suiteName] == nil then
+            superSuites[suiteName] = suite;
+        else
+            error("Test suite name collision: " .. suiteName);
+        end
+    end
+end
+
+local function recursivelyRunTestsInDirectory(absoluteRootDirectoryPath)
+    local directories = { absoluteRootDirectoryPath };
+    local testSuites = {};
+    populateDirectoryTree(directories);
+    for _, absoluteDirectoryPath in ipairs(directories) do
+        local useLongSuiteNames = true;
+        local testSuitesInDir = loadTestSuitesFromDirectory(absoluteDirectoryPath, useLongSuiteNames);
+        composeSuites(testSuites, testSuitesInDir);
+    end
+    runTestSuites(testSuites);
+end
+
 local function runTestsInDirectory(absoluteDirectoryPath)
     local testSuites = loadTestSuitesFromDirectory(absoluteDirectoryPath);
     runTestSuites(testSuites);
@@ -179,12 +215,16 @@ local function runTestsInFile(absoluteFilePath)
     printTestReport(totalTests, testsPassed, testsFailed);
 end
 
-local function main(testsDirectoryPath)
+local function main(testsDirectoryPath, recurse)
     if testsDirectoryPath ~= nil then
         local absoluteTestPath = shell.resolve(testsDirectoryPath);
 
         if isDirectoryPathValid(absoluteTestPath) then
-            return runTestsInDirectory(absoluteTestPath);
+            if recurse then
+                return recursivelyRunTestsInDirectory(absoluteTestPath)
+            else
+                return runTestsInDirectory(absoluteTestPath);
+            end
         elseif isFilePathValid(absoluteTestPath) then
             return runTestsInFile(absoluteTestPath);
         end
@@ -194,4 +234,5 @@ end
 
 local commandLineArgs = { ... };
 local testsDirectoryPath = commandLineArgs[1];
-main(testsDirectoryPath);
+local recurse = commandLineArgs[2] == "-r";
+main(testsDirectoryPath, recurse);
