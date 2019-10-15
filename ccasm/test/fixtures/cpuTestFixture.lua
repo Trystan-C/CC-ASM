@@ -4,7 +4,7 @@ apiLoader.loadIfNotPresent("/ccasm/src/memory.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/cpu.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
-apiLoader.loadIfNotPresent("/ccasm/test/utils/expect.lua");
+apiLoader.loadIfNotPresent("/ccasm/test/assert/expect.lua");
 
 local objectCode;
 local apiEnv = {};
