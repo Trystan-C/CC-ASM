@@ -1,4 +1,5 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/instructions.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/macros.lua");
@@ -64,8 +65,8 @@ local function dequeueNextToken()
     return token;
 end
 
-local function throwUnexpectedSymbolError(token)
-    local message = "Unexpected symbol: " .. token;
+local function throwUnexpectedTokenError(token)
+    local message = "Unexpected token: " .. token;
     error(message);
 end
 
@@ -119,7 +120,7 @@ end
 
 local function parseOperandFromNextToken(verifiers)
     if not isNextTokenAnOperand() then
-        throwUnexpectedSymbolError(token);
+        throwUnexpectedTokenError(token);
     end
 
     local token = dequeueNextToken();
@@ -231,7 +232,7 @@ end
 
 local function isNextTokenSymbol()
     local token = peekNextToken();
-    return token:match("(%a[%w_]+)") == token;
+    return operandTypes.getType(token) == "symbolicAddress";
 end
 
 local function reset()
@@ -258,7 +259,7 @@ function assemble(code)
         elseif isNextTokenSymbol() then
             assembleNextTokenAsSymbol();
         else
-            throwUnexpectedSymbolError(dequeueNextToken());
+            throwUnexpectedTokenError(dequeueNextToken());
         end
     end
 

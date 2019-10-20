@@ -73,7 +73,7 @@ end
 
 symbolicAddress = {
     typeByte = 3;
-    pattern = "(%a[%w_]+)";
+    pattern = "^(%a[%w_]-)$";
     sizeInBytes = 2;
 };
 

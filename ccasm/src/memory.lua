@@ -18,6 +18,12 @@ function readBytes(startAddress, numBytes)
     return result;
 end
 
+function writeBytes(startAddress, data)
+    for offset, byte in ipairs(data) do
+        bytes[offset + startAddress - 1] = byte;
+    end
+end
+
 function clear()
     for i = 1, totalMemoryInBytes do
         bytes[i - 1] = 0;
