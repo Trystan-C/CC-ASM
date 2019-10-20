@@ -35,6 +35,8 @@ local function wordGetter(operand)
         getter = registers.addressRegisters[registerId(operand)].getWord;
     elseif operand.definition == operandTypes.immediateData then
         getter = function() return tableUtils.zeroPadFrontToSize(operand.valueBytes, 2) end
+    elseif operand.definition == operandTypes.symbolicAddress then
+        getter = function() return memory.readBytes(absoluteAddress(operand), 2) end
     end
     return getter;
 end
@@ -59,6 +61,10 @@ local function wordSetter(operand)
         setter = registers.dataRegisters[registerId(operand)].setWord;
     elseif operand.definition == operandTypes.addressRegister then
         setter = registers.addressRegisters[registerId(operand)].setWord;
+    elseif operand.definition == operandTypes.symbolicAddress then
+        setter = function(word)
+            memory.writeBytes(absoluteAddress(operand), tableUtils.trimToSize(word, 2));
+        end
     end
     return setter;
 end
