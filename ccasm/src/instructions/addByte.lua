@@ -1,43 +1,43 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
-apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/operandUtils.lua");
 
 byteValue = 3;
 numOperands = 2;
 
-individualOperandVerifiers = {};
-groupOperandVerifiers = {};
-
-local function registerId(operand)
-    return operand.valueBytes[1];
-end
-
-local function getDataFromOperand(operand)
-    local result;
-    if operand.definition == operandTypes.dataRegister then
-        result = registers.dataRegisters[registerId(operand)].getByte();
-    elseif operand.definition == operandTypes.addressRegister then
-        result = registers.addressRegisters[registerId(operand)].getByte();
-    elseif operand.definition == operandTypes.immediateData then
-        result = operand.valueBytes;
+individualOperandVerifiers = {
+    sizeShouldBeOneByte = function(operand)
+        if operand.definition ~= operand.symbolicAddress then
+            assert(
+                operand.sizeInBytes == 1,
+                "addByte: operand must be 1 byte"
+            );
+        end
     end
-    return result;
-end
+};
 
-local function set(operand)
-    local setter;
-    if operand.definition == operandTypes.dataRegister then
-        setter = registers.dataRegisters[registerId(operand)].setByte;
-    end
-    return {
-        byte = setter;
-    };
-end
+groupOperandVerifiers = {
+    fromMustBeImmediateDataOrRegister = function(from, to)
+        assert(
+            from.definition == operandTypes.addressRegister or
+            from.definition == operandTypes.dataRegister or
+            from.definition == operandTypes.immediateData,
+            "addByte: 'from' must be an address register or data register."
+        );
+    end,
+    
+    destinationMustBeDataRegister = function(from, to)
+        assert(
+            to.definition == operandTypes.dataRegister,
+            "addByte: destination must be a data register."
+        );
+    end,
+};
 
 function execute(from, to)
-    local fromData = getDataFromOperand(from);
-    local toData = getDataFromOperand(to);
-    local sum = integer.addBytes(fromData, toData);
-    set(to).byte(tableUtils.trimToSize(sum, 1));
+    local fromData = operandUtils.byte(from).get();
+    local toData = operandUtils.byte(to).get();
+    local sum = tableUtils.trimToSize(integer.addBytes(fromData, toData), 1);
+    operandUtils.byte(to).set(sum);
 end

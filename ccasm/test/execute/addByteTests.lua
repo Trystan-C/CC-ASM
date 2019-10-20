@@ -35,6 +35,27 @@ local testSuite = {
             .dataRegister(6).hasValue(13);
     end,
 
+    addToAddressRegisterThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("addByte #3, a2");
+        end);
+    end,
+
+    addSymbolToDataRegisterThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                var declareByte hFF
+                addByte var, d0
+            ]]);
+        end);
+    end,
+    
+    addImmediateDataTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("addByte #256, D3");
+        end);
+    end,
+
 };
 
 return testSuite;

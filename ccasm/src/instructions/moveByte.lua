@@ -1,6 +1,6 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
-apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/operandUtils.lua");
 
 byteValue = 0;
 numOperands = 2;
@@ -25,39 +25,5 @@ groupOperandVerifiers = {
 };
 
 execute = function(from, to)
-    if from.definition == operandTypes.dataRegister then
-        local fromRegisterId = from.valueBytes[1];
-        if to.definition == operandTypes.dataRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.dataRegisters[toRegisterId].setByte(
-                    registers.dataRegisters[fromRegisterId].getByte()
-            );
-        elseif to.definition == operandTypes.addressRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.addressRegisters[toRegisterId].setByte(
-                    registers.dataRegisters[fromRegisterId].getByte()
-            );
-        end
-    elseif from.definition == operandTypes.addressRegister then
-        local fromRegisterId = from.valueBytes[1];
-        if to.definition == operandTypes.dataRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.dataRegisters[toRegisterId].setByte(
-                    registers.addressRegisters[fromRegisterId].getByte()
-            );
-        elseif to.definition == operandTypes.addressRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.addressRegisters[toRegisterId].setByte(
-                    registers.addressRegisters[fromRegisterId].getByte()
-            );
-        end
-    elseif from.definition == operandTypes.immediateData then
-        if to.definition == operandTypes.dataRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.dataRegisters[toRegisterId].setByte(from.valueBytes); -- TODO: Change to just valueBytes.
-        elseif to.definition == operandTypes.addressRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.addressRegisters[toRegisterId].setByte(from.valueBytes);
-        end
-    end
+    operandUtils.byte(to).set(operandUtils.byte(from).get());
 end
