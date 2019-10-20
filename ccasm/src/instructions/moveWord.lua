@@ -1,7 +1,7 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
-apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/operandUtils.lua");
 
 byteValue = 1;
 numOperands = 2;
@@ -26,40 +26,5 @@ groupOperandVerifiers = {
 };
 
 execute = function(from, to)
-    if from.definition == operandTypes.dataRegister then
-        local fromRegisterId = from.valueBytes[1];
-        if to.definition == operandTypes.dataRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.dataRegisters[toRegisterId].setWord(
-                    registers.dataRegisters[fromRegisterId].getWord()
-            );
-        elseif to.definition == operandTypes.addressRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.addressRegisters[toRegisterId].setWord(
-                    registers.dataRegisters[fromRegisterId].getWord()
-            );
-        end
-    elseif from.definition == operandTypes.addressRegister then
-        local fromRegisterId = from.valueBytes[1];
-        if to.definition == operandTypes.dataRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.dataRegisters[toRegisterId].setWord(
-                    registers.addressRegisters[fromRegisterId].getWord()
-            );
-        elseif to.definition == operandTypes.addressRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.addressRegisters[toRegisterId].setWord(
-                    registers.addressRegisters[fromRegisterId].getWord()
-            );
-        end
-    elseif from.definition == operandTypes.immediateData then
-        tableUtils.zeroPadFrontToSize(from.valueBytes, 2); -- TODO: Codify word width, so we don't have to use inline constants.
-        if to.definition == operandTypes.dataRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.dataRegisters[toRegisterId].setWord(from.valueBytes);
-        elseif to.definition == operandTypes.addressRegister then
-            local toRegisterId = to.valueBytes[1];
-            registers.addressRegisters[toRegisterId].setWord(from.valueBytes);
-        end
-    end
+    operandUtils.word(to).set(operandUtils.word(from).get());
 end

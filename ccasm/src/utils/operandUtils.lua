@@ -27,6 +27,18 @@ local function byteGetter(operand)
     return getter;
 end
 
+local function wordGetter(operand)
+    local getter;
+    if operand.definition == operandTypes.dataRegister then
+        getter = registers.dataRegisters[registerId(operand)].getWord;
+    elseif operand.definition == operandTypes.addressRegister then
+        getter = registers.addressRegisters[registerId(operand)].getWord;
+    elseif operand.definition == operandTypes.immediateData then
+        getter = function() return tableUtils.zeroPadFrontToSize(operand.valueBytes, 2) end
+    end
+    return getter;
+end
+
 local function byteSetter(operand)
     local setter;
     if operand.definition == operandTypes.dataRegister then
@@ -41,9 +53,26 @@ local function byteSetter(operand)
     return setter;
 end
 
+local function wordSetter(operand)
+    local setter;
+    if operand.definition == operandTypes.dataRegister then
+        setter = registers.dataRegisters[registerId(operand)].setWord;
+    elseif operand.definition == operandTypes.addressRegister then
+        setter = registers.addressRegisters[registerId(operand)].setWord;
+    end
+    return setter;
+end
+
 function byte(operand)
     return {
         get = byteGetter(operand);
         set = byteSetter(operand);
+    };
+end
+
+function word(operand)
+    return {
+        get = wordGetter(operand);
+        set = wordSetter(operand);
     };
 end
