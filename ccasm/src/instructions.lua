@@ -2,16 +2,13 @@ assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
-apiLoader.loadIfNotPresent("/ccasm/src/instructions/moveByte.lua");
-apiLoader.loadIfNotPresent("/ccasm/src/instructions/moveWord.lua");
-apiLoader.loadIfNotPresent("/ccasm/src/instructions/moveLong.lua");
-apiLoader.loadIfNotPresent("/ccasm/src/instructions/addByte.lua");
 
 local apiEnv = getfenv();
-apiEnv.moveByte = moveByte;
-apiEnv.moveWord = moveWord;
-apiEnv.moveLong = moveLong;
-apiEnv.addByte = addByte;
+for _, fileName in pairs(fs.list("/ccasm/src/instructions")) do
+    apiLoader.loadIfNotPresent("/ccasm/src/instructions/" .. fileName);
+    local instructionName = fileName:match("^(.+)%.lua$");
+    apiEnv[instructionName] = _G[instructionName];
+end
 
 local function isInstructionDefinition(definition)
     return type(definition) == "table" and
