@@ -8,7 +8,6 @@
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* addWord/Long
 * subByte/Word/Long
 * mulByte/Word/Long
 * cmpByte/Word/Long

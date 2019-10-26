@@ -41,6 +41,20 @@ local function wordGetter(operand)
     return getter;
 end
 
+local function longGetter(operand)
+    local getter;
+    if operand.definition == operandTypes.dataRegister then
+        getter = registers.dataRegisters[registerId(operand)].getLong;
+    elseif operand.definition == operandTypes.addressRegister then
+        getter = registers.addressRegisters[registerId(operand)].getLong;
+    elseif operand.definition == operandTypes.immediateData then
+        getter = function() return tableUtils.zeroPadFrontToSize(operand.valueBytes, 4) end
+    elseif operand.definition == operandTypes.symbolicAddress then
+        getter = function() return memory.readBytes(absoluteAddress(operand), 4) end
+    end
+    return getter;
+end
+
 local function byteSetter(operand)
     local setter;
     if operand.definition == operandTypes.dataRegister then
@@ -69,6 +83,20 @@ local function wordSetter(operand)
     return setter;
 end
 
+local function longSetter(operand)
+    local setter;
+    if operand.definition == operandTypes.dataRegister then
+        setter = registers.dataRegisters[registerId(operand)].setLong;
+    elseif operand.definition == operandTypes.addressRegister then
+        setter = registers.addressRegisters[registerId(operand)].setLong;
+    elseif operand.definition == operandTypes.symbolicAddress then
+        setter = function(long)
+            memory.writeBytes(absoluteAddress(operand), tableUtils.trimToSize(word, 4));
+        end
+    end
+    return setter;
+end
+
 function byte(operand)
     return {
         get = byteGetter(operand);
@@ -80,5 +108,12 @@ function word(operand)
     return {
         get = wordGetter(operand);
         set = wordSetter(operand);
+    };
+end
+
+function long(operand)
+    return {
+        get = longGetter(operand);
+        set = longSetter(operand);
     };
 end
