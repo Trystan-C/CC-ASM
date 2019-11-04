@@ -5,6 +5,7 @@ apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/cpu.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
 apiLoader.loadIfNotPresent("/ccasm/test/assert/expect.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
 local objectCode;
 local apiEnv = {};
@@ -85,10 +86,19 @@ local function load()
     };
 end
 
+local function logBinary()
+    logger.info("[bindump]\nsize=%%\nbytes=%%", #objectCode.binaryOutput, objectCode.binaryOutput);
+
+    return {
+        load = load;
+    };
+end
+
 function assemble(code)
     objectCode = assembler.assemble(code);
 
     return {
         load = load;
+        logBinary = logBinary;
     };
 end

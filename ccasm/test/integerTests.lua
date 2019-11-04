@@ -67,6 +67,11 @@ local testSuite = {
         expect.value(integer.addBytes({ 0xFF }, { 0xFF })).toDeepEqual({ 1, 0xFE });
     end,
 
+    subtractBytes = function()
+        expect.value(integer.subtractBytes({ 25 }, { 13 })).toDeepEqual({ 12 });
+        expect.value(integer.subtractBytes({ 1 }, { 2 })).toDeepEqual({ 0xFF, 0xFF, 0xFF, 0xFF });
+    end,
+
 };
 
 return testSuite;

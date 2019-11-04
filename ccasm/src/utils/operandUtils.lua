@@ -3,6 +3,8 @@ apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 
+apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
+
 local function registerId(operand)
     return operand.valueBytes[1];
 end

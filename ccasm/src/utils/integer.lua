@@ -21,12 +21,14 @@ end
 
 function getSizeInBytesForInteger(int)
     assertValueIsInteger(int);
-    local power = 8;
+    if int < 0 then
+        return 4;
+    end
 
+    local power = 8;
     while math.pow(2, power) - 1 < int do
         power = power + 8;
     end
-
     return power / 8;
 end
 
@@ -86,4 +88,10 @@ end
 
 function addBytes(byteTable1, byteTable2)
     return getBytesForInteger(getIntegerFromBytes(byteTable1) + getIntegerFromBytes(byteTable2));
+end
+
+function subtractBytes(byteTable1, byteTable2)
+    return getBytesForInteger(
+        getSignedIntegerFromBytes(byteTable1) - getSignedIntegerFromBytes(byteTable2)
+    );
 end
