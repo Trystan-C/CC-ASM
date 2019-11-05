@@ -8,7 +8,8 @@
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* subByte/Word/Long
+* subWord/Long
+* Consolidate instruction tests -- moveTests.lua, addTests.lua, subTests.lua, etc.
 * mulByte/Word/Long
 * cmpByte/Word/Long
 * beq
