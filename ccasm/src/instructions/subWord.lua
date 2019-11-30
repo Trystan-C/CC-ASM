@@ -22,3 +22,4 @@ function execute(from, to)
     local toWord = operandUtils.word(to).get();
     local difference = integer.subtractBytes(toWord, fromWord);
     operandUtils.word(to).set(tableUtils.fitToSize(difference, 2));
+end
