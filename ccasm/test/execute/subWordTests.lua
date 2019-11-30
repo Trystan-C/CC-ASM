@@ -22,6 +22,34 @@ local testSuite = {
             .dataRegister(0).hasValue(0xFFFF);
     end,
 
+    subWordFromAddressRegisterThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                moveWord #hAABB, a0
+                subWord #hAA00, a0
+            ]]);
+        end);
+    end,
+
+    subWordAtSymbolicAddressThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                moveWord #hABCD, D3
+                subWord sym, d3
+                sym declareWord #hAB00
+            ]]);
+        end);
+    end,
+
+    subWordFromSymbolicAddressThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                subWord #hEFDD, var
+                var declareWord #hABCD
+            ]]);
+        end);
+    end,
+
 };
 
 return testSuite;
