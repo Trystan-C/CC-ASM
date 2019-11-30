@@ -64,3 +64,14 @@ function trimToSize(tbl, size)
     end
     return result;
 end
+
+function fitToSize(tbl, size)
+    assertIsTable(tbl);
+    local tblSize = countKeys(tbl);
+    if tblSize > size then
+        return trimToSize(tbl, size);
+    elseif tblSize < size then
+        return zeroPadFrontToSize(tbl, size);
+    end
+    return tbl;
+end

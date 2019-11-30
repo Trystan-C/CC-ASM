@@ -18,8 +18,7 @@ groupOperandVerifiers = {
 };
 
 function execute(from, to)
-    local fromWord = operandUtils.byte(from).get();
-    local toWord = operandUtils.byte(to).get();
+    local fromWord = operandUtils.word(from).get();
+    local toWord = operandUtils.word(to).get();
     local difference = integer.subtractBytes(toWord, fromWord);
-    operandUtils.word(to).set(tableUtils.trimToSize(difference, 2));
-end
+    operandUtils.word(to).set(tableUtils.fitToSize(difference, 2));

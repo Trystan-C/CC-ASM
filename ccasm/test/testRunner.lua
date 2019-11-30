@@ -94,8 +94,10 @@ local function printTestReport(report)
     end
     local totalTestsRun = totalTestsPassed + totalTestsFailed;
     print(string.format("%d tests passed, %d failed of %d tests run.", totalTestsPassed, totalTestsFailed, totalTestsRun));
-    print("------------------");
-    printTestFailures(failures);
+    if totalTestsFailed > 0 then
+        print("--FAILURES--------");
+        printTestFailures(failures);
+    end
 end
 
 local function runTestSuites(testSuites)
