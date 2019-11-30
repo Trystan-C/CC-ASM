@@ -48,8 +48,8 @@ local function runTestSuite(testSuite)
         return runTestSuite(testSuite["only"]);
     end
 
-    local passCount = 0;
-    local failCount = 0;
+    local passedNames = {};
+    local failedNames = {};
 
     beforeAll();
     for testName, testFunc in pairs(testSuite) do
@@ -57,41 +57,56 @@ local function runTestSuite(testSuite)
 
         local testPassed = runTest(testName, testFunc);
         if testPassed then
-            passCount = passCount + 1;
+            table.insert(passedNames, testName);
         else
-            failCount = failCount + 1;
+            table.insert(failedNames, testName);
         end
 
         afterEach();
     end
     afterAll();
 
-    return passCount, failCount;
+    return {
+        passes = passedNames,
+        failures = failedNames,
+    };
 end
 
-local function printTestReport(totalTestsRun, totalTestsPassed, totalTestsFailed)
-    local testReportMessage = totalTestsPassed .. " passed, " .. totalTestsFailed ..
-                              " failed of " .. totalTestsRun .. " tests run.";
-    print(testReportMessage);
+local function printTestFailures(failures)
+    print("Tests failed:");
+    for suiteName, testNames in pairs(failures) do
+        print(suiteName .. ":");
+        for _, testName in ipairs(testNames) do
+            print("\t\t- " .. testName);
+        end
+    end
+end
+
+
+local function printTestReport(report)
+    local totalTestsPassed = 0;
+    local totalTestsFailed = 0;
+    local failures = {};
+    for suiteName, suiteReport in pairs(report) do
+        totalTestsPassed = totalTestsPassed + #suiteReport.passes;
+        totalTestsFailed = totalTestsFailed + #suiteReport.failures;
+        failures[suiteName] = #suiteReport.failures > 0 and suiteReport.failures or nil;
+    end
+    local totalTestsRun = totalTestsPassed + totalTestsFailed;
+    print(string.format("%d tests passed, %d failed of %d tests run.", totalTestsPassed, totalTestsFailed, totalTestsRun));
+    print("------------------");
+    printTestFailures(failures);
 end
 
 local function runTestSuites(testSuites)
-    local totalTestsPassed = 0;
-    local totalTestsFailed = 0;
+    local report = {};
 
     for suiteName, testSuite in pairs(testSuites) do
         print("Running test suite: " .. suiteName);
-        local suitePassCount, suiteFailCount = runTestSuite(testSuite);
-        totalTestsPassed = totalTestsPassed + suitePassCount;
-        totalTestsFailed = totalTestsFailed + suiteFailCount;
+        report[suiteName] = runTestSuite(testSuite);
     end
 
-    local totalTestsRun = totalTestsPassed + totalTestsFailed;
-    printTestReport(totalTestsRun, totalTestsPassed, totalTestsFailed);
-end
-
-local function getFileNameFromAbsolutePath(absoluteFilePath)
-    return absoluteFilePath:match(".-/(.+)%.lua");
+    printTestReport(report);
 end
 
 local function loadTestSuiteFromTestFile(absoluteTestFilePath)
@@ -133,14 +148,18 @@ local function getTestFilePathsInDirectory(absoluteDirectoryPath)
     return absoluteTestFilePaths;
 end
 
-local function loadTestSuitesFromDirectory(absoluteDirectoryPath, useLongSuiteNames)
+local function getTestSuiteNameFromAbsoluteFilePath(absoluteTestFilePath)
+    return absoluteTestFilePath:match("^(.+)%.lua");
+end
+
+local function loadTestSuitesFromDirectory(absoluteDirectoryPath)
     local testSuites = {};
     local testFilesInDirectory = getTestFilePathsInDirectory(absoluteDirectoryPath);
 
     for _, fileName in pairs(testFilesInDirectory) do
         local absoluteTestFilePath = absoluteDirectoryPath .. '/' .. fileName;
         local testSuite = loadTestSuiteFromTestFile(absoluteTestFilePath);
-        local suiteName = useLongSuiteNames and absoluteTestFilePath or getFileNameFromAbsolutePath(absoluteTestFilePath);
+        local suiteName = getTestSuiteNameFromAbsoluteFilePath(absoluteTestFilePath);
         testSuites[suiteName] = testSuite;
     end
 
@@ -196,8 +215,7 @@ local function recursivelyRunTestsInDirectory(absoluteRootDirectoryPath)
     local testSuites = {};
     populateDirectoryTree(directories);
     for _, absoluteDirectoryPath in ipairs(directories) do
-        local useLongSuiteNames = true;
-        local testSuitesInDir = loadTestSuitesFromDirectory(absoluteDirectoryPath, useLongSuiteNames);
+        local testSuitesInDir = loadTestSuitesFromDirectory(absoluteDirectoryPath);
         composeSuites(testSuites, testSuitesInDir);
     end
     runTestSuites(testSuites);
@@ -210,9 +228,9 @@ end
 
 local function runTestsInFile(absoluteFilePath)
     local testSuite = loadTestSuiteFromTestFile(absoluteFilePath);
-    local testsPassed, testsFailed = runTestSuite(testSuite);
-    local totalTests = testsPassed + testsFailed;
-    printTestReport(totalTests, testsPassed, testsFailed);
+    local suiteName = getTestSuiteNameFromAbsoluteFilePath(absoluteFilePath);
+    local report = { [suiteName] = runTestSuite(testSuite) };
+    printTestReport(report);
 end
 
 local function main(testsDirectoryPath, recurse)

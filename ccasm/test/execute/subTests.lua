@@ -15,6 +15,16 @@ local testSuite = {
             .dataRegister(0).hasValue(15);
     end,
 
+    subWordFromDataRegister = function()
+        fixture.assemble([[
+            moveWord #hABCD, d1
+            subWord #hAB00, d1
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(1).hasValue(0xCD);
+    end,
+
     subByteCanOverflow = function()
         fixture.assemble([[
             moveByte #1, d0
@@ -23,6 +33,13 @@ local testSuite = {
             .load()
             .step(2)
             .dataRegister(0).hasValue(0xFF);
+    end,
+
+    subWordCanOverflow = function()
+        fixture.assemble("subWord #1, d0")
+            .load()
+            .step()
+            .dataRegister(0).hasValue(0xFFFF);
     end,
 
     subByteFromAddressRegisterThrowsError = function()
