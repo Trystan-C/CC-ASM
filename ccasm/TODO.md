@@ -1,15 +1,10 @@
-# Items TODO
-* Implement movement of byte/word/long from symbolic addresses.
-* Add execution tests for moveByte, possibly remove assembly tests.
-* Add execution tests for moveWord, possibly remove assembly tests.
-* Extract macros to sub-folder with a file per macro.
+## Desired
+* Way to refresh changes w/o restarting the computer?
 
 ## Macros to Add
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* subLong
-* Consolidate instruction tests -- moveTests.lua, addTests.lua, subTests.lua, etc.
 * mulByte/Word/Long
 * cmpByte/Word/Long
 * beq
