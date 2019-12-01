@@ -86,6 +86,7 @@ function getSignedIntegerFromBytes(bytes)
     return val;
 end
 
+-- TODO: Update this to use signed integers. Add a couple test cases.
 function addBytes(byteTable1, byteTable2)
     return getBytesForInteger(getIntegerFromBytes(byteTable1) + getIntegerFromBytes(byteTable2));
 end
@@ -93,5 +94,11 @@ end
 function subtractBytes(byteTable1, byteTable2)
     return getBytesForInteger(
         getSignedIntegerFromBytes(byteTable1) - getSignedIntegerFromBytes(byteTable2)
+    );
+end
+
+function multiplyBytes(byteTable1, byteTable2)
+    return getBytesForInteger(
+        getSignedIntegerFromBytes(byteTable1) * getSignedIntegerFromBytes(byteTable2)
     );
 end
