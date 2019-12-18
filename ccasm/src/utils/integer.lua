@@ -102,3 +102,12 @@ function multiplyBytes(byteTable1, byteTable2)
         getSignedIntegerFromBytes(byteTable1) * getSignedIntegerFromBytes(byteTable2)
     );
 end
+
+function divideBytes(byteTable1, byteTable2)
+    local numerator = getSignedIntegerFromBytes(byteTable2);
+    local denominator = getSignedIntegerFromBytes(byteTable1);
+    if denominator == 0 then
+        error("divideBytes: Illegal division by zero.");
+    end
+    return getBytesForInteger(math.floor(numerator / denominator));
+end

@@ -79,6 +79,14 @@ local testSuite = {
         expect.value(integer.multiplyBytes({ 0x7F, 0xFF }, { 0x7F })).toDeepEqual({ 0x3F, 0x7F, 0x81 });
     end,
 
+    divideBytes = function()
+        expect.value(integer.divideBytes({ 2 }, { 4 })).toDeepEqual({ 2 });
+        expect.value(integer.divideBytes({ 20, 00 }, { 40, 00 })).toDeepEqual({ 2 });
+        expect.value(integer.divideBytes({ 20, 00, 00, 00 }, { 40, 00, 00, 00 })).toDeepEqual({ 2 });
+        expect.value(integer.divideBytes({ 0xFF }, { 1 })).toDeepEqual({ 0xFF, 0xFF, 0xFF, 0xFF });
+        expect.value(integer.divideBytes({ 0xFF }, { 0xFF })).toDeepEqual({ 1 });
+    end,
+
 };
 
 return testSuite;

@@ -1,3 +1,29 @@
+function recursivelySerializeTable(tbl)
+    local function serializeTableKey(k)
+        local result = "[";
+        if type(k) == "string" then
+            result = result .. "\"" .. k .. "\"";
+        else
+            result = result .. tostring(k);
+        end
+        return result .. "]:";
+    end
+
+    local result = "{";
+    for k, v in pairs(tbl) do
+        result = result .. serializeTableKey(k);
+        if type(v) == "table" then
+            result = result .. recursivelySerializeTable(v);
+        elseif type(v) == "string" then
+            result = result .. "\"" .. v .. "\"";
+        else
+            result = result .. tostring(v);
+        end
+        result = result .. ",";
+        end
+    return (result:len() > 1 and result:sub(1, result:len()-1) or result) .. "}";
+end
+
 function assertIsTable(tbl)
     local condition = type(tbl) == "table";
     local message = "Expected " .. tostring(tbl) .. " to be a table.";
@@ -21,7 +47,7 @@ function assertTableSizesAreEqual(...)
         if not size then
             size = tblSize;
         else
-            local message = "Expected " .. tostring(tbl) .. " to have size " .. tostring(size) .. " but was " .. tostring(tblSize) .. ".";
+            local message = "Expected " .. recursivelySerializeTable(tbl) .. " to have size " .. tostring(size) .. " but was " .. tostring(tblSize) .. ".";
             local condition = tblSize == size;
             assert(condition, message);
         end

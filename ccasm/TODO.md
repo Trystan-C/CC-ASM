@@ -1,11 +1,16 @@
 ## Desired
 * Way to refresh changes w/o restarting the computer?
 
+## Documentation
+* CONTRIBUTING.md for adding instructions/tests.
+* Update README.md with system overview, limitations, etc.
+
 ## Macros to Add
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* divByte/Word/Long
+* divWord/Long
+* Update integer.addBytes to use signed integers. Add a couple test cases.
 * cmpByte/Word/Long
 * beq
 * bne

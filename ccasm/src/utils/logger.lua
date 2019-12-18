@@ -1,3 +1,6 @@
+assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
+
 local function assertFormatIsValid(format)
     assert(type(format) == "string", "Log formats must be valid strings.");
 end
@@ -10,35 +13,9 @@ local function getCharacterArray(str)
     return chars;
 end
 
-local function serializeTableKey(k)
-    local result = "[";
-    if type(k) == "string" then
-        result = result .. "\"" .. k .. "\"";
-    else
-        result = result .. tostring(k);
-    end
-    return result .. "]:";
-end
-
-local function recursivelySerializeTable(tbl)
-    local result = "{";
-    for k, v in pairs(tbl) do
-        result = result .. serializeTableKey(k);
-        if type(v) == "table" then
-            result = result .. recursivelySerializeTable(v);
-        elseif type(v) == "string" then
-            result = result .. "\"" .. v .. "\"";
-        else
-            result = result .. tostring(v);
-        end
-        result = result .. ",";
-        end
-    return (result:len() > 1 and result:sub(1, result:len()-1) or result) .. "}";
-end
-
 local function serializeObject(object)
     if type(object) == "table" then
-        return recursivelySerializeTable(object);
+        return tableUtils.recursivelySerializeTable(object);
     else
         return tostring(object);
     end
