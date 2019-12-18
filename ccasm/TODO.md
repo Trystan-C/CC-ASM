@@ -5,7 +5,7 @@
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* mulByte/Word/Long
+* mulLong
 * cmpByte/Word/Long
 * beq
 * bne
