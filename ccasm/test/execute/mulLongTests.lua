@@ -7,66 +7,48 @@ local testSuite = {
 
     multiplyDataRegisters = function()
         fixture.assemble([[
-            moveWord #h1234, d0
-            moveWord #2, d1
-            mulWord d0, d1
+            moveLong #h12340000, d0
+            moveLong #2, d1
+            mulLong d0, d1
         ]])
             .load()
             .step(3)
-            .dataRegister(1).hasValue(0x2468);
+            .dataRegister(1).hasValue(0x24680000);
     end,
 
     multiplyImmediateDataAndDataRegister = function()
         fixture.assemble([[
-            moveWord #h1234, d0
-            mulWord #2, d0
+            moveLong #h12340000, d0
+            mulLong #2, d0
         ]])
             .load()
             .step(2)
-            .dataRegister(0).hasValue(0x2468);
+            .dataRegister(0).hasValue(0x24680000);
     end,
 
     multiplicationIsSigned = function()
         fixture.assemble([[
-            moveWord #1, d0
-            mulWord #hFFFF, d0
-            moveWord #hFFFF, d1
-            mulWord #hFFFF, d1
+            moveLong #1, d0
+            mulLong #hFFFFFFFF, d0
+            moveLong #hFFFFFFFF, d1
+            mulLong #hFFFFFFFF, d1
         ]])
             .load()
             .step(4)
-            .dataRegister(0).hasValue(0xFFFF)
+            .dataRegister(0).hasValue(0xFFFFFFFF)
             .dataRegister(1).hasValue(1);
     end,
 
     multiplyFromAddressRegisterThrowsError = function()
         expect.errorToBeThrown(function()
-            fixture.assemble([[
-                moveWord #h1234, a0
-                moveWord #1, d0
-                mulWord a0, d0
-            ]]);
+            fixture.assemble("mulLong a0, d0");
         end);
     end,
 
     multiplyToAddressRegisterThrowsError = function()
         expect.errorToBeThrown(function()
-            fixture.assemble([[
-                moveWord #1, d0
-                moveWord #2, a0
-                mulWord d0, a0
-            ]]);
+            fixture.assemble("mulLong #2, A3");
         end);
-    end,
-
-    multiplyOnlyAffectsLowerWord = function()
-        fixture.assemble([[
-            moveLong #h12340000, d0
-            mulWord #2, d0
-        ]])
-            .load()
-            .step(2)
-            .dataRegister(0).hasValue(0x12340000);
     end,
 
 };

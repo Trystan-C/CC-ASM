@@ -57,6 +57,16 @@ local testSuite = {
         end);
     end,
 
+    multiplyOnlyAffectsLowerByte = function()
+        fixture.assemble([[
+            moveWord #h1200, D5
+            mulByte #2, d5
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(5).hasValue(0x1200);
+    end,
+
 };
 
 return testSuite;
