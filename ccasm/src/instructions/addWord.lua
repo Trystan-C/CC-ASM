@@ -11,5 +11,5 @@ groupOperandVerifiers = {};
 
 function execute(from, to)
     local sum = integer.addBytes(operandUtils.word(from).get(), operandUtils.word(to).get());
-    operandUtils.word(to).set(tableUtils.trimToSize(sum, 2));
+    operandUtils.word(to).set(tableUtils.fitToSize(sum, 2));
 end

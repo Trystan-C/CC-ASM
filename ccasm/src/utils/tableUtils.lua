@@ -84,9 +84,10 @@ end
 
 function trimToSize(tbl, size)
     assertIsTable(tbl);
+    local tblSize = countKeys(tbl);
     local result = {};
     for i = 1, size do
-        result[i] = tbl[i];
+        result[size - i + 1] = tbl[tblSize - i + 1];
     end
     return result;
 end
