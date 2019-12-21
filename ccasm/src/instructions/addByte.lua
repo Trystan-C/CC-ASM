@@ -18,12 +18,11 @@ individualOperandVerifiers = {
 };
 
 groupOperandVerifiers = {
-    fromMustBeImmediateDataOrRegister = function(from, to)
+    fromMustBeImmediateDataOrDataRegister = function(from, to)
         assert(
-            from.definition == operandTypes.addressRegister or
             from.definition == operandTypes.dataRegister or
             from.definition == operandTypes.immediateData,
-            "addByte: 'from' must be an address register or data register."
+            "addByte: source must be data register."
         );
     end,
     
@@ -38,6 +37,6 @@ groupOperandVerifiers = {
 function execute(from, to)
     local fromData = operandUtils.byte(from).get();
     local toData = operandUtils.byte(to).get();
-    local sum = tableUtils.trimToSize(integer.addBytes(fromData, toData), 1);
+    local sum = tableUtils.fitToSize(integer.addBytes(fromData, toData), 1);
     operandUtils.byte(to).set(sum);
 end

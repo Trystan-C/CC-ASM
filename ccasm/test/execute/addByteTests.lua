@@ -16,16 +16,6 @@ local testSuite = {
             .dataRegister(2).hasValue(10);
     end,
 
-    addAddressRegisterToDataRegister = function()
-        fixture.assemble([[
-            moveByte #hFF, a5
-            addByte a5, d3
-        ]])
-            .load()
-            .step(2)
-            .dataRegister(3).hasValue(0xFF);
-    end,
-
     addImmediateDataToDataRegister = function()
         fixture.assemble([[
             addByte #13, d6
@@ -33,6 +23,28 @@ local testSuite = {
             .load()
             .step()
             .dataRegister(6).hasValue(13);
+    end,
+
+    addOnlyAffectsLowerByte = function()
+        fixture.assemble([[
+            moveWord #h12FF, d0
+            addByte #1, d0
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(0).hasValue(0x1200);
+    end,
+
+    addByteWithOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("addByte #h1234, d0");
+        end);
+    end,
+
+    addFromAddressRegisterThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("addByte a0, d0");
+        end);
     end,
 
     addToAddressRegisterThrowsError = function()

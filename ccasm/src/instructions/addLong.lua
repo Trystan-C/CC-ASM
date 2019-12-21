@@ -8,9 +8,16 @@ byteValue = 5;
 numOperands = 2;
 
 groupOperandVerifiers = {
-    destinationCannotBeSymbolicAddress = function(from, to)
-        assert(to.definition ~= operandTypes.symbolicAddress, "addLong: Destination cannot be symbolic address.");
-    end
+    sourceMustBeImmediateDataOrDataRegister = function(from, to)
+        assert(
+            from.definition == operandTypes.dataRegister or
+            from.definition == operandTypes.immediateData,
+            "addLong: source must be immediate data or data register."
+        );
+    end,
+    destinationMustBeDataRegister = function(from, to)
+        assert(to.definition == operandTypes.dataRegister, "addLong: destination must be data register.");
+    end,
 };
 
 function execute(from, to)

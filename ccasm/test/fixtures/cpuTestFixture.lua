@@ -32,11 +32,34 @@ apiEnv.assertDataRegisterValueIs = function(id, value)
     };
 end
 
+apiEnv.printAddressRegisterValue = function(id)
+    logger.info("ADDRESS_REGISTER[%%]=%%", id, registers.addressRegisters[id].value);
+
+    return {
+        step = apiEnv.step;
+        dataRegister = apiEnv.dataRegister;
+        addressRegister = apiEnv.addressRegister;
+    };
+end
+
+apiEnv.printDataRegisterValue = function(id)
+    logger.info("DATA_REGISTER[%%]=%%", id, registers.dataRegisters[id].value);
+
+    return {
+        step = apiEnv.step;
+        dataRegister = apiEnv.dataRegister;
+        addressRegister = apiEnv.addressRegister;
+    };
+end
+
 apiEnv.addressRegister = function(id)
     return {
         hasValue = function(value)
             return apiEnv.assertAddressRegisterValueIs(id, value);
-        end
+        end,
+        printValue = function(value)
+            return apiEnv.printAddressRegisterValue(id);
+        end,
     };
 end
 
@@ -44,7 +67,10 @@ apiEnv.dataRegister = function (id)
     return {
         hasValue = function(value)
             return apiEnv.assertDataRegisterValueIs(id, value);
-        end
+        end,
+        printValue = function()
+            return apiEnv.printDataRegisterValue(id);
+        end,
     };
 end
 
