@@ -14,7 +14,6 @@
 * Update divByte/Word/Long to not allow symbolic address source/destination.
 * Update subByte/Word tests to check that only lower byte/word is affected.
 * Update subByte/Word to not allow for address register source/destination.
-* Remove old assembler tests, since they just couple us to the byte code format. Symbol tests can be moved into instruction tests :^)
 * cmpByte/Word/Long
 * beq
 * bne
