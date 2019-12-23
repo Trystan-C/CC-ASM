@@ -1,5 +1,4 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
-apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/instructions.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/macros.lua");

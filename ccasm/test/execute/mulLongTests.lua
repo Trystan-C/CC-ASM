@@ -51,6 +51,33 @@ local testSuite = {
         end);
     end,
 
+    multiplyFromSymbolicAddressThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                mulLong var, d3
+                var declareLong #h1234ABCD
+            ]]);
+        end);
+    end,
+
+    multiplyToSymbolicAddressThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                mulLong D6, var
+                var declareLong #h1234ABCD
+            ]]);
+        end);
+    end,
+
+    multiplyOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                moveByte #1, d0
+                mulLong #h1234ABCD5678, d0
+            ]]);
+        end);
+    end,
+
 };
 
 return testSuite;

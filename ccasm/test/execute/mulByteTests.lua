@@ -67,6 +67,30 @@ local testSuite = {
             .dataRegister(5).hasValue(0x1200);
     end,
 
+    multiplyFromSymbolicAddressThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                mulByte var, d0
+                var declareByte #55
+            ]]);
+        end);
+    end,
+
+    multiplyToSymbolicAddressThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                mulByte d0, var
+                var declareByte #hAB
+            ]]);
+        end);
+    end,
+
+    multiplyOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("mulByte #1234, d5");
+        end);
+    end,
+
 };
 
 return testSuite;

@@ -7,9 +7,10 @@ local testSuite = {
 
     multiplyDataRegisters = function()
         fixture.assemble([[
-            moveWord #h1234, d0
+            moveWord var, d0
             moveWord #2, d1
             mulWord d0, d1
+            var declareWord #h1234
         ]])
             .load()
             .step(3)
@@ -67,6 +68,30 @@ local testSuite = {
             .load()
             .step(2)
             .dataRegister(0).hasValue(0x12340000);
+    end,
+
+    multiplyOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("mulWord #h1234ABCD, D4");
+        end);
+    end,
+
+    multiplyFromSymbolicAddressThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                mulWord var, d0
+                var declareWord #h1234
+            ]]);
+        end);
+    end,
+
+    multiplyToSymoblicAddressThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                mulWord d3, var
+                var declareWord #h1234
+            ]]);
+        end);
     end,
 
 };

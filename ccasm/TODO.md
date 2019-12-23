@@ -1,5 +1,7 @@
 ## Desired
+* Move all instructions back into one file. Yeah.
 * Way to refresh changes w/o restarting the computer?
+* Memory map screen data, e.g., x/y position of the cursor, color values, etc.
 
 ## Documentation
 * CONTRIBUTING.md for adding instructions/tests.
@@ -9,10 +11,10 @@
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* Update mulByte/Word/Long to not allow symbolic address source/destination.
 * Update divByte/Word/Long to not allow symbolic address source/destination.
 * Update subByte/Word tests to check that only lower byte/word is affected.
 * Update subByte/Word to not allow for address register source/destination.
+* Remove old assembler tests, since they just couple us to the byte code format. Symbol tests can be moved into instruction tests :^)
 * cmpByte/Word/Long
 * beq
 * bne
@@ -30,13 +32,11 @@
 * andByte/Word/Long
 * xorByte/Word/Long
 * trap <byte>
-    * 0 -- Set x-coordinate of cursor on terminal.
-    * 1 -- Set y-coordinate of cursor on terminal.
-    * 2 -- Write null-terminated ASCII string at A0.
-    * 3 -- Kill execution, i.e., halt CPU.
-    * 4 -- Shutdown
-    * 5 -- Restart
-    * 6 -- Read null-terminated string from std-in to the address stored in A0.
+    * 0 -- Write null-terminated ASCII string at A0.
+    * 1 -- Kill execution, i.e., halt CPU.
+    * 2 -- Shutdown
+    * 3 -- Restart
+    * 4 -- Read null-terminated string from std-in to the address stored in A0.
     
 ## Other Features
 * File-descriptor system for interacting with peripherals.

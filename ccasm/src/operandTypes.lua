@@ -4,7 +4,7 @@ apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
 dataRegister = {
     typeByte = 0,
     sizeInBytes = 1,
-    pattern = "[dD](%d)"
+    pattern = "^[dD](%d)$"
 };
 
 dataRegister.parseValueAsBytes = function(token)
