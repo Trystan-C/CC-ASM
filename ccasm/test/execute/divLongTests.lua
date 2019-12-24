@@ -73,6 +73,12 @@ local testSuite = {
         end);
     end,
 
+    divideOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("divLong #h1234ABCD5678, d0");
+        end);
+    end,
+
 };
 
 return testSuite;

@@ -83,6 +83,12 @@ local testSuite = {
         end);
     end,
 
+    divByteOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("divByte #h1234, d0");
+        end);
+    end,
+
 };
 
 return testSuite;

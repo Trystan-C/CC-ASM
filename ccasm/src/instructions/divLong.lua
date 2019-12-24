@@ -6,12 +6,20 @@ apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 byteValue = 14;
 numOperands = 2;
 
-groupOperandVerifiers = {
-    sourceCannotBeAddressRegister = function(from, to)
-        assert(from.definition ~= operandTypes.addressRegister, "divLong: Source cannot be address register.");
+individualOperandVerifiers = {
+    verify = function(operand)
+        assert(operand.sizeInBytes <= 4, "divLong: Operand must be at most 4 bytes.");
     end,
-    destinationCannotBeAddressRegister = function(from, to)
-        assert(to.definition ~= operandTypes.addressRegister, "divLong: Destination cannot be address register.");
+};
+
+groupOperandVerifiers = {
+    verify = function(from, to)
+        assert(
+            from.definition == operandTypes.immediateData or
+            from.definition == operandTypes.dataRegister,
+            "divLong: Source must be immediate data or data register."
+        );
+        assert(to.definition == operandTypes.dataRegister, "divLong: Destination must be data register.");
     end,
 };
 
