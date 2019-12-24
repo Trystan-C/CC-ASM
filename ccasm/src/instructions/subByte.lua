@@ -7,12 +7,19 @@ apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 byteValue = 6;
 numOperands = 2;
 
-groupOperandVerifiers = {
-    sourceCannotBeSymbolicAddress = function(from, to)
-        assert(from.definition ~= operandTypes.symbolicAddress, "subByte: Source cannot be symbolic address.");
+individualOperandVerifiers = {
+    verify = function(operand)
+        assert(operand.sizeInBytes == 1, "subByte: Operand must be 1 byte.");
     end,
+};
 
-    destinationMustBeDataRegister = function(from, to)
+groupOperandVerifiers = {
+    verify = function(from, to)
+        assert(
+            from.definition == operandTypes.immediateData or
+            from.definition == operandTypes.dataRegister,
+            "subByte: Source must be immediate data or data reigster."
+        );
         assert(to.definition == operandTypes.dataRegister, "subByte: Destination must be data register.");
     end,
 };

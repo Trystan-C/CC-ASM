@@ -53,6 +53,22 @@ local testSuite = {
         end);
     end,
 
+    subByteAffectsOnlyLowerByte = function()
+        fixture.assemble([[
+            moveWord #h1200, d0
+            subByte #1, d0
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(0).hasValue(0x12FF);
+    end,
+
+    subByteOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("subByte #h1234, d0");
+        end);
+    end,
+
 };
 
 return testSuite;

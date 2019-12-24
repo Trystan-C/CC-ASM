@@ -50,6 +50,12 @@ local testSuite = {
         end);
     end,
 
+    subLongOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("subLong #h1234ABCD5678, d0");
+        end);
+    end,
+
 };
 
 return testSuite;

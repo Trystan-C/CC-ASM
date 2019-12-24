@@ -50,6 +50,22 @@ local testSuite = {
         end);
     end,
 
+    subWordAffectsOnlyLowerWord = function()
+        fixture.assemble([[
+            moveLong #h12340000, d0
+            subWord #1, d0
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(0).hasValue(0x1234FFFF);
+    end,
+
+    subWordOperandTooLargeThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble("subWord #h1234ABCD, d0");
+        end);
+    end,
+
 };
 
 return testSuite;

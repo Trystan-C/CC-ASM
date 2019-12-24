@@ -11,8 +11,6 @@
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* Update subByte/Word tests to check that only lower byte/word is affected.
-* Update subByte/Word to not allow for address register source/destination.
 * cmpByte/Word/Long
 * beq
 * bne
