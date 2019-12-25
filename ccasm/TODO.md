@@ -1,5 +1,4 @@
 ## Desired
-* Move all instructions back into one file. Yeah.
 * Way to refresh changes w/o restarting the computer?
 * Memory map screen data, e.g., x/y position of the cursor, color values, etc.
 
@@ -11,6 +10,7 @@
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
+* Add moveLong group operand verifier.
 * cmpByte/Word/Long
 * beq
 * bne

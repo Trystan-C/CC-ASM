@@ -31,7 +31,7 @@ end
 
 local function loadInstruction()
     local byte = readNextByte();
-    local definition = instructions.byteToDefinitionMap[byte];
+    local definition = instructions.definitionFromByte(byte);
 
     if definition == nil then
         throwUnsupportedInstructionError(byte);
