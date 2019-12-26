@@ -37,7 +37,7 @@ apiEnv.moveWord = {
         sizeShouldBeTwoBytes = function(operand)
             if operand.definition ~= operandTypes.symbolicAddress then
                 local condition = operand.sizeInBytes <= 2;
-                local errorMessage = "moveWord: Operand size " .. operand.sizeInBytes .. " >= 2.";
+                local errorMessage = "moveWord: Operand size " .. operand.sizeInBytes .. " > 2.";
                 assert(condition, errorMessage);
             end
         end
@@ -61,7 +61,7 @@ apiEnv.moveLong = {
         sizeShouldBeFourBytes = function(operand)
             if operand.definition ~= operandTypes.symbolicAddress then
                 local condition = operand.sizeInBytes <= 4;
-                local errorMessage = "moveLong: Operand size " .. operand.sizeInBytes .. " >= 4.";
+                local errorMessage = "moveLong: Operand size " .. operand.sizeInBytes .. " > 4.";
                 assert(condition, errorMessage);
             end
         end
