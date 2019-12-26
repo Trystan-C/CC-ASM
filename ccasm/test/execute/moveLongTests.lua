@@ -68,6 +68,16 @@ local testSuite = {
             .dataRegister(0).hasValue(0xFF001122);
     end,
 
+    moveLongBetweenSymbolicAddressesThrowsError = function()
+        expect.errorToBeThrown(function()
+            fixture.assemble([[
+                moveLong var1, var2
+                var1 declareLong #h1234ABCD
+                var2 declareLong #h5678EFFF
+            ]]);
+        end);
+    end,
+
 };
 
 return testSuite;

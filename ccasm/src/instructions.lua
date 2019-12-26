@@ -67,7 +67,13 @@ apiEnv.moveLong = {
         end
     },
     groupOperandVerifiers = {
-        -- TODO
+        verify = function(from, to)
+            assert(
+                from.definition ~= operandTypes.symbolicAddress or
+                to.definition ~= operandTypes.symbolicAddress,
+                "moveLong: Cannot move directly between direct or indirect addresses."
+            );
+        end,
     },
     execute = function(from, to)
         operandUtils.long(to).set(operandUtils.long(from).get());
