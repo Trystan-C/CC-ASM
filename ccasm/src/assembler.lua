@@ -117,7 +117,7 @@ local function markSymbolicAddressFillIndex(symbol)
     table.insert(objectCode.symbols[symbol].fillIndices, fillIndex);
 end
 
-local function parseOperandFromNextToken(verifiers)
+local function parseOperandFromNextToken(verify)
     if not isNextTokenAnOperand() then
         throwUnexpectedTokenError(token);
     end
@@ -135,8 +135,13 @@ local function parseOperandFromNextToken(verifiers)
     };
     operand.sizeInBytes = #operand.valueBytes;
 
-    for _, verifier in pairs(verifiers) do
-        verifier(operand);
+    -- TODO: Deprecate the table stuff.
+    if type(verify) == "table" then
+        for _, verifier in pairs(verify) do
+            verifier(operand);
+        end
+    else
+        verify(operand);
     end
 
     return operand;
@@ -165,13 +170,18 @@ local function assembleNextTokenAsInstruction()
     appendInstructionAsBinary(definition.byteValue);
 
     for _ = 1, numOperands do
-        local verifiers = definition.individualOperandVerifiers or {};
+        local verifiers = definition.individualOperandVerifiers or definition.verifyEach or {};
         local operand = assembleNextTokenAsInstructionOperand(verifiers);
         table.insert(operands, operand);
     end
 
-    for _, groupVerifier in pairs((definition.groupOperandVerifiers or {})) do
-        groupVerifier(unpack(operands));
+    -- TODO: Deperecate the table stuff.
+    if definition.verifyAll then
+        definition.verifyAll(unpack(operands));
+    else
+        for _, groupVerifier in pairs((definition.groupOperandVerifiers or {})) do
+            groupVerifier(unpack(operands));
+        end
     end
 end
 

@@ -9,23 +9,19 @@ local apiEnv = getfenv();
 apiEnv.moveByte = {
     byteValue = 0,
     numOperands = 2,
-    individualOperandVerifiers = {
-        sizeShouldBeOneByte = function(operand)
-            if operand.definition ~= operandTypes.symbolicAddress then
-                local condition = operand.sizeInBytes == 1;
-                local errorMessage = "moveByte: Operand size " .. operand.sizeInBytes .. " ~= 1.";
-                assert(condition, errorMessage);
-            end
-        end
-    },
-    groupOperandVerifiers = {
-        cannotMoveBetweenAddresses = function(operand1, operand2)
-            local condition = not (operand1.definition == operandTypes.symbolicAddress and
-                            operand2.definition == operandTypes.symbolicAddress);
-            local errorMessage = "moveByte: Cannot move directly between direct or indirect addresses.";
+    verifyEach = function(operand)
+        if operand.definition ~= operandTypes.symbolicAddress then
+            local condition = operand.sizeInBytes == 1;
+            local errorMessage = "moveByte: Operand size " .. operand.sizeInBytes .. " > 1.";
             assert(condition, errorMessage);
         end
-    },
+    end,
+    verifyAll = function(operand1, operand2)
+        local condition = not (operand1.definition == operandTypes.symbolicAddress and
+                        operand2.definition == operandTypes.symbolicAddress);
+        local errorMessage = "moveByte: Cannot move directly between direct or indirect addresses.";
+        assert(condition, errorMessage);
+    end,
     execute = function(from, to)
         operandUtils.byte(to).set(operandUtils.byte(from).get());
     end,
@@ -33,23 +29,19 @@ apiEnv.moveByte = {
 apiEnv.moveWord = {
     byteValue = 1,
     numOperands = 2,
-    individualOperandVerifiers = {
-        sizeShouldBeTwoBytes = function(operand)
-            if operand.definition ~= operandTypes.symbolicAddress then
-                local condition = operand.sizeInBytes <= 2;
-                local errorMessage = "moveWord: Operand size " .. operand.sizeInBytes .. " > 2.";
-                assert(condition, errorMessage);
-            end
-        end
-    },
-    groupOperandVerifiers = {
-    cannotMoveBetweenAddresses = function(operand1, operand2)
-            local condition = not (operand1.definition == operandTypes.symbolicAddress and
-                            operand2.definition == operandTypes.symbolicAddress);
-            local errorMessage = "moveWord: Cannot move directly between direct or indirect addresses addresses.";
+    verifyEach = function(operand)
+        if operand.definition ~= operandTypes.symbolicAddress then
+            local condition = operand.sizeInBytes <= 2;
+            local errorMessage = "moveWord: Operand size " .. operand.sizeInBytes .. " > 2.";
             assert(condition, errorMessage);
         end
-    },
+    end,
+    verifyAll = function(operand1, operand2)
+        local condition = not (operand1.definition == operandTypes.symbolicAddress and
+                        operand2.definition == operandTypes.symbolicAddress);
+        local errorMessage = "moveWord: Cannot move directly between direct or indirect addresses addresses.";
+        assert(condition, errorMessage);
+    end,
     execute = function(from, to)
         operandUtils.word(to).set(operandUtils.word(from).get());
     end,
@@ -57,24 +49,20 @@ apiEnv.moveWord = {
 apiEnv.moveLong = {
     byteValue = 2,
     numOperands = 2,
-    individualOperandVerifiers = {
-        sizeShouldBeFourBytes = function(operand)
-            if operand.definition ~= operandTypes.symbolicAddress then
-                local condition = operand.sizeInBytes <= 4;
-                local errorMessage = "moveLong: Operand size " .. operand.sizeInBytes .. " > 4.";
-                assert(condition, errorMessage);
-            end
+    verifyEach = function(operand)
+        if operand.definition ~= operandTypes.symbolicAddress then
+            local condition = operand.sizeInBytes <= 4;
+            local errorMessage = "moveLong: Operand size " .. operand.sizeInBytes .. " > 4.";
+            assert(condition, errorMessage);
         end
-    },
-    groupOperandVerifiers = {
-        verify = function(from, to)
-            assert(
-                from.definition ~= operandTypes.symbolicAddress or
-                to.definition ~= operandTypes.symbolicAddress,
-                "moveLong: Cannot move directly between direct or indirect addresses."
-            );
-        end,
-    },
+    end,
+    verifyAll = function(from, to)
+        assert(
+            from.definition ~= operandTypes.symbolicAddress or
+            to.definition ~= operandTypes.symbolicAddress,
+            "moveLong: Cannot move directly between direct or indirect addresses."
+        );
+    end,
     execute = function(from, to)
         operandUtils.long(to).set(operandUtils.long(from).get());
     end,
