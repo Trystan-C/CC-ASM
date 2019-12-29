@@ -4,11 +4,36 @@ apiLoader.loadIfNotPresent("/ccasm/src/memory.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/cpu.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/bitUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/test/assert/expect.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
 local objectCode;
 local apiEnv = {};
+
+apiEnv.statusRegister = function()
+    local next = {
+        step = apiEnv.step;
+        dataRegister = apiEnv.dataRegister;
+        addressRegister = apiEnv.addressRegister;
+        statusRegister = apiEnv.statusRegister;
+    };
+    local function errorMessage(name, expected, actual)
+        return name .. ": Expected " .. expected .. " but was " .. actual .. ".";
+    end
+    return {
+        comparisonFlagIs = function(value)
+            local actual = bitUtils.getAt(value, registers.STATUS_COMPARISON);
+            assert(actual, errorMessage("comparisonFlag", value, actual));
+            return next;
+        end,
+        negativeFlagIs = function(value)
+            local actual = bitUtils.getAt(value, registers.STATUS_NEGATIVE);
+            assert(actual, errorMessage("negativeFlag", value, actual));
+            return next;
+        end,
+    };
+end
 
 apiEnv.assertAddressRegisterValueIs = function(id, value)
     expect.value(registers.addressRegisters[id].value)
@@ -87,6 +112,7 @@ apiEnv.step = function(steps)
         step = apiEnv.step;
         dataRegister = apiEnv.dataRegister;
         addressRegister = apiEnv.addressRegister;
+        statusRegister = apiEnv.statusRegister;
     };
 end
 

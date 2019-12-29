@@ -388,6 +388,31 @@ apiEnv.divLong = {
         operandUtils.long(to).set(tableUtils.fitToSize(quotient, 4));
     end,
 };
+--COMPARISON------------------------------------------------------------
+apiEnv.cmpByte = {
+    byteValue = 15,
+    numOperands = 2,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes == 1, "cmpByte: Operand must be 1 byte.");
+    end,
+    verifyAll = function(operand1, operand2)
+        assert(
+            operand1.definition == operandTypes.dataRegister or
+            operand1.definition == operandTypes.immediateData,
+            "cmpByte: Left operand must be immediate data or data register."
+        );
+        assert(
+            operand2.definition == operandTypes.immediateData or
+            operand2.definition == operandTypes.dataRegister,
+            "cmpByte: Right operand must be immediate data or data register."
+        );
+    end,
+    execute = function(from, to)
+        local a = integer.getSignedIntegerFromBytes(operandUtils.byte(from).get());
+        local b = integer.getSignedIntegerFromBytes(operandUtils.byte(to).get());
+        registers.compare(a, b);
+    end,
+};
 ------------------------------------------------------------------------
 --PUBLIC API------------------------------------------------------------
 local function isInstructionDefinition(definition)

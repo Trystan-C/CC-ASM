@@ -1,4 +1,5 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/bitUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
@@ -75,6 +76,24 @@ function clear()
     for i = 0, 7 do
         dataRegisters[i].setLong(tableUtils.zeros(registerWidthInBytes));
         addressRegisters[i].setLong(tableUtils.zeros(registerWidthInBytes));
+    end
+    statusRegister = 0;
+end
+
+statusRegister = 0;
+STATUS_COMPARISON = 0;
+STATUS_NEGATIVE = 1;
+function compare(a, b)
+    local diff = a - b;
+    if diff == 0 then
+        bitUtils.setOnAt(statusRegister, STATUS_COMPARISON);
+    else
+        bitUtils.setOffAt(statusRegister, STATUS_COMPARISON);
+    end
+    if diff < 0 then
+        bitUtils.setOnAt(statusRegister, STATUS_NEGATIVE);
+    else
+        bitUtils.setOffAt(statusRegister, STATUS_NEGATIVE);
     end
 end
 

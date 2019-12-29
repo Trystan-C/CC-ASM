@@ -9,13 +9,23 @@ local testSuite = {
     end,
 
     clearRegisters = function()
+        for _, dataRegister in ipairs(registers.dataRegisters) do
+            dataRegister.setLong({ 0x12, 0x23, 0xAB, 0xCD });
+        end
+        for _, addressRegister in ipairs(registers.addressRegisters) do
+            addressRegister.setLong({ 0x12, 0x23, 0xAB, 0xCD });
+        end
+        statusRegister = 0xFF;
+
         registers.clear();
+
         for _, dataRegister in ipairs(registers.dataRegisters) do
             expect.value(dataRegister.value).toDeepEqual({ 0, 0, 0, 0 });
         end
         for _, addressRegister in ipairs(registers.addressRegisters) do
             expect.value(addressRegister.value).toDeepEqual({ 0, 0, 0, 0 });
         end
+        expect.value(registers.statusRegister).toEqual(0);
     end,
 
     getAndSetDataRegisterByte = function()
