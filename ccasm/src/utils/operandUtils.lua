@@ -2,14 +2,14 @@ assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
-
 apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
 local function registerId(operand)
     return operand.valueBytes[1];
 end
 
-local function absoluteAddress(operand)
+function absoluteAddress(operand)
+    assert(operand.definition == operandTypes.symbolicAddress, "Expected symbolic address operand.");
     local offset = integer.getSignedIntegerFromBytes(operand.valueBytes);
     local symbolStartAddress = operand.valueStartAddress + offset;
     return symbolStartAddress;

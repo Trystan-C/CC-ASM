@@ -7,60 +7,49 @@ local testSuite = {
     compareDataRegisters = function()
         fixture.assemble([[
             moveByte #1, d0
-            cmpByte d1, d0
+            cmpByte d0, d1
         ]])
             .load()
             .step(2)
-            .statusRegister().comparisonFlagIs(1)
-            .statusRegister().negativeFlagIs(0);
-
-        fixture.assemble([[
-            moveByte #1, d0
-            moveByte #2, d1
-            cmpByte d1, d0
-        ]])
-            .load()
-            .step(3)
-            .statusRegister().comparisonFlagIs(1)
-            .statusRegister().negativeFlagIs(1);
-
-        fixture.assemble([[
-            moveByte #1, d0
-            moveByte #1, d1
-            cmpByte d1, d0
-        ]])
-            .load()
-            .step(3)
             .statusRegister().comparisonFlagIs(0)
             .statusRegister().negativeFlagIs(0);
     end,
 
-    compareImmediateData = function()
+    compareImmediateDataWithDataRegister = function()
         fixture.assemble([[
-            moveByte #1, d0
-            cmpByte #1, d0
-        ]])
-            .load()
-            .step(2)
-            .statusRegister().comparisonFlagIs(1)
-            .statusRegister().negativeFlagIs(0);
-
-        fixture.assemble([[
-            moveByte #1, d0
+            moveByte #3, d0
             cmpByte #2, d0
         ]])
             .load()
             .step(2)
-            .statusRegister().comparisonFlagIs(1)
+            .statusRegister().comparisonFlagIs(0)
             .statusRegister().negativeFlagIs(1);
+    end,
 
+    compareDataRegisterWithImmediateData = function()
+        fixture.assemble("cmpByte d0, #0")
+            .load()
+            .step()
+            .statusRegister().comparisonFlagIs(1)
+            .statusRegister().negativeFlagIs(0);
+    end,
+
+    compareImmediateData = function()
+        fixture.assemble("cmpByte #1, #1")
+            .load()
+            .step()
+            .statusRegister().comparisonFlagIs(1)
+            .statusRegister().negativeFlagIs(0);
+    end,
+
+    comparisonOnlyConsidersLowerByte = function()
         fixture.assemble([[
-            moveByte #1, d0
-            cmpByte #1, d0
+            moveWord #h1234, d0
+            cmpByte #h34, d0
         ]])
             .load()
             .step(2)
-            .statusRegister().comparisonFlagIs(0)
+            .statusRegister().comparisonFlagIs(1)
             .statusRegister().negativeFlagIs(0);
     end,
 

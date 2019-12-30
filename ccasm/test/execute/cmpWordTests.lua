@@ -11,8 +11,8 @@ local testSuite = {
         ]])
             .load()
             .step(2)
-            .statusRegister().comparisonFlagIs(1)
-            .statusRegister().negativeFlagIs(1);
+            .statusRegister().comparisonFlagIs(0)
+            .statusRegister().negativeFlagIs(0);
     end,
 
     compareDataRegisterWithImmediateData = function()
@@ -22,15 +22,15 @@ local testSuite = {
         ]])
             .load()
             .step(2)
-            .statusRegister().comparisonFlagIs(1)
-            .statusRegister().negativeFlagIs(0);
+            .statusRegister().comparisonFlagIs(0)
+            .statusRegister().negativeFlagIs(1);
     end,
 
     compareDataRegisters = function()
         fixture.assemble("cmpWord d0, d0")
             .load()
             .step()
-            .statusRegister().comparisonFlagIs(0)
+            .statusRegister().comparisonFlagIs(1)
             .statusRegister().negativeFlagIs(0);
     end,
 
@@ -38,7 +38,7 @@ local testSuite = {
         fixture.assemble("cmpWord #1, #1")
             .load()
             .step()
-            .statusRegister().comparisonFlagIs(0)
+            .statusRegister().comparisonFlagIs(1)
             .statusRegister().negativeFlagIs(0);
     end,
 
@@ -49,7 +49,7 @@ local testSuite = {
         ]])
             .load()
             .step(2)
-            .statusRegister().comparisonFlagIs(0)
+            .statusRegister().comparisonFlagIs(1)
             .statusRegister().negativeFlagIs(0);
     end,
 

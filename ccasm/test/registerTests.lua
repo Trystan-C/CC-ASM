@@ -15,7 +15,7 @@ local testSuite = {
         for _, addressRegister in ipairs(registers.addressRegisters) do
             addressRegister.setLong({ 0x12, 0x23, 0xAB, 0xCD });
         end
-        statusRegister = 0xFF;
+        registers.setStatusRegister(0xFF);
 
         registers.clear();
 
@@ -25,7 +25,7 @@ local testSuite = {
         for _, addressRegister in ipairs(registers.addressRegisters) do
             expect.value(addressRegister.value).toDeepEqual({ 0, 0, 0, 0 });
         end
-        expect.value(registers.statusRegister).toEqual(0);
+        expect.value(registers.getStatusRegister()).toEqual(0);
     end,
 
     getAndSetDataRegisterByte = function()

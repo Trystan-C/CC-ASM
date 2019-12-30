@@ -74,11 +74,6 @@ local function throwSymbolRedefinitionError(symbol)
     error(message);
 end
 
-local function throwSymbolUndeclaredError(symbol)
-    local message = "Symbol is used but never declared: " .. tostring(symbol) .. ".";
-    error(message);
-end
-
 local function isNextTokenAnInstruction()
     return instructions[peekNextToken()] ~= nil;
 end
@@ -214,7 +209,7 @@ end
 local function fillSymbolAddressReferences()
     for symbol, definition in pairs(objectCode.symbols) do
         if not symbolIsDeclared(symbol) then
-            throwSymbolUndeclaredError(symbol)
+            error("Symbol is used but never declared: " .. tostring(symbol) .. ".");
         else
             fillReferencesForSymbol(definition)
         end
@@ -230,7 +225,7 @@ local function addSymbolicAddress(symbol)
 end
 
 local function assembleNextTokenAsSymbol()
-    local symbol = dequeueNextToken();
+    local symbol = dequeueNextToken():match(operandTypes.symbolicAddress.pattern);
 
     if symbolIsDeclared(symbol) then
         throwSymbolRedefinitionError(symbol);

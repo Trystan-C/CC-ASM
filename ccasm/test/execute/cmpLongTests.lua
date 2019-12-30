@@ -12,7 +12,7 @@ local testSuite = {
         ]])
             .load()
             .step(3)
-            .statusRegister().comparisonFlagIs(0)
+            .statusRegister().comparisonFlagIs(1)
             .statusRegister().negativeFlagIs(0);
     end,
 
@@ -23,18 +23,18 @@ local testSuite = {
         ]])
             .load()
             .step(2)
-            .statusRegister().comparisonFlagIs(1)
+            .statusRegister().comparisonFlagIs(0)
             .statusRegister().negativeFlagIs(0);
     end,
 
     compareDataRegisterWithImmediateData = function()
         fixture.assemble([[
-            moveLong #h1234ABCE, d0
-            cmpLong d0, #h1234ABCD
+            moveLong #h1234ABCD, d0
+            cmpLong d0, #h1234ABCE
         ]])
             .load()
             .step(2)
-            .statusRegister().comparisonFlagIs(1)
+            .statusRegister().comparisonFlagIs(0)
             .statusRegister().negativeFlagIs(1);
     end,
 
@@ -42,7 +42,7 @@ local testSuite = {
         fixture.assemble("cmpLong #h1234ABCD, #h1234ABCD")
             .load()
             .step()
-            .statusRegister().comparisonFlagIs(0)
+            .statusRegister().comparisonFlagIs(1)
             .statusRegister().negativeFlagIs(0);
     end,
 

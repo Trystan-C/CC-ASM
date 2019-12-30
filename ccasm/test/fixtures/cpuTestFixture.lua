@@ -22,14 +22,18 @@ apiEnv.statusRegister = function()
         return name .. ": Expected " .. expected .. " but was " .. actual .. ".";
     end
     return {
+        printValue = function()
+            logger.info("STATUS_REGISTER=%%", registers.statusRegister);
+            return next;
+        end,
         comparisonFlagIs = function(value)
-            local actual = bitUtils.getAt(value, registers.STATUS_COMPARISON);
-            assert(actual, errorMessage("comparisonFlag", value, actual));
+            local actual = bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON);
+            assert(actual == value, errorMessage("comparisonFlag", value, actual));
             return next;
         end,
         negativeFlagIs = function(value)
-            local actual = bitUtils.getAt(value, registers.STATUS_NEGATIVE);
-            assert(actual, errorMessage("negativeFlag", value, actual));
+            local actual = bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_NEGATIVE);
+            assert(actual == value, errorMessage("negativeFlag", value, actual));
             return next;
         end,
     };
@@ -117,8 +121,8 @@ apiEnv.step = function(steps)
 end
 
 apiEnv.programCounterIsAt = function(address)
-    local condition = address == cpu.getProgramCounter();
-    local message = "Expected program counter to be at address 0x" .. string.format("%X", address) .. " but was 0x" .. string.format("%X", cpu.getProgramCounter());
+    local condition = address == registers.getProgramCounter();
+    local message = "Expected program counter to be at address 0x" .. string.format("%X", address) .. " but was 0x" .. string.format("%X", registers.getProgramCounter());
     assert(condition, message);
 
     return {
@@ -130,7 +134,7 @@ local function load()
     registers.clear();
     memory.clear();
     memory.load(objectCode.origin, objectCode.binaryOutput);
-    cpu.setProgramCounter(objectCode.origin);
+    registers.setProgramCounter(objectCode.origin);
 
     return {
         programCounterIsAt = apiEnv.programCounterIsAt;

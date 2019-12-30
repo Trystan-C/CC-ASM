@@ -464,6 +464,47 @@ apiEnv.cmpLong = {
         );
     end,
 };
+--BRANCHING-------------------------------------------------------------
+apiEnv.beq = {
+    byteValue = 18,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 2, "beq: Operand must be at most 2 bytes.");
+        assert(
+            operand.definition == operandTypes.symbolicAddress or
+            operand.definition == operandTypes.immediateData,
+            "beq: Operand must be a symbolic address or immediate data."
+        );
+    end,
+    execute = function(operand)
+        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 1 then
+            local address;
+            if operand.definition == operandTypes.symbolicAddress then
+                address = operandUtils.absoluteAddress(operand);
+            else
+                address = integer.getIntegerFromBytes(operandUtils.word(operand).get());
+            end
+            registers.setProgramCounter(address);
+        end
+    end,
+};
+apiEnv.bne = {
+    byteValue = 19,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 2, "bne: Operand must be at most 2 bytes.");
+        assert(
+            operand.definition == operandTypes.symbolicAddress or
+            operand.definition == operandTypes.immediateData,
+            "bne: Operand must be a symbolic address or immediate data."
+        );
+    end,
+    execute = function(operand)
+        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 0 then
+            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        end
+    end,
+};
 ------------------------------------------------------------------------
 --PUBLIC API------------------------------------------------------------
 local function isInstructionDefinition(definition)

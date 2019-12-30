@@ -4,23 +4,9 @@ apiLoader.loadIfNotPresent("/ccasm/src/memory.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/instructions.lua");
 
-local programCounter = 0;
-
-function getProgramCounter()
-    return programCounter;
-end
-
-function setProgramCounter(address)
-    if memory.isAddressValid(address) then
-        programCounter = address;
-    else
-        error("cpu: Expected program counter to be a valid address, was " .. tostring(address));
-    end
-end
-
 local function readNextByte()
-    local byte = memory.bytes[programCounter];
-    programCounter = programCounter + 1;
+    local byte = memory.bytes[registers.getProgramCounter()];
+    registers.setProgramCounter(registers.getProgramCounter() + 1);
     return byte;
 end
 
@@ -38,7 +24,7 @@ end
 local function loadOperand()
     local typeByte = readNextByte();
     local sizeInBytes = readNextByte();
-    local operandValueStartAddress = programCounter;
+    local operandValueStartAddress = registers.getProgramCounter();
     local valueBytes = {};
     for i = 1, sizeInBytes do
         valueBytes[i] = readNextByte();

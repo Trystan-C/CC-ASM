@@ -1,8 +1,39 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/memory.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/bitUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
+local apiEnv = getfenv();
+
+--STATUS REGISTER------------------------------------------
+local statusRegister = 0;
+STATUS_COMPARISON = 0;
+STATUS_NEGATIVE = 1;
+function compare(a, b)
+    local diff = a - b;
+    if diff == 0 then
+        statusRegister = bitUtils.setOnAt(statusRegister, STATUS_COMPARISON);
+    else
+        statusRegister = bitUtils.setOffAt(statusRegister, STATUS_COMPARISON);
+    end
+    if diff < 0 then
+        statusRegister = bitUtils.setOnAt(statusRegister, STATUS_NEGATIVE);
+    else
+        statusRegister = bitUtils.setOffAt(statusRegister, STATUS_NEGATIVE);
+    end
+end
+
+function getStatusRegister()
+    return statusRegister;
+end
+
+function setStatusRegister(value)
+    assert(value >= 0 and value <= 255, "setStatusRegister: Expected " .. tostring(value) .. " to be 1 byte.");
+    statusRegister = value;
+end
+-----------------------------------------------------------
+--DATA/ADDRESS REGISTERS-----------------------------------
 local function assertByteTableSizeIs(byteTable, size)
     local condition = #byteTable == size;
     local message = "Expected byte table to have size " .. tostring(size) .. " but was " .. tostring(#byteTable) .. ".";
@@ -72,31 +103,6 @@ local registerMetatable = {
     end,
 };
 
-function clear()
-    for i = 0, 7 do
-        dataRegisters[i].setLong(tableUtils.zeros(registerWidthInBytes));
-        addressRegisters[i].setLong(tableUtils.zeros(registerWidthInBytes));
-    end
-    statusRegister = 0;
-end
-
-statusRegister = 0;
-STATUS_COMPARISON = 0;
-STATUS_NEGATIVE = 1;
-function compare(a, b)
-    local diff = a - b;
-    if diff == 0 then
-        bitUtils.setOnAt(statusRegister, STATUS_COMPARISON);
-    else
-        bitUtils.setOffAt(statusRegister, STATUS_COMPARISON);
-    end
-    if diff < 0 then
-        bitUtils.setOnAt(statusRegister, STATUS_NEGATIVE);
-    else
-        bitUtils.setOffAt(statusRegister, STATUS_NEGATIVE);
-    end
-end
-
 registerWidthInBytes = 4;
 dataRegisters = {};
 addressRegisters = {};
@@ -112,3 +118,28 @@ for i = 0, 7 do
     setmetatable(dataRegisters[i], registerMetatable);
     setmetatable(addressRegisters[i], registerMetatable);
 end
+-----------------------------------------------------------
+--PROGRAM COUNTER------------------------------------------
+local programCounter = 0;
+
+function getProgramCounter()
+    return programCounter;
+end
+
+function setProgramCounter(address)
+    if memory.isAddressValid(address) then
+        programCounter = address;
+    else
+        error("registers: Expected program counter to be a valid address, was " .. tostring(address));
+    end
+end
+-----------------------------------------------------------
+--COMMON---------------------------------------------------
+function clear()
+    for i = 0, 7 do
+        dataRegisters[i].setLong(tableUtils.zeros(registerWidthInBytes));
+        addressRegisters[i].setLong(tableUtils.zeros(registerWidthInBytes));
+    end
+    statusRegister = 0;
+end
+-----------------------------------------------------------

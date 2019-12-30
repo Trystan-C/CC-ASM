@@ -3,7 +3,7 @@ function onAt(pos)
 end
 
 function getAt(int, pos)
-    return bit.band(int, onAt(pos));
+    return bit.blogic_rshift(bit.band(int, onAt(pos)), pos);
 end
 
 function setOnAt(int, pos)
