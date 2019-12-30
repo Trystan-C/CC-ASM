@@ -413,6 +413,30 @@ apiEnv.cmpByte = {
         registers.compare(a, b);
     end,
 };
+apiEnv.cmpWord = {
+    byteValue = 16,
+    numOperands = 2,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 2, "cmpWord: Operand must be at most 2 bytes.");
+    end,
+    verifyAll = function(left, right)
+        assert(
+            left.definition == operandTypes.immediateData or
+            left.definition == operandTypes.dataRegister,
+            "cmpWord: Left operand must be immediate data or data register."
+        );
+        assert(
+            right.definition == operandTypes.immediateData or
+            right.definition == operandTypes.dataRegister,
+            "cmpWord: Right operand must be immediate data or data register."
+        );
+    end,
+    execute = function(left, right)
+        local a = integer.getSignedIntegerFromBytes(operandUtils.word(left).get());
+        local b = integer.getSignedIntegerFromBytes(operandUtils.word(right).get());
+        registers.compare(a, b);
+    end,
+};
 ------------------------------------------------------------------------
 --PUBLIC API------------------------------------------------------------
 local function isInstructionDefinition(definition)

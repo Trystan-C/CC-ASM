@@ -14,13 +14,8 @@ function setProgramCounter(address)
     if memory.isAddressValid(address) then
         programCounter = address;
     else
-        error("Expected program counter to be a valid address, was " .. tostring(address));
+        error("cpu: Expected program counter to be a valid address, was " .. tostring(address));
     end
-end
-
-local function throwUnsupportedInstructionError(byte)
-    local message = "Unsupported instruction byte: " .. tostring(byte) .. ".";
-    error(message);
 end
 
 local function readNextByte()
@@ -34,7 +29,7 @@ local function loadInstruction()
     local definition = instructions.definitionFromByte(byte);
 
     if definition == nil then
-        throwUnsupportedInstructionError(byte);
+        error("cpu: Unsupported instruction byte: " .. tostring(byte) .. ".");
     end
 
     return definition;
