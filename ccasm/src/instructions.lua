@@ -478,13 +478,7 @@ apiEnv.beq = {
     end,
     execute = function(operand)
         if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 1 then
-            local address;
-            if operand.definition == operandTypes.symbolicAddress then
-                address = operandUtils.absoluteAddress(operand);
-            else
-                address = integer.getIntegerFromBytes(operandUtils.word(operand).get());
-            end
-            registers.setProgramCounter(address);
+            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
         end
     end,
 };

@@ -1,4 +1,5 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
@@ -9,10 +10,18 @@ local function registerId(operand)
 end
 
 function absoluteAddress(operand)
-    assert(operand.definition == operandTypes.symbolicAddress, "Expected symbolic address operand.");
-    local offset = integer.getSignedIntegerFromBytes(operand.valueBytes);
-    local symbolStartAddress = operand.valueStartAddress + offset;
-    return symbolStartAddress;
+    assert(
+        operand.definition == operandTypes.symbolicAddress or
+        operand.definition == operandTypes.immediateData,
+        "absoluteAddress: Expected symbolic address or immediate data operand."
+    );
+    if operand.definition == operandTypes.symbolicAddress then
+        local offset = integer.getSignedIntegerFromBytes(operand.valueBytes);
+        local symbolStartAddress = operand.valueStartAddress + offset;
+        return symbolStartAddress;
+    elseif operand.definition == operandTypes.immediateData then
+        return integer.getIntegerFromBytes(word(operand).get());
+    end
 end
 
 local function byteGetter(operand)
