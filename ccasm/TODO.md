@@ -1,6 +1,7 @@
 ## Desired
 * Way to refresh changes w/o restarting the computer?
 * Memory map screen data, e.g., x/y position of the cursor, color values, etc.
+* Write disassembler using ccasm.
 
 ## Documentation
 * CONTRIBUTING.md for adding instructions/tests.
@@ -10,7 +11,6 @@
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* cmpWord/Long
 * beq
 * bne
 * blt

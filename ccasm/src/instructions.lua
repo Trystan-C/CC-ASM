@@ -407,10 +407,11 @@ apiEnv.cmpByte = {
             "cmpByte: Right operand must be immediate data or data register."
         );
     end,
-    execute = function(from, to)
-        local a = integer.getSignedIntegerFromBytes(operandUtils.byte(from).get());
-        local b = integer.getSignedIntegerFromBytes(operandUtils.byte(to).get());
-        registers.compare(a, b);
+    execute = function(left, right)
+        registers.compare(
+            integer.getSignedIntegerFromBytes(operandUtils.byte(left).get()),
+            integer.getSignedIntegerFromBytes(operandUtils.byte(right).get())
+        );
     end,
 };
 apiEnv.cmpWord = {
@@ -432,9 +433,35 @@ apiEnv.cmpWord = {
         );
     end,
     execute = function(left, right)
-        local a = integer.getSignedIntegerFromBytes(operandUtils.word(left).get());
-        local b = integer.getSignedIntegerFromBytes(operandUtils.word(right).get());
-        registers.compare(a, b);
+        registers.compare(
+            integer.getSignedIntegerFromBytes(operandUtils.word(left).get()),
+            integer.getSignedIntegerFromBytes(operandUtils.word(right).get())
+        );
+    end,
+};
+apiEnv.cmpLong = {
+    byteValue = 17,
+    numOperands = 2,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 4, "cmpLong: Operand must be at most 4 bytes.");
+    end,
+    verifyAll = function(left, right)
+        assert(
+            left.definition == operandTypes.immediateData or
+            left.definition == operandTypes.dataRegister,
+            "cmpLong: Left operand must be immediate data or data register."
+        );
+        assert(
+            right.definition == operandTypes.immediateData or
+            right.definition == operandTypes.dataRegister,
+            "cmpLong: Right operand must be immediate data or data register."
+        );
+    end,
+    execute = function(left, right)
+        registers.compare(
+            integer.getSignedIntegerFromBytes(operandUtils.long(left).get()),
+            integer.getSignedIntegerFromBytes(operandUtils.long(right).get())
+        );
     end,
 };
 ------------------------------------------------------------------------
