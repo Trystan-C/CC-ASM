@@ -499,6 +499,42 @@ apiEnv.bne = {
         end
     end,
 };
+apiEnv.blt = {
+    byteValue = 20,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 2, "blt: Operand must be at most 2 bytes.");
+        assert(
+            operand.definition == operandTypes.symbolicAddress or
+            operand.definition == operandTypes.immediateData,
+            "blt: Operand must be a symbolic address or immediate data."
+        );
+    end,
+    execute = function(operand)
+        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 0 and 
+        bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_NEGATIVE) == 1 then
+            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        end
+    end,
+};
+apiEnv.ble = {
+    byteValue = 21,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 2, "blt: Operand must be at most 2 bytes.");
+        assert(
+            operand.definition == operandTypes.symbolicAddress or
+            operand.definition == operandTypes.immediateData,
+            "ble: Operand must be a symbolic address or immediate data."
+        );
+    end,
+    execute = function(operand)
+        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 1 or
+        bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_NEGATIVE) == 1 then
+            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        end
+    end,
+};
 ------------------------------------------------------------------------
 --PUBLIC API------------------------------------------------------------
 local function isInstructionDefinition(definition)
