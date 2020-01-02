@@ -11,8 +11,6 @@
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* bgt
-* bge
 * bsr
 * ret
 * push <d0-7/a0-6>, +(sp/a7)-

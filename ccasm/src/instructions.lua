@@ -535,8 +535,44 @@ apiEnv.ble = {
         end
     end,
 };
+apiEnv.bgt = {
+    byteValue = 22,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 2, "bgt: Operand must be at most 2 bytes.");
+        assert(
+            operand.definition == operandTypes.symbolicAddress or
+            operand.definition == operandTypes.immediateData,
+            "bgt: Operand must be a symbolic address or immediate data."
+        );
+    end,
+    execute = function(operand)
+        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 0 and
+        bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_NEGATIVE) == 0 then
+            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        end
+    end,
+};
+apiEnv.bge = {
+    byteValue = 23,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 2, "bge: Operand must be at most 2 bytes.");
+        assert(
+            operand.definition == operandTypes.symbolicAddress or
+            operand.definition == operandTypes.immediateData,
+            "bge: Operand must be a symbolic address or immediate data."
+        );
+    end,
+    execute = function(operand)
+        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 1 or
+        bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_NEGATIVE) == 0 then
+            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        end
+    end,
+};
 ------------------------------------------------------------------------
---PUBLIC API------------------------------------------------------------
+--DEFINITION MAP------------------------------------------------------------
 local function isInstructionDefinition(definition)
     return type(definition) == "table" and
             definition.byteValue ~= nil and
