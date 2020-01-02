@@ -1,4 +1,5 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/operandUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
@@ -571,8 +572,28 @@ apiEnv.bge = {
         end
     end,
 };
-------------------------------------------------------------------------
---DEFINITION MAP------------------------------------------------------------
+--SUBROUTINES----------------------------------------------
+apiEnv.bsr = {
+    byteValue = 24,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(operand.definition == operandTypes.symbolicAddress, "bsr: Operand must be symbolic address.");
+    end,
+    execute = function(operand)
+        -- Program counter will be at the next instruction, since cpu will read the instruction and operand before executing.
+        registers.pushStack(integer.getBytesForInteger(2, registers.getProgramCounter()));
+        registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+    end,
+};
+apiEnv.ret = {
+    byteValue = 25,
+    numOperands = 0,
+    execute = function()
+        registers.setProgramCounter(integer.getIntegerFromBytes(registers.popStackWord()));
+    end,
+};
+-----------------------------------------------------------
+--DEFINITION MAP-------------------------------------------
 local function isInstructionDefinition(definition)
     return type(definition) == "table" and
             definition.byteValue ~= nil and

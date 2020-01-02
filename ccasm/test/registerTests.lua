@@ -64,6 +64,28 @@ local testSuite = {
         expect.value(registers.addressRegisters[3].getLong()).toDeepEqual(long);
     end,
 
+    -- TODO: compare tests
+
+    pushOverStackLimitThrowsError = function()
+        local bytes = {};
+        for i = 1, registers.STACK_SIZE_IN_BYTES do
+            table.insert(bytes, 0);
+        end
+        registers.pushStack(bytes);
+        expect.errorToBeThrown(function()
+            registers.pushStack({ 0 });
+        end);
+    end,
+
+    stack = function()
+        registers.pushStack({ 0x12 });
+        registers.pushStack({ 0x12, 0x34 });
+        registers.pushStack({ 0x12, 0x34, 0xAB, 0xCD });
+        expect.value(registers.popStackLong()).toDeepEqual({ 0x12, 0x34, 0xAB, 0xCD });
+        expect.value(registers.popStackWord()).toDeepEqual({ 0x12, 0x34 });
+        expect.value(registers.popStackByte()).toDeepEqual({ 0x12 });
+    end,
+
 };
 
 return testSuite;

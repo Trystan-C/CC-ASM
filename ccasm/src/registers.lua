@@ -32,7 +32,6 @@ function setStatusRegister(value)
     assert(value >= 0 and value <= 255, "setStatusRegister: Expected " .. tostring(value) .. " to be 1 byte.");
     statusRegister = value;
 end
------------------------------------------------------------
 --DATA/ADDRESS REGISTERS-----------------------------------
 local function assertByteTableSizeIs(byteTable, size)
     local condition = #byteTable == size;
@@ -118,7 +117,37 @@ for i = 0, 7 do
     setmetatable(dataRegisters[i], registerMetatable);
     setmetatable(addressRegisters[i], registerMetatable);
 end
------------------------------------------------------------
+--STACK----------------------------------------------------
+local STACK_START_ADDRESS = 0x7F;
+STACK_SIZE_IN_BYTES = 1024;
+local stackPointer = STACK_START_ADDRESS;
+
+function pushStack(byteTable)
+    local numBytes = tableUtils.countKeys(byteTable);
+    if stackPointer + numBytes > STACK_START_ADDRESS + STACK_SIZE_IN_BYTES then
+        error("registers: Stack write exceeds max address.");
+    end
+    memory.writeBytes(stackPointer, byteTable);
+    stackPointer = stackPointer + numBytes;
+end
+
+function popStackByte()
+    local byte = memory.readBytes(stackPointer - 1, 1);
+    stackPointer = stackPointer - 1;
+    return byte;
+end
+
+function popStackWord()
+    local word = memory.readBytes(stackPointer - 2, 2);
+    stackPointer = stackPointer - 2;
+    return word;
+end
+
+function popStackLong()
+    local long = memory.readBytes(stackPointer - 4, 4);
+    stackPointer = stackPointer - 4;
+    return long;
+end
 --PROGRAM COUNTER------------------------------------------
 local programCounter = 0;
 
@@ -141,5 +170,6 @@ function clear()
         addressRegisters[i].setLong(tableUtils.zeros(registerWidthInBytes));
     end
     statusRegister = 0;
+    stackPointer = STACK_START_ADDRESS;
 end
 -----------------------------------------------------------
