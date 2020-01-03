@@ -122,28 +122,35 @@ local STACK_START_ADDRESS = 0x7F;
 STACK_SIZE_IN_BYTES = 1024;
 local stackPointer = STACK_START_ADDRESS;
 
+local function isAddressInStackRegion(address)
+    return address >= STACK_START_ADDRESS and address <= STACK_START_ADDRESS + STACK_SIZE_IN_BYTES;
+end
+
 function pushStack(byteTable)
     local numBytes = tableUtils.countKeys(byteTable);
-    if stackPointer + numBytes > STACK_START_ADDRESS + STACK_SIZE_IN_BYTES then
-        error("registers: Stack write exceeds max address.");
+    if not isAddressInStackRegion(stackPointer + numBytes) then
+        error("pushStack: Stack write exceeds max address.");
     end
     memory.writeBytes(stackPointer, byteTable);
     stackPointer = stackPointer + numBytes;
 end
 
 function popStackByte()
+    assert(isAddressInStackRegion(stackPointer - 1), "popStackByte: Illegal pop below stack base.");
     local byte = memory.readBytes(stackPointer - 1, 1);
     stackPointer = stackPointer - 1;
     return byte;
 end
 
 function popStackWord()
+    assert(isAddressInStackRegion(stackPointer - 2), "popStackWord: Illegal pop below stack base.");
     local word = memory.readBytes(stackPointer - 2, 2);
     stackPointer = stackPointer - 2;
     return word;
 end
 
 function popStackLong()
+    assert(isAddressInStackRegion(stackPointer - 4), "popStackLong: Illegal pop below stack base.");
     local long = memory.readBytes(stackPointer - 4, 4);
     stackPointer = stackPointer - 4;
     return long;

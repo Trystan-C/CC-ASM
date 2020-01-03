@@ -11,8 +11,6 @@
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* push <d0-7/a0-6>, +(sp/a7)-
-* pop <d0-7/a0-6>, +(sp/a7)-
 * lshiftByte/Word/Long
 * rshiftByte/Word/Long
 * orByte/Word/Long

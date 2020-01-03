@@ -82,6 +82,14 @@ function zeroPadFrontToSize(tbl, size)
     return tbl;
 end
 
+function zeroPadBackToSize(tbl, size)
+    assertIsTable(tbl);
+    while #tbl < size do
+        table.insert(tbl, 0);
+    end
+    return tbl;
+end
+
 function trimToSize(tbl, size)
     assertIsTable(tbl);
     local tblSize = countKeys(tbl);

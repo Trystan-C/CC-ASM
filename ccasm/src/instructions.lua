@@ -1,5 +1,6 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
+apiLoader.loadIfNotPresent("/ccasm/src/utils/bitUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/operandUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
@@ -592,6 +593,60 @@ apiEnv.ret = {
         registers.setProgramCounter(integer.getIntegerFromBytes(registers.popStackWord()));
     end,
 };
+--STACK----------------------------------------------------
+apiEnv.push = {
+    byteValue = 26,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(
+            operand.definition == operandTypes.registerRange or
+            operand.definition == operandTypes.dataRegister or
+            operand.definition == operandTypes.addressRegister,
+            "push: Operand must be a data/address register or register range.");
+    end,
+    execute = function(operand)
+        if operand.definition == operandTypes.registerRange then
+            local dataRegisterIds = operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[1]);
+            for _, dataRegisterId in ipairs(dataRegisterIds) do
+                registers.pushStack(registers.dataRegisters[dataRegisterId].value);
+            end
+
+            local addressRegisterIds = operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[2]);
+            for _, addressRegisterId in ipairs(addressRegisterIds) do
+                registers.pushStack(registers.addressRegisters[addressRegisterId].value);
+            end
+        else
+            registers.pushStack(operandUtils.long(operand).get());
+        end
+    end,
+};
+apiEnv.pop = {
+    byteValue = 27,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(
+            operand.definition == operandTypes.registerRange or
+            operand.definition == operandTypes.dataRegister or
+            operand.definition == operandTypes.addressRegister,
+            "pop: Operand must be data/address register or register range."
+        );
+    end,
+    execute = function(operand)
+        if operand.definition == operandTypes.registerRange then
+            local dataRegisterIds = operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[1]);
+            for i = #dataRegisterIds, 1, -1 do
+                registers.dataRegisters[dataRegisterIds[i]].setLong(registers.popStackLong());
+            end
+
+            local addressRegisterIds = operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[2]);
+            for i = #addressRegisterIds, 1, -1 do
+                registers.addressRegisters[addressRegisterIds[i]].setLong(registers.popStackLong());
+            end
+        else
+            operandUtils.long(operand).set(registers.popStackLong());
+        end
+    end,
+}
 -----------------------------------------------------------
 --DEFINITION MAP-------------------------------------------
 local function isInstructionDefinition(definition)

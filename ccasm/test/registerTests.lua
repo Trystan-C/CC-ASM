@@ -64,7 +64,21 @@ local testSuite = {
         expect.value(registers.addressRegisters[3].getLong()).toDeepEqual(long);
     end,
 
-    -- TODO: compare tests
+    popAtStackBaseThrowsError = function()
+        expect.errorToBeThrown(function()
+            registers.popStackByte();
+        end);
+
+        registers.clear();
+        expect.errorToBeThrown(function()
+            registers.popStackWord();
+        end);
+        
+        registers.clear();
+        expect.errorToBeThrown(function()
+            registers.popStackLong();
+        end);
+    end,
 
     pushOverStackLimitThrowsError = function()
         local bytes = {};

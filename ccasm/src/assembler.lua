@@ -225,7 +225,7 @@ local function addSymbolicAddress(symbol)
 end
 
 local function assembleNextTokenAsSymbol()
-    local symbol = dequeueNextToken():match(operandTypes.symbolicAddress.pattern);
+    local symbol = operandTypes.symbolicAddress.match(dequeueNextToken());
 
     if symbolIsDeclared(symbol) then
         throwSymbolRedefinitionError(symbol);
