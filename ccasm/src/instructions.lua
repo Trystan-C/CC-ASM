@@ -829,6 +829,29 @@ apiEnv.andWord = {
         );
     end,
 };
+apiEnv.andLong = {
+    byteValue = 37,
+    numOperands = 2,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 4, "andLong: Operand must be at most 1 byte.");
+        assert(
+            operand.definition == operandTypes.dataRegister or
+            operand.definition == operandTypes.immediateData,
+            "andLong: Operand must be data register or immediate data."
+        );
+    end,
+    verifyAll = function(source, destination)
+        assert(destination.definition == operandTypes.dataRegister, "andLong: Destination must be data register.");
+    end,
+    execute = function(source, destination)
+        operandUtils.long(destination).set(
+            integer.andBytes(
+                operandUtils.long(source).get(),
+                operandUtils.long(destination).get()
+            )
+        );
+    end,
+};
 --DEFINITION MAP-------------------------------------------
 local function isInstructionDefinition(definition)
     return type(definition) == "table" and
