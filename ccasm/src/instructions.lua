@@ -712,6 +712,30 @@ apiEnv.rshiftWord = {
         );
     end,
 };
+--OR-------------------------------------------------------
+apiEnv.orByte = {
+    byteValue = 32,
+    numOperands = 2,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 1, "orByte: Operand must be at most 1 byte.");
+        assert(
+            operand.definition == operandTypes.dataRegister or
+            operand.definition == operandTypes.immediateData,
+            "orByte: Operand must be data register or immediate data."
+        );
+    end,
+    verifyAll = function(source, destination)
+        assert(destination.definition == operandTypes.dataRegister, "orByte: Destination must be data register.");
+    end,
+    execute = function(source, destination)
+        operandUtils.byte(destination).set(
+            integer.orBytes(
+                operandUtils.byte(source).get(),
+                operandUtils.byte(destination).get()
+            )
+        );
+    end,
+};
 --DEFINITION MAP-------------------------------------------
 local function isInstructionDefinition(definition)
     return type(definition) == "table" and

@@ -104,6 +104,15 @@ function multiplyBytes(byteTable1, byteTable2)
     );
 end
 
+function divideBytes(byteTable1, byteTable2)
+    local numerator = getSignedIntegerFromBytes(byteTable2);
+    local denominator = getSignedIntegerFromBytes(byteTable1);
+    if denominator == 0 then
+        error("divideBytes: Illegal division by zero.");
+    end
+    return getBytesForInteger(math.floor(numerator / denominator));
+end
+
 function leftShiftBytes(byteTable, shiftCount)
     assertIsValidByteTable(byteTable);
     assert(shiftCount >= 0, "integer.leftShiftBytes: Expected shift value to be >= 0.");
@@ -124,11 +133,12 @@ function rightShiftBytes(byteTable, shiftCount)
     return result;
 end
 
-function divideBytes(byteTable1, byteTable2)
-    local numerator = getSignedIntegerFromBytes(byteTable2);
-    local denominator = getSignedIntegerFromBytes(byteTable1);
-    if denominator == 0 then
-        error("divideBytes: Illegal division by zero.");
+function orBytes(byteTable1, byteTable2)
+    assertIsValidByteTable(byteTable1);
+    assertIsValidByteTable(byteTable2);
+    local result = {};
+    for i = 1, math.max(#byteTable1, #byteTable2) do
+        result[i] = bit.bor(byteTable1[i] or 0, byteTable2[i] or 0);
     end
-    return getBytesForInteger(math.floor(numerator / denominator));
+    return result;
 end
