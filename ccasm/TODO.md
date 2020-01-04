@@ -11,7 +11,6 @@
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* orWord/Long
 * andByte/Word/Long
 * xorByte/Word/Long
 * trap <byte>

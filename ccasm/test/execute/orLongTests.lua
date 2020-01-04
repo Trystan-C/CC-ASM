@@ -6,48 +6,48 @@ local testSuite = {
 
     orDataRegisters = function()
         fixture.assemble([[
-            moveByte #hA0, d0
-            moveByte #h0B, d1
-            orByte d0, d1
+            moveLong #hAAAA0000, d0
+            moveLong #h0000BBBB, d1
+            orLong d0, d1
         ]])
             .load()
             .step(3)
-            .dataRegister(1).hasValue(0xAB);
+            .dataRegister(1).hasValue(0xAAAABBBB);
     end,
 
     orImmediateDataAndDataRegister = function()
         fixture.assemble([[
-            moveByte #h77, d0
-            orByte #hAA, d0
+            moveLong #h77777777, d0
+            orLong #hAAAAAAAA, d0
         ]])
             .load()
             .step(2)
-            .dataRegister(0).hasValue(0xFF);
+            .dataRegister(0).hasValue(0xFFFFFFFF);
     end,
 
     orDataRegisterAndImmediateDataThrowsError = function()
         expect.errorToBeThrown(function()
-            fixture.assemble("orByte d0, #1");
+            fixture.assemble("orLong d0, #1");
         end);
     end,
 
     orOperandTooLargeThrowsError = function()
         expect.errorToBeThrown(function()
-            fixture.assemble("orByte #h1234, d0");
+            fixture.assemble("orLong #h1234ABCD5678, d0");
         end);
     end,
 
     orInvalidOperandTypeThrowsError = function()
         expect.errorToBeThrown(function()
-            fixture.assemble("orByte a0, d0");
+            fixture.assemble("orLong a0, d0");
         end);
         expect.errorToBeThrown(function()
-            fixture.assemble("orByte d0, a0");
+            fixture.assemble("orLong d0, a0");
         end);
         expect.errorToBeThrown(function()
             fixture.assemble([[
-                orByte var, d0
-                var declareByte #hFF
+                orLong var, d0
+                var declareLong #hFFFFFFFF
             ]]);
         end);
     end,

@@ -3,6 +3,7 @@ apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/operandTypes.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
+--CORE-----------------------------------------------------
 local addressSize = operandTypes.symbolicAddress.sizeInBytes;
 local totalMemoryInBytes = math.pow(math.pow(2, 8), addressSize);
 bytes = {};

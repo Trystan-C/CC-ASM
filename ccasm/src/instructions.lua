@@ -736,6 +736,52 @@ apiEnv.orByte = {
         );
     end,
 };
+apiEnv.orWord = {
+    byteValue = 33,
+    numOperands = 2,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 2, "orWord: Operand must be at most 2 bytes.");
+        assert(
+            operand.definition == operandTypes.dataRegister or
+            operand.definition == operandTypes.immediateData,
+            "orWord: Operand must be data register or immediate data."
+        );
+    end,
+    verifyAll = function(source, destination)
+        assert(destination.definition == operandTypes.dataRegister, "orWord: Destination must be data register.");
+    end,
+    execute = function(source, destination)
+        operandUtils.word(destination).set(
+            integer.orBytes(
+                operandUtils.word(source).get(),
+                operandUtils.word(destination).get()
+            )
+        );
+    end,
+};
+apiEnv.orLong = {
+    byteValue = 34,
+    numOperands = 2,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 4, "orLong: Operand must be at most 4 bytes.");
+        assert(
+            operand.definition == operandTypes.dataRegister or
+            operand.definition == operandTypes.immediateData,
+            "orLong: Operand must be data register or immediate data."
+        );
+    end,
+    verifyAll = function(source, destination)
+        assert(destination.definition == operandTypes.dataRegister, "orLong: Destination must be data register.");
+    end,
+    execute = function(source, destination)
+        operandUtils.long(destination).set(
+            integer.orBytes(
+                operandUtils.long(source).get(),
+                operandUtils.long(destination).get()
+            )
+        );
+    end,
+};
 --DEFINITION MAP-------------------------------------------
 local function isInstructionDefinition(definition)
     return type(definition) == "table" and
