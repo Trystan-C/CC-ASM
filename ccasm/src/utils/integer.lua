@@ -56,14 +56,14 @@ function getBytesForInteger(sizeInBytes, int)
     return reversedBytes;
 end
 
-local function assertIsValidByteTable(bytes)
-    assert(type(bytes) == "table", "Expected byte table, got " .. tostring(bytes) .. ".");
-    assert(#bytes <= 4, "Expected byte table to be at most 4 bytes long, was " .. tostring(#bytes) .. ".");
+local function assertIsValidByteTable(name, bytes)
+    assert(type(bytes) == "table", name .. ": Expected byte table, got " .. tostring(bytes) .. ".");
+    assert(#bytes <= 4, name .. ": Expected byte table to be at most 4 bytes long, was " .. tostring(#bytes) .. ".");
 end
 
 -- TODO: Limits on integer size? Byte table can arbitrarily long.
 function getIntegerFromBytes(bytes)
-    assertIsValidByteTable(bytes);
+    assertIsValidByteTable("integer.getIntegerFromBytes", bytes);
     local val = 0;
     local i, bitShift = #bytes, 0;
     while i >= 1 do
@@ -78,7 +78,7 @@ function getIntegerFromBytes(bytes)
 end
 
 function getSignedIntegerFromBytes(bytes)
-    assertIsValidByteTable(bytes);
+    assertIsValidByteTable("integer.getSignedIntegerFromBytes", bytes);
     local val = getIntegerFromBytes(bytes);
     if val > 0 and bit.band(bytes[1], 0x80) ~= 0 then
         val = val - math.pow(2, 8*#bytes);
@@ -114,7 +114,7 @@ function divideBytes(byteTable1, byteTable2)
 end
 
 function leftShiftBytes(byteTable, shiftCount)
-    assertIsValidByteTable(byteTable);
+    assertIsValidByteTable("integer.leftShiftBytes", byteTable);
     assert(shiftCount >= 0, "integer.leftShiftBytes: Expected shift value to be >= 0.");
     local result = { 0, 0, 0, 0 };
     for i = shiftCount + 1, #byteTable do
@@ -124,7 +124,7 @@ function leftShiftBytes(byteTable, shiftCount)
 end
 
 function rightShiftBytes(byteTable, shiftCount)
-    assertIsValidByteTable(byteTable);
+    assertIsValidByteTable("integer.rightShiftBytes", byteTable);
     assert(shiftCount >= 0, "integer.rightShiftBytes: Expected shift value to be >= 0.");
     local result = { 0, 0, 0, 0 };
     for i = 1, #byteTable - shiftCount do
@@ -134,11 +134,21 @@ function rightShiftBytes(byteTable, shiftCount)
 end
 
 function orBytes(byteTable1, byteTable2)
-    assertIsValidByteTable(byteTable1);
-    assertIsValidByteTable(byteTable2);
+    assertIsValidByteTable("integer.orBytes", byteTable1);
+    assertIsValidByteTable("integer.orBytes", byteTable2);
     local result = {};
     for i = 1, math.max(#byteTable1, #byteTable2) do
         result[i] = bit.bor(byteTable1[i] or 0, byteTable2[i] or 0);
+    end
+    return result;
+end
+
+function andBytes(byteTable1, byteTable2)
+    assertIsValidByteTable("integer.andBytes", byteTable1);
+    assertIsValidByteTable("integer.andBytes", byteTable2);
+    local result = {};
+    for i = 1, math.max(#byteTable1, #byteTable2) do
+        result[i] = bit.band(byteTable1[i] or 0, byteTable2[i] or 0);
     end
     return result;
 end
