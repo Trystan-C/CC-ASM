@@ -152,3 +152,13 @@ function andBytes(byteTable1, byteTable2)
     end
     return result;
 end
+
+function xorBytes(byteTable1, byteTable2)
+    assertIsValidByteTable("integer.xorBytes", byteTable1);
+    assertIsValidByteTable("integer.xorBytes", byteTable2);
+    local result = {};
+    for i = 1, math.max(#byteTable1, #byteTable2) do
+        result[i] = bit.bxor(byteTable1[i] or 0, byteTable2[i] or 0);
+    end
+    return result;
+end

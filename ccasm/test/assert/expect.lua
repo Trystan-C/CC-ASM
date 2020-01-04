@@ -9,6 +9,13 @@ function errorToBeThrown(func)
     assert(expectationIsMet, errorMessage);
 end
 
+function errorsToBeThrown(...)
+    local funcs = { ... };
+    for _, func in ipairs(funcs) do
+        errorToBeThrown(func);
+    end
+end
+
 local function assertHasKey(tbl, key)
     local condition = tbl[key] ~= nil;
     local message = "Expected table " .. tostring(tbl) .. " to have key \"" .. tostring(key) .. "\".";

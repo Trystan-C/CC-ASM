@@ -852,6 +852,35 @@ apiEnv.andLong = {
         );
     end,
 };
+--XOR------------------------------------------------------
+local function xor(byteValue, name, sizeDescriptor, sizeInBytes)
+    apiEnv[name] = {
+        byteValue = byteValue,
+        numOperands = 2,
+        verifyEach = function(operand)
+            assert(operand.sizeInBytes <= sizeInBytes, name .. ": Operand must be at most " .. sizeInBytes .. " byte(s).");
+            assert(
+                operand.definition == operandTypes.immediateData or
+                operand.definition == operandTypes.dataRegister,
+                name .. ": Operand must be immediate data or data register."
+            );
+        end,
+        verifyAll = function(source, destination)
+            assert(destination.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
+        end,
+        execute = function(source, destination)
+            operandUtils[sizeDescriptor](destination).set(
+                integer.xorBytes(
+                    operandUtils[sizeDescriptor](source).get(),
+                    operandUtils[sizeDescriptor](destination).get()
+                )
+            );
+        end,
+    };
+end
+xor(38, "xorByte", "byte", 1);
+xor(39, "xorWord", "word", 2);
+xor(40, "xorLong", "long", 4);
 --DEFINITION MAP-------------------------------------------
 local function isInstructionDefinition(definition)
     return type(definition) == "table" and
