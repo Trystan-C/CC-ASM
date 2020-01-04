@@ -680,6 +680,38 @@ apiEnv.lshiftWord = {
         );
     end,
 };
+apiEnv.rshiftByte = {
+    byteValue = 30,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(
+            operand.definition == operandTypes.dataRegister or
+            operand.definition == operandTypes.addressRegister,
+            "rshiftByte: Operand must be data or address register."
+        );
+    end,
+    execute = function(operand)
+        operandUtils.long(operand).set(
+            integer.rightShiftBytes(operandUtils.long(operand).get(), 1)
+        );
+    end,
+};
+apiEnv.rshiftWord = {
+    byteValue = 31,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(
+            operand.definition == operandTypes.dataRegister or
+            operand.definition == operandTypes.addressRegister,
+            "rshiftWord: Operand must be data or address register."
+        );
+    end,
+    execute = function(operand)
+        operandUtils.long(operand).set(
+            integer.rightShiftBytes(operandUtils.long(operand).get(), 2)
+        );
+    end,
+};
 --DEFINITION MAP-------------------------------------------
 local function isInstructionDefinition(definition)
     return type(definition) == "table" and

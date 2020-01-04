@@ -104,12 +104,22 @@ function multiplyBytes(byteTable1, byteTable2)
     );
 end
 
-function leftShiftBytes(byteTable, numShifts)
+function leftShiftBytes(byteTable, shiftCount)
     assertIsValidByteTable(byteTable);
-    assert(numShifts >= 0, "integer.leftShiftBytes: Expcted shift value to be >= 0.");
+    assert(shiftCount >= 0, "integer.leftShiftBytes: Expected shift value to be >= 0.");
     local result = { 0, 0, 0, 0 };
-    for i = numShifts + 1, #byteTable do
-        result[i - numShifts] = byteTable[i];
+    for i = shiftCount + 1, #byteTable do
+        result[i - shiftCount] = byteTable[i];
+    end
+    return result;
+end
+
+function rightShiftBytes(byteTable, shiftCount)
+    assertIsValidByteTable(byteTable);
+    assert(shiftCount >= 0, "integer.rightShiftBytes: Expected shift value to be >= 0.");
+    local result = { 0, 0, 0, 0 };
+    for i = 1, #byteTable - shiftCount do
+        result[i + shiftCount] = byteTable[i];
     end
     return result;
 end
