@@ -104,6 +104,16 @@ function multiplyBytes(byteTable1, byteTable2)
     );
 end
 
+function leftShiftBytes(byteTable, numShifts)
+    assertIsValidByteTable(byteTable);
+    assert(numShifts >= 0, "integer.leftShiftBytes: Expcted shift value to be >= 0.");
+    local result = { 0, 0, 0, 0 };
+    for i = numShifts + 1, #byteTable do
+        result[i - numShifts] = byteTable[i];
+    end
+    return result;
+end
+
 function divideBytes(byteTable1, byteTable2)
     local numerator = getSignedIntegerFromBytes(byteTable2);
     local denominator = getSignedIntegerFromBytes(byteTable1);
