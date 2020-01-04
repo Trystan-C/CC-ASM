@@ -10,7 +10,6 @@
 * declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
 
 ## Instructions to Add
-* notByte/Word/Long
 * trap <byte>
     * 0 -- Write null-terminated ASCII string at A0.
     * 1 -- Kill execution, i.e., halt CPU.

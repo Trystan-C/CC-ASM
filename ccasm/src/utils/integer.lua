@@ -162,3 +162,12 @@ function xorBytes(byteTable1, byteTable2)
     end
     return result;
 end
+
+function notBytes(byteTable)
+    assertIsValidByteTable("integer.notBytes", byteTable);
+    local result = {};
+    for i = 1, #byteTable do
+        result[i] = bit.band(0xFF, bit.bnot(byteTable[i]));
+    end
+    return result;
+end

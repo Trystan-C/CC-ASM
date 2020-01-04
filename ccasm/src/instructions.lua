@@ -8,464 +8,175 @@ apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
 local apiEnv = getfenv();
 --MOVE------------------------------------------------------------------
-apiEnv.moveByte = {
-    byteValue = 0,
-    numOperands = 2,
-    verifyEach = function(operand)
-        if operand.definition ~= operandTypes.symbolicAddress then
-            local condition = operand.sizeInBytes == 1;
-            local errorMessage = "moveByte: Operand size " .. operand.sizeInBytes .. " > 1.";
-            assert(condition, errorMessage);
-        end
-    end,
-    verifyAll = function(operand1, operand2)
-        local condition = not (operand1.definition == operandTypes.symbolicAddress and
-                        operand2.definition == operandTypes.symbolicAddress);
-        local errorMessage = "moveByte: Cannot move directly between direct or indirect addresses.";
-        assert(condition, errorMessage);
-    end,
-    execute = function(from, to)
-        operandUtils.byte(to).set(operandUtils.byte(from).get());
-    end,
-};
-apiEnv.moveWord = {
-    byteValue = 1,
-    numOperands = 2,
-    verifyEach = function(operand)
-        if operand.definition ~= operandTypes.symbolicAddress then
-            local condition = operand.sizeInBytes <= 2;
-            local errorMessage = "moveWord: Operand size " .. operand.sizeInBytes .. " > 2.";
-            assert(condition, errorMessage);
-        end
-    end,
-    verifyAll = function(operand1, operand2)
-        local condition = not (operand1.definition == operandTypes.symbolicAddress and
-                        operand2.definition == operandTypes.symbolicAddress);
-        local errorMessage = "moveWord: Cannot move directly between direct or indirect addresses addresses.";
-        assert(condition, errorMessage);
-    end,
-    execute = function(from, to)
-        operandUtils.word(to).set(operandUtils.word(from).get());
-    end,
-};
-apiEnv.moveLong = {
-    byteValue = 2,
-    numOperands = 2,
-    verifyEach = function(operand)
-        if operand.definition ~= operandTypes.symbolicAddress then
-            local condition = operand.sizeInBytes <= 4;
-            local errorMessage = "moveLong: Operand size " .. operand.sizeInBytes .. " > 4.";
-            assert(condition, errorMessage);
-        end
-    end,
-    verifyAll = function(from, to)
-        assert(
-            from.definition ~= operandTypes.symbolicAddress or
-            to.definition ~= operandTypes.symbolicAddress,
-            "moveLong: Cannot move directly between direct or indirect addresses."
-        );
-    end,
-    execute = function(from, to)
-        operandUtils.long(to).set(operandUtils.long(from).get());
-    end,
-};
---ADDITION--------------------------------------------------------------
-apiEnv.addByte = {
-    byteValue = 3,
-    numOperands = 2,
-    individualOperandVerifiers = {
-        sizeShouldBeOneByte = function(operand)
-            if operand.definition ~= operand.symbolicAddress then
-                assert(
-                    operand.sizeInBytes == 1,
-                    "addByte: operand must be 1 byte"
-                );
+local function move(byteValue, name, sizeDescriptor, sizeInBytes)
+    apiEnv[name] = {
+        byteValue = byteValue,
+        numOperands = 2,
+        verifyEach = function(operand)
+            if operand.definition ~= operandTypes.symbolicAddress then
+                assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
             end
-        end
-    },
-    groupOperandVerifiers = {
-        fromMustBeImmediateDataOrDataRegister = function(from, to)
+        end,
+        verifyAll = function(from, to)
+            assert(
+                not (from.definition == operandTypes.symbolicAddress and to.definition == operandTypes.symbolicAddress),
+                name .. ": Cannot move directly between direct or indirect addresses."
+            );
+        end,
+        execute = function(from, to)
+            operandUtils[sizeDescriptor](to).set(operandUtils[sizeDescriptor](from).get());
+        end,
+    };
+end
+move(0, "moveByte", "byte", 1);
+move(1, "moveWord", "word", 2);
+move(2, "moveLong", "long", 4);
+--ADDITION--------------------------------------------------------------
+local function add(byteValue, name, sizeDescriptor, sizeInBytes)
+    apiEnv[name] = {
+        byteValue = byteValue,
+        numOperands = 2,
+        verifyEach = function(operand)
+            assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
+        end,
+        verifyAll = function(from, to)
             assert(
                 from.definition == operandTypes.dataRegister or
                 from.definition == operandTypes.immediateData,
-                "addByte: source must be data register."
+                name .. ": source must be data register."
             );
-        end,
-        
-        destinationMustBeDataRegister = function(from, to)
             assert(
                 to.definition == operandTypes.dataRegister,
-                "addByte: destination must be a data register."
+                name .. ": destination must be a data register."
             );
         end,
-    },
-    execute = function(from, to)
-        local fromData = operandUtils.byte(from).get();
-        local toData = operandUtils.byte(to).get();
-        local sum = tableUtils.fitToSize(integer.addBytes(fromData, toData), 1);
-        operandUtils.byte(to).set(sum);
-    end,
-};
-apiEnv.addWord = {
-    byteValue = 4,
-    numOperands = 2,
-    individualOperandVerifiers = {
-        sizeShouldBeAtMostTwoBytes = function(operand)
-            assert(operand.sizeInBytes <= 2, "addWord: Operand must be 2 bytes.");
-        end,
-    },
-    groupOperandVerifiers = {
-        sourceMustBeDataRegisterOrImmediateData = function(from, to)
-            assert(
-                from.definition == operandTypes.dataRegister or
-                from.definition == operandTypes.immediateData,
-                "addWord: source must be data register or immediate data."
+        execute = function(from, to)
+            local sum = integer.addBytes(
+                operandUtils[sizeDescriptor](from).get(),
+                operandUtils[sizeDescriptor](to).get()
             );
+            operandUtils[sizeDescriptor](to).set(tableUtils.fitToSize(sum, sizeInBytes));
         end,
-        destinationMustBeDataRegister = function(from, to)
-            assert(to.definition == operandTypes.dataRegister, "addWord: destination must be data register or immediate data.");
-        end,
-    },
-    execute = function(from, to)
-        local sum = integer.addBytes(operandUtils.word(from).get(), operandUtils.word(to).get());
-        operandUtils.word(to).set(tableUtils.fitToSize(sum, 2));
-    end,
-};
-apiEnv.addLong = {
-    byteValue = 5,
-    numOperands = 2,
-    groupOperandVerifiers = {
-        sourceMustBeImmediateDataOrDataRegister = function(from, to)
-            assert(
-                from.definition == operandTypes.dataRegister or
-                from.definition == operandTypes.immediateData,
-                "addLong: source must be immediate data or data register."
-            );
-        end,
-        destinationMustBeDataRegister = function(from, to)
-            assert(to.definition == operandTypes.dataRegister, "addLong: destination must be data register.");
-        end,
-    },
-    execute = function(from, to)
-        local sum = integer.addBytes(operandUtils.long(from).get(), operandUtils.long(to).get());
-        operandUtils.long(to).set(tableUtils.trimToSize(sum, 4));
-    end,
-};
+    };
+end
+add(3, "addByte", "byte", 1);
+add(4, "addWord", "word", 2);
+add(5, "addLong", "long", 4);
 --SUBTRACTION-----------------------------------------------------------
-apiEnv.subByte = {
-    byteValue = 6,
-    numOperands = 2,
-    individualOperandVerifiers = {
-        verify = function(operand)
-            assert(operand.sizeInBytes == 1, "subByte: Operand must be 1 byte.");
+local function sub(byteValue, name, sizeDescriptor, sizeInBytes)
+    apiEnv[name] = {
+        byteValue = byteValue,
+        numOperands = 2,
+        verifyEach = function(operand)
+            assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
         end,
-    },
-    groupOperandVerifiers = {
-        verify = function(from, to)
+        verifyAll = function(from, to)
             assert(
                 from.definition == operandTypes.immediateData or
                 from.definition == operandTypes.dataRegister,
-                "subByte: Source must be immediate data or data reigster."
+                name .. ": Source must be immediate data or data reigster."
             );
-            assert(to.definition == operandTypes.dataRegister, "subByte: Destination must be data register.");
+            assert(to.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
         end,
-    },
-    execute = function(from, to)
-        local fromByte = operandUtils.byte(from).get();
-        local toByte = operandUtils.byte(to).get();
-        local difference = integer.subtractBytes(toByte, fromByte);
-        operandUtils.byte(to).set(tableUtils.fitToSize(difference, 1));
-    end,
-};
-apiEnv.subWord = {
-    byteValue = 7,
-    numOperands = 2,
-    individualOperandVerifiers = {
-        verify = function(operand)
-            assert(operand.sizeInBytes <= 2, "subWord: Operand must be at most 2 bytes.");
-        end,
-    },
-    groupOperandVerifiers = {
-        verify = function(from, to)
-            assert(
-                from.definition == operandTypes.immediateData or
-                from.definition == operandTypes.dataRegister,
-                "subWord: Source must be immediate data or data register."
+        execute = function(from, to)
+            local difference = integer.subtractBytes(
+                operandUtils[sizeDescriptor](to).get(),
+                operandUtils[sizeDescriptor](from).get()
             );
-            assert(to.definition == operandTypes.dataRegister, "subWord: Destination must be data register.");
+            operandUtils[sizeDescriptor](to).set(tableUtils.fitToSize(difference, sizeInBytes));
         end,
-    },
-
-    execute = function(from, to)
-        local fromWord = operandUtils.word(from).get();
-        local toWord = operandUtils.word(to).get();
-        local difference = integer.subtractBytes(toWord, fromWord);
-        operandUtils.word(to).set(tableUtils.fitToSize(difference, 2));
-    end,
-};
-apiEnv.subLong = {
-    byteValue = 8,
-    numOperands = 2,
-    individualOperandVerifiers = {
-        verify = function(operand)
-            assert(operand.sizeInBytes <= 4, "subLong: Operand must be at most 4 bytes.");
-        end
-    },
-    groupOperandVerifiers = {
-        verify = function(from, to)
-            assert(
-                from.definition == operandTypes.immediateData or
-                from.definition == operandTypes.dataRegister,
-                "subLong: Source must be immediate data or data register."
-            );
-            assert(to.definition == operandTypes.dataRegister, "subLong: Destination must be data register.");
-        end,
-    },
-    execute = function(from, to)
-        local fromLong = operandUtils.long(from).get();
-        local toLong = operandUtils.long(to).get();
-        local difference = integer.subtractBytes(toLong, fromLong);
-        operandUtils.long(to).set(tableUtils.fitToSize(difference, 4));
-    end,
-};
+    };
+end
+sub(6, "subByte", "byte", 1);
+sub(7, "subWord", "word", 2);
+sub(8, "subLong", "long", 4);
 --MULTIPLICATION--------------------------------------------------------
-apiEnv.mulByte = {
-    byteValue = 9;
-    numOperands = 2;
-    individualOperandVerifiers = {
-        operandMustBeOneByte = function(operand)
-            assert(operand.sizeInBytes == 1, "mulByte: Operand must be one byte.");
+local function mul(byteValue, name, sizeDescriptor, sizeInBytes)
+    apiEnv[name] = {
+        byteValue = byteValue,
+        numOperands = 2,
+        verifyEach = function(operand)
+            assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
         end,
-    },
-    groupOperandVerifiers = {
-        sourceVerifier = function(from, to)
+        verifyAll = function(from, to)
             assert(
                 from.definition == operandTypes.dataRegister or
                 from.definition == operandTypes.immediateData,
-                "mulByte: Source must be data register or immediate data."
+                name .. ": Source must be data register or immediate data."
             );
+            assert(to.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
         end,
-        destinationVerifier = function(from, to)
-            assert(to.definition == operandTypes.dataRegister, "mulByte: Destination must be data register.");
-        end,
-    },
-    execute = function(from, to)
-        local product = integer.multiplyBytes(
-            operandUtils.byte(from).get(),
-            operandUtils.byte(to).get()
-        );
-        operandUtils.byte(to).set(tableUtils.fitToSize(product, 1));
-    end,
-};
-apiEnv.mulWord = {
-    byteValue = 10,
-    numOperands = 2,
-    individualOperandVerifiers = {
-        operandMustBeTwoBytes = function(operand)
-            assert(operand.sizeInBytes <= 2, "mulWord: Operand must be at most 2 bytes.");
-        end,
-    },
-    groupOperandVerifiers = {
-        sourceVerifier = function(from, to)
-            assert(
-                from.definition == operandTypes.dataRegister or
-                from.definition == operandTypes.immediateData,
-                "mulWord: Source must be immediate data or data register."
+        execute = function(from, to)
+            local product = integer.multiplyBytes(
+                operandUtils[sizeDescriptor](from).get(),
+                operandUtils[sizeDescriptor](to).get()
             );
+            operandUtils[sizeDescriptor](to).set(tableUtils.fitToSize(product, sizeInBytes));
         end,
-        destinationVerifier = function(from, to)
-            assert(to.definition == operandTypes.dataRegister, "mulWord: Destination must be data register.");
-        end
-    },
-    execute = function(from, to)
-        local product = integer.multiplyBytes(
-            operandUtils.word(from).get(),
-            operandUtils.word(to).get()
-        );
-        operandUtils.word(to).set(tableUtils.fitToSize(product, 2));
-    end,
-};
-apiEnv.mulLong = {
-    byteValue = 11,
-    numOperands = 2,
-    individualOperandVerifiers = {
-        verify = function(operand)
-            assert(operand.sizeInBytes <= 4, "mulLong: Operand must be at most 4 bytes.");
-        end,
-    },
-    groupOperandVerifiers = {
-        verify = function(from, to)
-            assert(
-                from.definition == operandTypes.dataRegister or
-                from.definition == operandTypes.immediateData,
-                "mulLong: Source must be immediate data or data register."
-            );
-            assert(to.definition == operandTypes.dataRegister, "mulLong: Destination must be data register.");
-        end
-    },
-    execute = function(from, to)
-        local product = integer.multiplyBytes(
-            operandUtils.long(from).get(),
-            operandUtils.long(to).get()
-        );
-        operandUtils.long(to).set(tableUtils.fitToSize(product, 4));
-    end,
-};
+    };
+end
+mul(9, "mulByte", "byte", 1);
+mul(10, "mulWord", "word", 2);
+mul(11, "mulLong", "long", 4);
 --DIVISION-------------------------------------------------
-apiEnv.divByte = {
-    byteValue = 12,
-    numOperands = 2,
-    individualOperandVerifiers = {
-        verify = function(operand)
-            assert(operand.sizeInBytes == 1, "divByte: Operand must be 1 byte.");
+local function div(byteValue, name, sizeDescriptor, sizeInBytes)
+    apiEnv[name] = {
+        byteValue = byteValue,
+        numOperands = 2,
+        verifyEach = function(operand)
+            assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
         end,
-    },
-    groupOperandVerifiers = {
-        verify = function(from, to)
+        verifyAll = function(from, to)
             assert(
                 from.definition == operandTypes.immediateData or
                 from.definition == operandTypes.dataRegister,
-                "divByte: Source must be immediate data or data register."
+                name .. ": Source must be immediate data or data register."
             );
-            assert(to.definition == operandTypes.dataRegister, "divByte: Destination must be data register.");
+            assert(to.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
         end,
-    },
-    execute = function(from, to)
-        local quotient = integer.divideBytes(
-            operandUtils.byte(from).get(),
-            operandUtils.byte(to).get()
-        );
-        operandUtils.byte(to).set(tableUtils.fitToSize(quotient, 1));
-    end,
-};
-apiEnv.divWord = {
-    byteValue = 13,
-    numOperands = 2,
-    individualOperandVerifiers = {
-        verify = function(operand)
-            assert(operand.sizeInBytes <= 2, "divWord: Operand must be at most 2 bytes.");
-        end,
-    },
-    groupOperandVerifiers = {
-        verify = function(from, to)
-            assert(
-                from.definition == operandTypes.immediateData or
-                from.definition == operandTypes.dataRegister,
-                "divWord: Source must be immediate data or data register."
+        execute = function(from, to)
+            local quotient = integer.divideBytes(
+                operandUtils[sizeDescriptor](from).get(),
+                operandUtils[sizeDescriptor](to).get()
             );
-            assert(to.definition == operandTypes.dataRegister, "divWord: Destination must be data register.");
+            operandUtils[sizeDescriptor](to).set(tableUtils.fitToSize(quotient, sizeInBytes));
         end,
-    },
-    execute = function(from, to)
-        local quotient = integer.divideBytes(
-            operandUtils.word(from).get(),
-            operandUtils.word(to).get()
-        );
-        operandUtils.word(to).set(tableUtils.fitToSize(quotient, 2));
-    end,
-};
-apiEnv.divLong = {
-    byteValue = 14,
-    numOperands = 2,
-    individualOperandVerifiers = {
-        verify = function(operand)
-            assert(operand.sizeInBytes <= 4, "divLong: Operand must be at most 4 bytes.");
-        end,
-    },
-    groupOperandVerifiers = {
-        verify = function(from, to)
-            assert(
-                from.definition == operandTypes.immediateData or
-                from.definition == operandTypes.dataRegister,
-                "divLong: Source must be immediate data or data register."
-            );
-            assert(to.definition == operandTypes.dataRegister, "divLong: Destination must be data register.");
-        end,
-    },
-    execute = function(from, to)
-        local quotient = integer.divideBytes(
-            operandUtils.long(from).get(),
-            operandUtils.long(to).get()
-        );
-        operandUtils.long(to).set(tableUtils.fitToSize(quotient, 4));
-    end,
-};
+    };
+end
+div(12, "divByte", "byte", 1);
+div(13, "divWord", "word", 2);
+div(14, "divLong", "long", 4);
 --COMPARISON------------------------------------------------------------
-apiEnv.cmpByte = {
-    byteValue = 15,
-    numOperands = 2,
-    verifyEach = function(operand)
-        assert(operand.sizeInBytes == 1, "cmpByte: Operand must be 1 byte.");
-    end,
-    verifyAll = function(operand1, operand2)
-        assert(
-            operand1.definition == operandTypes.dataRegister or
-            operand1.definition == operandTypes.immediateData,
-            "cmpByte: Left operand must be immediate data or data register."
-        );
-        assert(
-            operand2.definition == operandTypes.immediateData or
-            operand2.definition == operandTypes.dataRegister,
-            "cmpByte: Right operand must be immediate data or data register."
-        );
-    end,
-    execute = function(left, right)
-        registers.compare(
-            integer.getSignedIntegerFromBytes(operandUtils.byte(left).get()),
-            integer.getSignedIntegerFromBytes(operandUtils.byte(right).get())
-        );
-    end,
-};
-apiEnv.cmpWord = {
-    byteValue = 16,
-    numOperands = 2,
-    verifyEach = function(operand)
-        assert(operand.sizeInBytes <= 2, "cmpWord: Operand must be at most 2 bytes.");
-    end,
-    verifyAll = function(left, right)
-        assert(
-            left.definition == operandTypes.immediateData or
-            left.definition == operandTypes.dataRegister,
-            "cmpWord: Left operand must be immediate data or data register."
-        );
-        assert(
-            right.definition == operandTypes.immediateData or
-            right.definition == operandTypes.dataRegister,
-            "cmpWord: Right operand must be immediate data or data register."
-        );
-    end,
-    execute = function(left, right)
-        registers.compare(
-            integer.getSignedIntegerFromBytes(operandUtils.word(left).get()),
-            integer.getSignedIntegerFromBytes(operandUtils.word(right).get())
-        );
-    end,
-};
-apiEnv.cmpLong = {
-    byteValue = 17,
-    numOperands = 2,
-    verifyEach = function(operand)
-        assert(operand.sizeInBytes <= 4, "cmpLong: Operand must be at most 4 bytes.");
-    end,
-    verifyAll = function(left, right)
-        assert(
-            left.definition == operandTypes.immediateData or
-            left.definition == operandTypes.dataRegister,
-            "cmpLong: Left operand must be immediate data or data register."
-        );
-        assert(
-            right.definition == operandTypes.immediateData or
-            right.definition == operandTypes.dataRegister,
-            "cmpLong: Right operand must be immediate data or data register."
-        );
-    end,
-    execute = function(left, right)
-        registers.compare(
-            integer.getSignedIntegerFromBytes(operandUtils.long(left).get()),
-            integer.getSignedIntegerFromBytes(operandUtils.long(right).get())
-        );
-    end,
-};
+local function cmp(byteValue, name, sizeDescriptor, sizeInBytes)
+    apiEnv[name] = {
+        byteValue = byteValue,
+        numOperands = 2,
+        verifyEach = function(operand)
+            assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
+        end,
+        verifyAll = function(left, right)
+            assert(
+                left.definition == operandTypes.dataRegister or
+                left.definition == operandTypes.immediateData,
+                name .. ": Left operand must be immediate data or data register."
+            );
+            assert(
+                right.definition == operandTypes.immediateData or
+                right.definition == operandTypes.dataRegister,
+                name .. "cmpByte: Right operand must be immediate data or data register."
+            );
+        end,
+        execute = function(left, right)
+            registers.compare(
+                integer.getSignedIntegerFromBytes(operandUtils[sizeDescriptor](left).get()),
+                integer.getSignedIntegerFromBytes(operandUtils[sizeDescriptor](right).get())
+            );
+        end,
+    };
+end
+cmp(15, "cmpByte", "byte", 1);
+cmp(16, "cmpWord", "word", 2);
+cmp(17, "cmpLong", "long", 4);
 --BRANCHING-------------------------------------------------------------
 apiEnv.beq = {
     byteValue = 18,
@@ -713,145 +424,65 @@ apiEnv.rshiftWord = {
     end,
 };
 --OR-------------------------------------------------------
-apiEnv.orByte = {
-    byteValue = 32,
-    numOperands = 2,
-    verifyEach = function(operand)
-        assert(operand.sizeInBytes <= 1, "orByte: Operand must be at most 1 byte.");
-        assert(
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.immediateData,
-            "orByte: Operand must be data register or immediate data."
-        );
-    end,
-    verifyAll = function(source, destination)
-        assert(destination.definition == operandTypes.dataRegister, "orByte: Destination must be data register.");
-    end,
-    execute = function(source, destination)
-        operandUtils.byte(destination).set(
-            integer.orBytes(
-                operandUtils.byte(source).get(),
-                operandUtils.byte(destination).get()
-            )
-        );
-    end,
-};
-apiEnv.orWord = {
-    byteValue = 33,
-    numOperands = 2,
-    verifyEach = function(operand)
-        assert(operand.sizeInBytes <= 2, "orWord: Operand must be at most 2 bytes.");
-        assert(
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.immediateData,
-            "orWord: Operand must be data register or immediate data."
-        );
-    end,
-    verifyAll = function(source, destination)
-        assert(destination.definition == operandTypes.dataRegister, "orWord: Destination must be data register.");
-    end,
-    execute = function(source, destination)
-        operandUtils.word(destination).set(
-            integer.orBytes(
-                operandUtils.word(source).get(),
-                operandUtils.word(destination).get()
-            )
-        );
-    end,
-};
-apiEnv.orLong = {
-    byteValue = 34,
-    numOperands = 2,
-    verifyEach = function(operand)
-        assert(operand.sizeInBytes <= 4, "orLong: Operand must be at most 4 bytes.");
-        assert(
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.immediateData,
-            "orLong: Operand must be data register or immediate data."
-        );
-    end,
-    verifyAll = function(source, destination)
-        assert(destination.definition == operandTypes.dataRegister, "orLong: Destination must be data register.");
-    end,
-    execute = function(source, destination)
-        operandUtils.long(destination).set(
-            integer.orBytes(
-                operandUtils.long(source).get(),
-                operandUtils.long(destination).get()
-            )
-        );
-    end,
-};
+-- _or, since 'or' is a keyword.
+local function _or(byteValue, name, sizeDescriptor, sizeInBytes)
+    apiEnv[name] = {
+        byteValue = byteValue,
+        numOperands = 2,
+        verifyEach = function(operand)
+            assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
+            assert(
+                operand.definition == operandTypes.dataRegister or
+                operand.definition == operandTypes.immediateData,
+                name .. ": Operand must be data register or immediate data."
+            );
+        end,
+        verifyAll = function(source, destination)
+            assert(destination.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
+        end,
+        execute = function(source, destination)
+            operandUtils[sizeDescriptor](destination).set(
+                integer.orBytes(
+                    operandUtils[sizeDescriptor](source).get(),
+                    operandUtils[sizeDescriptor](destination).get()
+                )
+            );
+        end,
+    };
+end
+_or(32, "orByte", "byte", 1);
+_or(33, "orWord", "word", 2);
+_or(34, "orLong", "long", 4);
 --AND------------------------------------------------------
-apiEnv.andByte = {
-    byteValue = 35,
-    numOperands = 2,
-    verifyEach = function(operand)
-        assert(operand.sizeInBytes <= 1, "andByte: Operand must be at most 1 byte.");
-        assert(
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.immediateData,
-            "andByte: Operand must be data register or immediate data."
-        );
-    end,
-    verifyAll = function(source, destination)
-        assert(destination.definition == operandTypes.dataRegister, "andByte: Destination must be data register.");
-    end,
-    execute = function(source, destination)
-        operandUtils.byte(destination).set(
-            integer.andBytes(
-                operandUtils.byte(source).get(),
-                operandUtils.byte(destination).get()
-            )
-        );
-    end,
-};
-apiEnv.andWord = {
-    byteValue = 36,
-    numOperands = 2,
-    verifyEach = function(operand)
-        assert(operand.sizeInBytes <= 2, "andWord: Operand must be at most 1 byte.");
-        assert(
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.immediateData,
-            "andWord: Operand must be data register or immediate data."
-        );
-    end,
-    verifyAll = function(source, destination)
-        assert(destination.definition == operandTypes.dataRegister, "andWord: Destination must be data register.");
-    end,
-    execute = function(source, destination)
-        operandUtils.word(destination).set(
-            integer.andBytes(
-                operandUtils.word(source).get(),
-                operandUtils.word(destination).get()
-            )
-        );
-    end,
-};
-apiEnv.andLong = {
-    byteValue = 37,
-    numOperands = 2,
-    verifyEach = function(operand)
-        assert(operand.sizeInBytes <= 4, "andLong: Operand must be at most 1 byte.");
-        assert(
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.immediateData,
-            "andLong: Operand must be data register or immediate data."
-        );
-    end,
-    verifyAll = function(source, destination)
-        assert(destination.definition == operandTypes.dataRegister, "andLong: Destination must be data register.");
-    end,
-    execute = function(source, destination)
-        operandUtils.long(destination).set(
-            integer.andBytes(
-                operandUtils.long(source).get(),
-                operandUtils.long(destination).get()
-            )
-        );
-    end,
-};
+-- _and, since 'and' is a keyword.
+local function _and(byteValue, name, sizeDescriptor, sizeInBytes)
+    apiEnv[name] = {
+        byteValue = byteValue,
+        numOperands = 2,
+        verifyEach = function(operand)
+            assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
+            assert(
+                operand.definition == operandTypes.dataRegister or
+                operand.definition == operandTypes.immediateData,
+                name .. ": Operand must be data register or immediate data."
+            );
+        end,
+        verifyAll = function(source, destination)
+            assert(destination.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
+        end,
+        execute = function(source, destination)
+            operandUtils[sizeDescriptor](destination).set(
+                integer.andBytes(
+                    operandUtils[sizeDescriptor](source).get(),
+                    operandUtils[sizeDescriptor](destination).get()
+                )
+            );
+        end,
+    };
+end
+_and(35, "andByte", "byte", 1);
+_and(36, "andWord", "word", 2);
+_and(37, "andLong", "long", 4);
 --XOR------------------------------------------------------
 local function xor(byteValue, name, sizeDescriptor, sizeInBytes)
     apiEnv[name] = {
@@ -881,6 +512,28 @@ end
 xor(38, "xorByte", "byte", 1);
 xor(39, "xorWord", "word", 2);
 xor(40, "xorLong", "long", 4);
+--NOT------------------------------------------------------
+-- _not, since 'not' is a keyword.
+local function _not(byteValue, name, sizeDescriptor, sizeInBytes)
+    apiEnv[name] = {
+        byteValue = byteValue,
+        numOperands = 1,
+        verifyEach = function(operand)
+            assert(operand.sizeInBytes <= 1, name .. ": Operand must be at most " .. sizeInBytes .. " byte(s).");
+            assert(operand.definition == operandTypes.dataRegister, name .. ": Operand must be data register.");
+        end,
+        execute = function(operand)
+            operandUtils[sizeDescriptor](operand).set(
+                integer.notBytes(
+                    operandUtils[sizeDescriptor](operand).get()
+                )
+            );
+        end,
+    };
+end
+_not(41, "notByte", "byte", 1);
+_not(42, "notWord", "word", 2);
+_not(43, "notLong", "long", 4);
 --DEFINITION MAP-------------------------------------------
 local function isInstructionDefinition(definition)
     return type(definition) == "table" and
