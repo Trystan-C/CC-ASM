@@ -12,8 +12,8 @@
     * 1 -- Store cursor x/y in D6/D7.
     * 2 -- Set terminal cursor x/y to values in D0/D1.
     * 3 -- Write null-terminated ASCII string at A0.
-TODO:
     * 4 -- Read null-terminated string from std-in to the address stored in A0.
+TODO:
     * 5 -- Shutdown
     * 6 -- Restart
     

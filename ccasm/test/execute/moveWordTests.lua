@@ -73,7 +73,7 @@ local testSuite = {
             .dataRegister(0).hasValue(25);
     end,
 
-    moveByteFromDataRegisterToSymbolicAddress = function()
+    moveWordFromDataRegisterToSymbolicAddress = function()
         fixture.assemble([[
             moveWord #5, d0
             moveWord d0, var
@@ -83,7 +83,44 @@ local testSuite = {
             .load()
             .step(3)
             .dataRegister(6).hasValue(5);
-    end
+    end,
+
+    moveWordAbsoluteAddress = function()
+        fixture.assemble([[
+            moveWord #h1234, >h1000
+            moveWord >h1000, d0
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(0).hasValue(0x1234);
+    end,
+
+    moveWordDirectlyBetweenAddressesThrowsError = function()
+        expect.errorsToBeThrown(
+            function()
+                fixture.assemble([[
+                    moveWord var1, var2
+                    var1 declareWord #h1234
+                    var2 declareWord #h5678
+                ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveWord var1, >h1000
+                    var1 declareWord #h1234
+                ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveWord >h1000, var1
+                    var1 declareWord #h1234
+                ]]);
+            end,
+            function()
+                fixture.assemble("moveWord >h1000, >h1002");
+            end
+        );
+    end,
 
 };
 

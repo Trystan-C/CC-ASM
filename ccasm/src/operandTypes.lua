@@ -208,6 +208,32 @@ stringConstant.parseValueAsBytes = function(token)
     return bytes;
 end
 
+--ABSOLUTE ADDRESS-----------------------------------------
+absoluteAddress = {
+    typeByte = 7,
+    patterns = {
+        "^>([0-9])+$",
+        "^>(h[0-9A-Fa-f]+)$",
+        "^>(b[0-1]+)$",
+    },
+    sizeInBytes = 2,
+};
+
+absoluteAddress.match = function(token)
+    local result;
+    for _, pattern in ipairs(absoluteAddress.patterns) do
+        result = token:match(pattern);
+        if result then
+            break;
+        end
+    end
+    return result;
+end
+
+absoluteAddress.parseValueAsBytes = function(token)
+    -- Remove '>' prefix and add '#', so the token is parsable as immediate data.
+    return immediateData.parseValueAsBytes('#' .. token:sub(2));
+end
 --OPERAND TYPE LOOKUP--------------------------------------
 local function throwUnrecognizedOperandTypeError(token)
     local message = "Unrecognized operand type for token: " .. tostring(token);
@@ -238,6 +264,8 @@ function getType(token)
         return "registerRange";
     elseif tokenTypeIs(stringConstant) then
         return "stringConstant";
+    elseif tokenTypeIs(absoluteAddress) then
+        return "absoluteAddress";
     end
 
     throwUnrecognizedOperandTypeError(token);

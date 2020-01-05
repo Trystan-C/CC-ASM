@@ -13,14 +13,19 @@ local function move(byteValue, name, sizeDescriptor, sizeInBytes)
         byteValue = byteValue,
         numOperands = 2,
         verifyEach = function(operand)
-            if operand.definition ~= operandTypes.symbolicAddress and operand.definition ~= operandTypes.absoluteSymbolicAddress then
+            if operand.definition ~= operandTypes.symbolicAddress and
+            operand.definition ~= operandTypes.absoluteSymbolicAddress and
+            operand.definition ~= operandTypes.absoluteAddress then
                 assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
             end
         end,
         verifyAll = function(from, to)
             assert(
-                not (from.definition == operandTypes.symbolicAddress and to.definition == operandTypes.symbolicAddress),
-                name .. ": Cannot move directly between direct or indirect addresses."
+                not (from.definition == operandTypes.symbolicAddress and to.definition == operandTypes.symbolicAddress) and
+                not (from.definition == operandTypes.symbolicAddress and to.definition == operandTypes.absoluteAddress) and
+                not (from.definition == operandTypes.absoluteAddress and to.definition == operandTypes.symbolicAddress) and
+                not (from.definition == operandTypes.absoluteAddress and to.definition == operandTypes.absoluteAddress),
+                name .. ": Cannot move directly between absolute or symbolic addresses."
             );
         end,
         execute = function(from, to)
@@ -591,6 +596,18 @@ apiEnv.trap = {
                 error("trap(#3): Read " .. limit .. " bytes before stopping string read.");
             end
             term.write(str);
+        -- readString
+        elseif byte == 4 then
+            local str = read();
+            local strBytes = {};
+            for char in str:gmatch(".") do
+                table.insert(strBytes, string.byte(char));
+            end
+            table.insert(strBytes, 0); -- Append null-terminator.
+            memory.writeBytes(
+                integer.getIntegerFromBytes(registers.addressRegisters[0].getWord()),
+                strBytes
+            );
         else
             error("trap: Unsupporetd trap-byte(" .. tostring(byte) .. ").");
         end

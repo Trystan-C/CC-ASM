@@ -65,6 +65,28 @@ local testSuite = {
         expect.value(writtenStr).toEqual("test");
     end,
 
+    readString = function()
+        local originalRead = _G.read;
+        _G.read = function()
+            return "abc";
+        end
+
+        local result, message = pcall(function()
+            fixture.assemble([[
+                moveWord #h1000, a0
+                trap #4
+                moveLong >h1000, d0
+            ]])
+                .load()
+                .step(3)
+                .dataRegister(0).hasValue(0x61626300);
+        end);
+        _G.read = originalRead;
+        if not result then
+            error(message);
+        end
+    end,
+
     trapUnsupportedValueThrowsError = function()
         expect.errorsToBeThrown(function()
             fixture.assemble("trap #hFF")

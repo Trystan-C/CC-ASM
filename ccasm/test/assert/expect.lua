@@ -2,17 +2,20 @@ assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/utils/tableUtils.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
 
-function errorToBeThrown(func)
+function errorToBeThrown(func, case)
     local success = pcall(func);
     local expectationIsMet = not success;
-    local errorMessage = "Expected error to be thrown.";
+    local errorMessage = "Expected error to be thrown";
+    if case then
+        errorMessage = errorMessage .. " for case " .. tostring(case);
+    end
     assert(expectationIsMet, errorMessage);
 end
 
 function errorsToBeThrown(...)
     local funcs = { ... };
-    for _, func in ipairs(funcs) do
-        errorToBeThrown(func);
+    for caseNum, func in ipairs(funcs) do
+        errorToBeThrown(func, caseNum);
     end
 end
 

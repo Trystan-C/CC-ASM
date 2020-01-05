@@ -69,7 +69,44 @@ local testSuite = {
             .load()
             .step(3)
             .dataRegister(6).hasValue(5);
-    end
+    end,
+
+    moveByteAbsoluteAddress = function()
+        fixture.assemble([[
+            moveByte #13, >h1000
+            moveByte >h1000, d0
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(0).hasValue(13);
+    end,
+
+    moveByteDirectlyBetweenAddressesThrowsError = function()
+        expect.errorsToBeThrown(
+            function()
+                fixture.assemble([[
+                    moveByte var1, var2
+                    var1 declareByte #1
+                    var2 declareByte #2
+                ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveByte var1, >h1000
+                    var1 declareByte #1
+                ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveByte >h1000, var1
+                    var1 declareByte #1
+                ]]);
+            end,
+            function()
+                fixture.assemble("moveByte >h1000, >h1001");
+            end
+        );
+    end,
 
 };
 

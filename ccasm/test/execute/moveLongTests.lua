@@ -68,14 +68,41 @@ local testSuite = {
             .dataRegister(0).hasValue(0xFF001122);
     end,
 
-    moveLongBetweenSymbolicAddressesThrowsError = function()
-        expect.errorToBeThrown(function()
-            fixture.assemble([[
-                moveLong var1, var2
-                var1 declareLong #h1234ABCD
-                var2 declareLong #h5678EFFF
-            ]]);
-        end);
+    moveLongAbsoluteAddress = function()
+        fixture.assemble([[
+            moveLong #h1234ABCD, >h1000
+            moveLong >h1000, d0
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(0).hasValue(0x1234ABCD);
+    end,
+
+    moveLongDirectlyBetweenAddressesThrowsError = function()
+        expect.errorsToBeThrown(
+            function()
+                fixture.assemble([[
+                    moveLong var1, var2
+                    var1 declareLong #h1234ABCD
+                    var2 declareLong #h5678ABCD
+                ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveLong var1, >h1000
+                    var1 declareLong #h1234ABCD
+                ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveLong >h1000, var1
+                    var1 declareLong #h1234ABCD
+                ]]);
+            end,
+            function()
+                fixture.assemble("moveLong >h1000, >h1002");
+            end
+        );
     end,
 
 };
