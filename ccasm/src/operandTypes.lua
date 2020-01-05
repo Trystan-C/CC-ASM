@@ -55,30 +55,18 @@ immediateData = {
     },
 };
 
-immediateData.parseValueAsInt = function(token)
+immediateData.parseValueAsBytes = function(token)
     local format, rawValue = immediateData.match(token);
     local base = 10;
-
     if format == immediateData.formats.binary then
         base = 2;
     elseif format == immediateData.formats.hex then
         base = 16;
     end
+    local value = tonumber(rawValue, base);
+    integer.assertValueIsInteger(value);
 
-    local parsedValue = tonumber(rawValue, base);
-    integer.assertValueIsInteger(parsedValue);
-
-    return parsedValue;
-end
-
-immediateData.getSizeInBytes = function(token)
-    return integer.getSizeInBytesForInteger(immediateData.parseValueAsInt(token));
-end
-
-immediateData.parseValueAsBytes = function(token)
-    local size = immediateData.getSizeInBytes(token);
-    local value = immediateData.parseValueAsInt(token);
-
+    local size = integer.getSizeInBytesForInteger(value);
     return integer.getBytesForInteger(size, value);
 end
 
@@ -174,6 +162,25 @@ registerRange.parseValueAsBytes = function(token)
     return bytes;
 end
 
+--STRING---------------------------------------------------
+stringConstant = {
+    typeByte = 5,
+    match = function(token)
+        return token:match("\"(.+)\"");
+    end,
+};
+
+stringConstant.parseValueAsBytes = function(token)
+    local str = stringConstant.match(token);
+    local bytes = {};
+    for char in str:gmatch(".") do
+        table.insert(bytes, string.byte(char));
+    end
+    -- append null-terminator
+    table.insert(bytes, 0);
+    return bytes;
+end
+
 --OPERAND TYPE LOOKUP--------------------------------------
 local function throwUnrecognizedOperandTypeError(token)
     local message = "Unrecognized operand type for token: " .. tostring(token);
@@ -200,6 +207,8 @@ function getType(token)
         return "symbolicAddress";
     elseif tokenTypeIs(registerRange) then
         return "registerRange";
+    elseif tokenTypeIs(stringConstant) then
+        return "stringConstant";
     end
 
     throwUnrecognizedOperandTypeError(token);

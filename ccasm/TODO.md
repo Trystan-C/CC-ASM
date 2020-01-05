@@ -6,9 +6,6 @@
 * CONTRIBUTING.md for adding instructions/tests.
 * Update README.md with system overview, limitations, etc.
 
-## Macros to Add
-* declareString "str" -- Write string as ASCII bytes, append null-terminator (e.g., 0).
-
 ## Instructions to Add
 * trap <byte>
     * 0 -- Write null-terminated ASCII string at A0.

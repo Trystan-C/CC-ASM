@@ -129,15 +129,7 @@ local function parseOperandFromNextToken(verify)
         valueBytes = definition.parseValueAsBytes(token);
     };
     operand.sizeInBytes = #operand.valueBytes;
-
-    -- TODO: Deprecate the table stuff.
-    if type(verify) == "table" then
-        for _, verifier in pairs(verify) do
-            verifier(operand);
-        end
-    else
-        verify(operand);
-    end
+    verify(operand);
 
     return operand;
 end
@@ -165,18 +157,13 @@ local function assembleNextTokenAsInstruction()
     appendInstructionAsBinary(definition.byteValue);
 
     for _ = 1, numOperands do
-        local verifiers = definition.individualOperandVerifiers or definition.verifyEach or {};
+        local verifiers = definition.verifyEach;
         local operand = assembleNextTokenAsInstructionOperand(verifiers);
         table.insert(operands, operand);
     end
 
-    -- TODO: Deperecate the table stuff.
     if definition.verifyAll then
         definition.verifyAll(unpack(operands));
-    else
-        for _, groupVerifier in pairs((definition.groupOperandVerifiers or {})) do
-            groupVerifier(unpack(operands));
-        end
     end
 end
 
@@ -185,7 +172,7 @@ local function assembleNextTokenAsMacro()
     local operands = {};
 
     for _ = 1, definition.numOperands do
-        table.insert(operands, parseOperandFromNextToken(definition.individualOperandVerifiers));
+        table.insert(operands, parseOperandFromNextToken(definition.verifyEach));
     end
 
     local bytes = definition.assemble(objectCode, operands);
