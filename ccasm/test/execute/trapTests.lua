@@ -37,6 +37,34 @@ local testSuite = {
         term.setCursorPos(originalX, originalY);
     end,
 
+    writeString = function()
+        local originalTerm = _G.term;
+        local writtenStr = "set me";
+        local mockTerm = {
+            write = function(str)
+                writtenStr = str;
+            end,
+        };
+
+        setmetatable(mockTerm, { __index = originalTerm });
+        _G.term = mockTerm;
+        local result, message = pcall(function()
+            fixture.assemble([[
+                moveLong #str, a0
+                trap #3
+                str declareString "test"
+            ]])
+                .load()
+                .step(2);
+        end);
+        if not result then
+            logger.info("trapTests.writeString: Error during execution: %%", message);
+        end
+        _G.term = originalTerm;
+
+        expect.value(writtenStr).toEqual("test");
+    end,
+
     trapUnsupportedValueThrowsError = function()
         expect.errorsToBeThrown(function()
             fixture.assemble("trap #hFF")

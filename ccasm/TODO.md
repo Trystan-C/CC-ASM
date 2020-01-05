@@ -11,8 +11,8 @@
     * 0 -- Store terminal width/height in D6/D7.
     * 1 -- Store cursor x/y in D6/D7.
     * 2 -- Set terminal cursor x/y to values in D0/D1.
-TODO:
     * 3 -- Write null-terminated ASCII string at A0.
+TODO:
     * 4 -- Read null-terminated string from std-in to the address stored in A0.
     * 5 -- Shutdown
     * 6 -- Restart

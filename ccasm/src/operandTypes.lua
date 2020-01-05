@@ -46,26 +46,47 @@ end
 --IMMEDIATE DATA-------------------------------------------
 immediateData = {
     typeByte = 2,
-    match = function(token)
-        return token:match("^#([hb]?)(%w+%.?%w*)$");
-    end,
+    patterns = {
+        "^#([0-9]+)$",
+        "^#(h[0-9A-Fa-f]+)$",
+        "^#(b[0-1]+)$",
+    },
     formats = {
         hex = "h",
         binary = "b"
     },
 };
 
+immediateData.match = function(token)
+    local result;
+    for _, pattern in ipairs(immediateData.patterns) do
+        result = token:match(pattern);
+        if result then
+            break;
+        end
+    end
+    return result;
+end
+
 immediateData.parseValueAsBytes = function(token)
-    local format, rawValue = immediateData.match(token);
+    local rawValue = immediateData.match(token);
     local base = 10;
+    local format;
+    for name, prefix in pairs(immediateData.formats) do
+        if rawValue:sub(1, 1) == prefix then
+            rawValue = rawValue:sub(2);
+            format = prefix;
+            break;
+        end
+    end
     if format == immediateData.formats.binary then
         base = 2;
     elseif format == immediateData.formats.hex then
         base = 16;
     end
+
     local value = tonumber(rawValue, base);
     integer.assertValueIsInteger(value);
-
     local size = integer.getSizeInBytesForInteger(value);
     return integer.getBytesForInteger(size, value);
 end
@@ -78,23 +99,29 @@ symbolicAddress = {
     end,
     sizeInBytes = 2,
 };
-
+absoluteSymbolicAddress = {
+    typeByte = 4, 
+    match = function(token)
+        return token:match("^#(%a[%w_]-)$");
+    end,
+    sizeInBytes = symbolicAddress.sizeInBytes,
+};
 -- Returns a zero array for use as a place-holder.
--- References to this address will be filled after the
--- entire source has been passed over.
-symbolicAddress.parseValueAsBytes = function(token)
+-- References to symbols are filled with an offset from
+-- the reference in the object code to the symbol declaration
+-- in the object code.
+local function makeAddressFiller()
     local bytes = {};
-
-    for _ = 1, symbolicAddress.sizeInBytes do
+    for i = 1, symbolicAddress.sizeInBytes do
         table.insert(bytes, 0);
     end
-
     return bytes;
 end
-
+symbolicAddress.parseValueAsBytes = makeAddressFiller;
+absoluteSymbolicAddress.parseValueAsBytes = makeAddressFiller;
 --REGISTER RANGE-------------------------------------------
 registerRange = {
-    typeByte = 4;
+    typeByte = 5;
     patterns = {
         "^([dD][0-7]%-[0-7])/([aA][0-7]%-[0-7])$",
         "^([dD][0-7]%-[0-7])/([aA][0-7])$",
@@ -164,7 +191,7 @@ end
 
 --STRING---------------------------------------------------
 stringConstant = {
-    typeByte = 5,
+    typeByte = 6,
     match = function(token)
         return token:match("\"(.+)\"");
     end,
@@ -205,6 +232,8 @@ function getType(token)
         return "immediateData";
     elseif tokenTypeIs(symbolicAddress) then
         return "symbolicAddress";
+    elseif tokenTypeIs(absoluteSymbolicAddress) then
+        return "absoluteSymbolicAddress";
     elseif tokenTypeIs(registerRange) then
         return "registerRange";
     elseif tokenTypeIs(stringConstant) then

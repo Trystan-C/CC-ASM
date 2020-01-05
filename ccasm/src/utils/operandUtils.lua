@@ -12,10 +12,11 @@ end
 function absoluteAddress(operand)
     assert(
         operand.definition == operandTypes.symbolicAddress or
+        operand.definition == operandTypes.absoluteSymbolicAddress or
         operand.definition == operandTypes.immediateData,
         "absoluteAddress: Expected symbolic address or immediate data operand."
     );
-    if operand.definition == operandTypes.symbolicAddress then
+    if operand.definition == operandTypes.symbolicAddress or operand.definition == operandTypes.absoluteSymbolicAddress then
         local offset = integer.getSignedIntegerFromBytes(operand.valueBytes);
         local symbolStartAddress = operand.valueStartAddress + offset;
         return symbolStartAddress;
@@ -34,6 +35,8 @@ local function byteGetter(operand)
         getter = function() return operand.valueBytes end
     elseif operand.definition == operandTypes.symbolicAddress then
         getter = function() return memory.readBytes(absoluteAddress(operand), 1) end
+    elseif operand.definition == operandTypes.absoluteSymbolicAddress then
+        getter = function() return tableUtils.fitToSize(integer.getBytesForInteger(absoluteAddress(operand)), 1) end
     end
     return getter;
 end
@@ -48,6 +51,8 @@ local function wordGetter(operand)
         getter = function() return tableUtils.zeroPadFrontToSize(operand.valueBytes, 2) end
     elseif operand.definition == operandTypes.symbolicAddress then
         getter = function() return memory.readBytes(absoluteAddress(operand), 2) end
+    elseif operand.definition == operandTypes.absoluteSymbolicAddress then
+        getter = function() return tableUtils.fitToSize(integer.getBytesForInteger(absoluteAddress(operand)), 2) end
     end
     return getter;
 end
@@ -62,6 +67,8 @@ local function longGetter(operand)
         getter = function() return tableUtils.zeroPadFrontToSize(operand.valueBytes, 4) end
     elseif operand.definition == operandTypes.symbolicAddress then
         getter = function() return memory.readBytes(absoluteAddress(operand), 4) end
+    elseif operand.definition == operandTypes.absoluteSymbolicAddress then
+        getter = function() return tableUtils.fitToSize(integer.getBytesForInteger(absoluteAddress(operand)), 4) end
     end
     return getter;
 end

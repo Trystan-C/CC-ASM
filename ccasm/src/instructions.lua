@@ -13,7 +13,7 @@ local function move(byteValue, name, sizeDescriptor, sizeInBytes)
         byteValue = byteValue,
         numOperands = 2,
         verifyEach = function(operand)
-            if operand.definition ~= operandTypes.symbolicAddress then
+            if operand.definition ~= operandTypes.symbolicAddress and operand.definition ~= operandTypes.absoluteSymbolicAddress then
                 assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
             end
         end,
@@ -572,7 +572,25 @@ apiEnv.trap = {
                     registers.dataRegisters[1].getLong()
                 )
             );
-        -- unsupported trap byte
+        -- writeString
+        elseif byte == 3 then
+            local absoluteAddress = integer.getIntegerFromBytes(registers.addressRegisters[0].getWord());
+            local str = "";
+            local offset = 0;
+            local limit = 1024;
+            while offset <= limit do
+                local byte = (memory.readBytes(absoluteAddress + offset, 1))[1];
+                offset = offset + 1;
+                if byte == 0 then
+                    break;
+                else
+                    str = str .. string.char(byte);
+                end
+            end
+            if offset >= limit then
+                error("trap(#3): Read " .. limit .. " bytes before stopping string read.");
+            end
+            term.write(str);
         else
             error("trap: Unsupporetd trap-byte(" .. tostring(byte) .. ").");
         end

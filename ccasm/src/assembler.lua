@@ -120,8 +120,8 @@ local function parseOperandFromNextToken(verify)
     local token = dequeueNextToken();
     local definition = operandTypes[operandTypes.getType(token)]
 
-    if definition == operandTypes.symbolicAddress then
-        markSymbolicAddressFillIndex(token);
+    if definition == operandTypes.symbolicAddress or definition == operandTypes.absoluteSymbolicAddress then
+        markSymbolicAddressFillIndex(definition.match(token));
     end
 
     local operand = {
