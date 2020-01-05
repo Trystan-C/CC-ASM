@@ -8,14 +8,14 @@
 
 ## Instructions to Add
 * trap <byte>
-    * 0 -- Write null-terminated ASCII string at A0.
-    * 1 -- Kill execution, i.e., halt CPU.
-    * 2 -- Shutdown
-    * 3 -- Restart
+    * 0 -- Store terminal width/height in D6/D7.
+    * 1 -- Store cursor x/y in D6/D7.
+    * 2 -- Set terminal cursor x/y to values in D0/D1.
+TODO:
+    * 3 -- Write null-terminated ASCII string at A0.
     * 4 -- Read null-terminated string from std-in to the address stored in A0.
-    * 5 -- Set terminal cursor X
-    * 6 -- Set terminal cursor Y
-    * 7 -- Get terminal dimensions, store in d6, d7?
+    * 5 -- Shutdown
+    * 6 -- Restart
     
 ## Other Features
 * File-descriptor system for interacting with peripherals.

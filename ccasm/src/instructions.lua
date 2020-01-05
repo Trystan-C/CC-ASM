@@ -534,6 +534,50 @@ end
 _not(41, "notByte", "byte", 1);
 _not(42, "notWord", "word", 2);
 _not(43, "notLong", "long", 4);
+--TRAP-----------------------------------------------------
+apiEnv.trap = {
+    byteValue = 44,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(operand.definition == operandTypes.immediateData, "trap: Operand must be immediate data.");
+        assert(operand.sizeInBytes == 1, "trap: Operand must be at most 1 byte.");
+    end,
+    execute = function(operand)
+        local byte = (operandUtils.byte(operand).get())[1];
+        -- getTerminalDimensions
+        if byte == 0 then
+            local width, height = term.getSize();
+            registers.dataRegisters[6].setLong(
+                tableUtils.fitToSize(integer.getBytesForInteger(width), 4)
+            );
+            registers.dataRegisters[7].setLong(
+                tableUtils.fitToSize(integer.getBytesForInteger(height), 4)
+            );
+        -- getCursorPosition
+        elseif byte == 1 then
+            local cursorX, cursorY = term.getCursorPos();
+            registers.dataRegisters[6].setLong(
+                tableUtils.fitToSize(integer.getBytesForInteger(cursorX), 4)
+            );
+            registers.dataRegisters[7].setLong(
+                tableUtils.fitToSize(integer.getBytesForInteger(cursorY), 4)
+            );
+        -- setCursorPosition
+        elseif byte == 2 then
+            term.setCursorPos(
+                integer.getSignedIntegerFromBytes(
+                    registers.dataRegisters[0].getLong()
+                ),
+                integer.getSignedIntegerFromBytes(
+                    registers.dataRegisters[1].getLong()
+                )
+            );
+        -- unsupported trap byte
+        else
+            error("trap: Unsupporetd trap-byte(" .. tostring(byte) .. ").");
+        end
+    end,
+};
 --DEFINITION MAP-------------------------------------------
 local function isInstructionDefinition(definition)
     return type(definition) == "table" and
