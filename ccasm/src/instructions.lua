@@ -608,6 +608,10 @@ apiEnv.trap = {
                 integer.getIntegerFromBytes(registers.addressRegisters[0].getWord()),
                 strBytes
             );
+        elseif byte == 5 then
+            os.shutdown();
+        elseif byte == 6 then
+            os.reboot();
         else
             error("trap: Unsupporetd trap-byte(" .. tostring(byte) .. ").");
         end

@@ -1,5 +1,5 @@
 local function printUsage()
-    print("Usage: testRunner <directory-path> | <file-path>");
+    print("Usage: testRunner <directory-path> -r(ecurse) | <file-path>");
 end
 
 local function isFunction(value)

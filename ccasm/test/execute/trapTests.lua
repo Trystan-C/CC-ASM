@@ -87,6 +87,42 @@ local testSuite = {
         end
     end,
 
+    shutdown = function()
+        local oldShutdown = _G.os.shutdown;
+        local called = false;
+        _G.os.shutdown = function()
+            called = true;
+        end
+
+        local result, message = pcall(function()
+            fixture.assemble("trap #5")
+                .load()
+                .step();
+        end);
+        _G.os.shutdown = oldShutdown;
+        if not result then
+            error(message);
+        end
+    end,
+
+    reboot = function()
+        local oldReboot = _G.os.reboot;
+        local called = false;
+        _G.os.reboot = function()
+            called = true;
+        end
+
+        local result, message = pcall(function()
+            fixture.assemble("trap #6")
+                .load()
+                .step();
+        end);
+        _G.os.reboot = oldReboot;
+        if not result then
+            error(message);
+        end
+    end,
+
     trapUnsupportedValueThrowsError = function()
         expect.errorsToBeThrown(function()
             fixture.assemble("trap #hFF")
