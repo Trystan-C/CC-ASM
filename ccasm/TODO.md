@@ -11,7 +11,7 @@
     * Add common interface for developing drivers for each peripheral.
 
 ## Planned Features
-* Nada right now.
+* Comments
 
 ## Bugs
 * Add support for string constants with spaces. Assembler splits everything by space.

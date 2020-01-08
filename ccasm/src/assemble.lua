@@ -20,7 +20,6 @@ for _, filePath in ipairs(args) do
 
             local objectCode = assembler.assemble(code);
             local objectFilePath = filePath:match("^(.+)%.ccasm$") .. ".cco";
-            print("Writing object file " .. objectFilePath .. "...");
             local outFile = fs.open(objectFilePath, "wb");
             -- Write origin as first word.
             local originBytes = tableUtils.fitToSize(integer.getBytesForInteger(objectCode.origin), 2);
@@ -31,6 +30,7 @@ for _, filePath in ipairs(args) do
                 outFile.write(byte);
             end
             outFile.close();
+            print("Wrote object file " .. objectFilePath .. ".");
         end);
         if not result then
             print("ERROR: " .. errorMessage);
