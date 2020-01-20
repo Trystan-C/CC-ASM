@@ -126,6 +126,10 @@ local function isAddressInStackRegion(address)
     return address >= STACK_START_ADDRESS and address <= STACK_START_ADDRESS + STACK_SIZE_IN_BYTES;
 end
 
+function getStackPointer()
+    return stackPointer;
+end
+
 function pushStack(byteTable)
     local numBytes = tableUtils.countKeys(byteTable);
     if not isAddressInStackRegion(stackPointer + numBytes) then
