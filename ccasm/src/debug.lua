@@ -5,10 +5,20 @@ apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/memory.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/cpu.lua");
 
+local screenWidth, screenHeight = term.getSize();
 local baseAddress = 0;
 
+local function drawCenteredHeader(startX, startY, label)
+    local centerX = math.floor(screenWidth / 2) - math.floor(label:len() / 2);
+    term.setCursorPos(centerX, startY);
+    term.write(label);
+    term.setCursorPos(1, startY);
+    term.write("+" .. string.rep("-", centerX - 2));
+    term.setCursorPos(centerX + label:len(), startY);
+    term.write(string.rep("-", screenWidth - centerX - label:len()) .. "+");
+end
+
 local function draw()
-    local screenWidth, screenHeight = term.getSize();
     local function curX()
         return ({ term.getCursorPos() })[1];
     end
@@ -17,15 +27,6 @@ local function draw()
     end
     local function formatBytesAsHex(bytes)
         return "0x" .. string.format("%" .. (#bytes * 2) .. "X", integer.getIntegerFromBytes(bytes)):gsub("%s", "0");
-    end
-    local function drawCenteredHeader(startX, startY, label)
-        local centerX = math.floor(screenWidth / 2) - math.floor(label:len() / 2);
-        term.setCursorPos(centerX, startY);
-        term.write(label);
-        term.setCursorPos(1, startY);
-        term.write("+" .. string.rep("-", centerX - 2));
-        term.setCursorPos(centerX + label:len(), startY);
-        term.write(string.rep("-", screenWidth - centerX - label:len()) .. "+");
     end
     local function drawRegister(prefix, bytes)
         local info = prefix .. ": " .. formatBytesAsHex(bytes);
@@ -82,6 +83,8 @@ local function draw()
     term.clear();
     term.setCursorPos(1, 1);
     drawRegisterBlock("DATA REGISTERS", "D", registers.dataRegisters);
+    term.setCursorPos(3, 1);
+    term.write("[h]");
     term.setCursorPos(1, curY() + 1);
     drawRegisterBlock("ADDRESS REGISTERS", "A", registers.addressRegisters);
     drawStatusRegisters();
@@ -91,21 +94,82 @@ local function draw()
     return drawMemory();
 end
 
+local function drawHelp()
+    term.clear();
+    drawCenteredHeader(1, 1, "DEBUGGER COMMANDS");
+    term.setCursorPos(1, 2);
+    print(" - s: Step the CPU.");
+    print(" - k: Scroll up.");
+    print(" - j: Scroll down.");
+    print(" - m: Jump to address.");
+    print(" - e: Exit program.");
+    term.setCursorPos(1, screenHeight);
+    term.write("Press any key to continue.");
+    os.pullEvent("key");
+end
+
+local function tryStep()
+    local success, message = pcall(cpu.step);
+    if not success then
+        term.setCursorPos(1, screenHeight);
+        term.clearLine();
+        term.write(string.rep("!", screenWidth));
+        term.setCursorPos(1, screenHeight - 1);
+        term.write(message);
+        sleep(5);
+    end
+end
+
+local function readJumpToAddress()
+    term.setCursorPos(1, screenHeight);
+    term.clearLine();
+    term.write(string.rep("/", screenWidth));
+    term.setCursorPos(1, screenHeight - 1);
+    term.clearLine();
+    term.write("jump to: ");
+    local addr = read();
+    if addr:match("^h.+") then
+        addr = tonumber(addr:match("^h(.+)"), 16);
+    else
+        addr = tonumber(addr);
+    end
+    if addr == nil or not memory.isAddressValid(addr) then
+        term.setCursorPos(1, screenHeight - 1);
+        term.clearLine();
+        term.write("Invalid address.");
+        sleep(1);
+        return baseAddress;
+    end
+    return addr;
+end
+
 local key;
 local i = 0;
 registers.setProgramCounter(0);
 repeat
     local memoryWidth, memoryHeight = draw();
-    key = ({ os.pullEvent("char") })[2];
+    key = ({ os.pullEvent("key") })[2];
     i = i + 1;
-    if key == 's' then
-        cpu.step();
-    elseif key == 'k' and baseAddress - memoryWidth >= 0 then
+    if key == keys.h then
+        drawHelp();
+    elseif key == keys.s then
+        tryStep();
+    elseif key == keys.k then
         baseAddress = baseAddress - memoryWidth - 1;
-    elseif key == 'j' and baseAddress + memoryWidth * memoryHeight <= #memory.bytes then
+    elseif key == keys.j then
         baseAddress = baseAddress + memoryWidth + 1;
+    elseif key == keys.m then
+        -- Swallow char event following key event, so the
+        -- subsequent call to read() doesn't get the 'm'.
+        os.pullEvent("char"); 
+        baseAddress = readJumpToAddress();
     end
-until key == 'e';
+    baseAddress = math.max(baseAddress, 0);
+    baseAddress = math.min(baseAddress, #memory.bytes - memoryWidth * memoryHeight);
+until key == keys.e;
 
+-- Swallow char event following key event, so
+-- the shell doesn't receive the 'e'.
+os.pullEvent("char");
 term.clear();
 term.setCursorPos(1, 1);
