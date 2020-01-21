@@ -7,6 +7,13 @@ apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
 local apiEnv = getfenv();
+--NOP-------------------------------------------------------------------
+apiEnv.nop = {
+    byteValue = 0,
+    numOperands = 0,
+    execute = function()
+    end,
+};
 --MOVE------------------------------------------------------------------
 local function move(byteValue, name, sizeDescriptor, sizeInBytes)
     apiEnv[name] = {
@@ -33,9 +40,9 @@ local function move(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-move(0, "moveByte", "byte", 1);
-move(1, "moveWord", "word", 2);
-move(2, "moveLong", "long", 4);
+move(1, "moveByte", "byte", 1);
+move(2, "moveWord", "word", 2);
+move(3, "moveLong", "long", 4);
 --ADDITION--------------------------------------------------------------
 local function add(byteValue, name, sizeDescriptor, sizeInBytes)
     apiEnv[name] = {
@@ -64,9 +71,9 @@ local function add(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-add(3, "addByte", "byte", 1);
-add(4, "addWord", "word", 2);
-add(5, "addLong", "long", 4);
+add(4, "addByte", "byte", 1);
+add(5, "addWord", "word", 2);
+add(6, "addLong", "long", 4);
 --SUBTRACTION-----------------------------------------------------------
 local function sub(byteValue, name, sizeDescriptor, sizeInBytes)
     apiEnv[name] = {
@@ -92,9 +99,9 @@ local function sub(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-sub(6, "subByte", "byte", 1);
-sub(7, "subWord", "word", 2);
-sub(8, "subLong", "long", 4);
+sub(7, "subByte", "byte", 1);
+sub(8, "subWord", "word", 2);
+sub(9, "subLong", "long", 4);
 --MULTIPLICATION--------------------------------------------------------
 local function mul(byteValue, name, sizeDescriptor, sizeInBytes)
     apiEnv[name] = {
@@ -120,9 +127,9 @@ local function mul(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-mul(9, "mulByte", "byte", 1);
-mul(10, "mulWord", "word", 2);
-mul(11, "mulLong", "long", 4);
+mul(10, "mulByte", "byte", 1);
+mul(11, "mulWord", "word", 2);
+mul(12, "mulLong", "long", 4);
 --DIVISION-------------------------------------------------
 local function div(byteValue, name, sizeDescriptor, sizeInBytes)
     apiEnv[name] = {
@@ -148,9 +155,9 @@ local function div(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-div(12, "divByte", "byte", 1);
-div(13, "divWord", "word", 2);
-div(14, "divLong", "long", 4);
+div(13, "divByte", "byte", 1);
+div(14, "divWord", "word", 2);
+div(15, "divLong", "long", 4);
 --COMPARISON------------------------------------------------------------
 local function cmp(byteValue, name, sizeDescriptor, sizeInBytes)
     apiEnv[name] = {
@@ -179,12 +186,12 @@ local function cmp(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-cmp(15, "cmpByte", "byte", 1);
-cmp(16, "cmpWord", "word", 2);
-cmp(17, "cmpLong", "long", 4);
+cmp(16, "cmpByte", "byte", 1);
+cmp(17, "cmpWord", "word", 2);
+cmp(18, "cmpLong", "long", 4);
 --BRANCHING-------------------------------------------------------------
 apiEnv.beq = {
-    byteValue = 18,
+    byteValue = 19,
     numOperands = 1,
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "beq: Operand must be at most 2 bytes.");
@@ -201,7 +208,7 @@ apiEnv.beq = {
     end,
 };
 apiEnv.bne = {
-    byteValue = 19,
+    byteValue = 20,
     numOperands = 1,
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "bne: Operand must be at most 2 bytes.");
@@ -218,7 +225,7 @@ apiEnv.bne = {
     end,
 };
 apiEnv.blt = {
-    byteValue = 20,
+    byteValue = 21,
     numOperands = 1,
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "blt: Operand must be at most 2 bytes.");
@@ -236,7 +243,7 @@ apiEnv.blt = {
     end,
 };
 apiEnv.ble = {
-    byteValue = 21,
+    byteValue = 22,
     numOperands = 1,
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "blt: Operand must be at most 2 bytes.");
@@ -254,7 +261,7 @@ apiEnv.ble = {
     end,
 };
 apiEnv.bgt = {
-    byteValue = 22,
+    byteValue = 23,
     numOperands = 1,
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "bgt: Operand must be at most 2 bytes.");
@@ -272,7 +279,7 @@ apiEnv.bgt = {
     end,
 };
 apiEnv.bge = {
-    byteValue = 23,
+    byteValue = 24,
     numOperands = 1,
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "bge: Operand must be at most 2 bytes.");
@@ -291,7 +298,7 @@ apiEnv.bge = {
 };
 --SUBROUTINES----------------------------------------------
 apiEnv.bsr = {
-    byteValue = 24,
+    byteValue = 25,
     numOperands = 1,
     verifyEach = function(operand)
         assert(operand.definition == operandTypes.symbolicAddress, "bsr: Operand must be symbolic address.");
@@ -303,7 +310,7 @@ apiEnv.bsr = {
     end,
 };
 apiEnv.ret = {
-    byteValue = 25,
+    byteValue = 26,
     numOperands = 0,
     execute = function()
         registers.setProgramCounter(integer.getIntegerFromBytes(registers.popStackWord()));
@@ -311,7 +318,7 @@ apiEnv.ret = {
 };
 --STACK----------------------------------------------------
 apiEnv.push = {
-    byteValue = 26,
+    byteValue = 27,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -337,7 +344,7 @@ apiEnv.push = {
     end,
 };
 apiEnv.pop = {
-    byteValue = 27,
+    byteValue = 28,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -365,7 +372,7 @@ apiEnv.pop = {
 }
 --SHIFT----------------------------------------------------
 apiEnv.lshiftByte = {
-    byteValue = 28,
+    byteValue = 29,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -381,7 +388,7 @@ apiEnv.lshiftByte = {
     end,
 };
 apiEnv.lshiftWord = {
-    byteValue = 29,
+    byteValue = 30,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -397,7 +404,7 @@ apiEnv.lshiftWord = {
     end,
 };
 apiEnv.rshiftByte = {
-    byteValue = 30,
+    byteValue = 31,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -413,7 +420,7 @@ apiEnv.rshiftByte = {
     end,
 };
 apiEnv.rshiftWord = {
-    byteValue = 31,
+    byteValue = 32,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -455,9 +462,9 @@ local function _or(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-_or(32, "orByte", "byte", 1);
-_or(33, "orWord", "word", 2);
-_or(34, "orLong", "long", 4);
+_or(33, "orByte", "byte", 1);
+_or(34, "orWord", "word", 2);
+_or(35, "orLong", "long", 4);
 --AND------------------------------------------------------
 -- _and, since 'and' is a keyword.
 local function _and(byteValue, name, sizeDescriptor, sizeInBytes)
@@ -485,9 +492,9 @@ local function _and(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-_and(35, "andByte", "byte", 1);
-_and(36, "andWord", "word", 2);
-_and(37, "andLong", "long", 4);
+_and(36, "andByte", "byte", 1);
+_and(37, "andWord", "word", 2);
+_and(38, "andLong", "long", 4);
 --XOR------------------------------------------------------
 local function xor(byteValue, name, sizeDescriptor, sizeInBytes)
     apiEnv[name] = {
@@ -514,9 +521,9 @@ local function xor(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-xor(38, "xorByte", "byte", 1);
-xor(39, "xorWord", "word", 2);
-xor(40, "xorLong", "long", 4);
+xor(39, "xorByte", "byte", 1);
+xor(40, "xorWord", "word", 2);
+xor(41, "xorLong", "long", 4);
 --NOT------------------------------------------------------
 -- _not, since 'not' is a keyword.
 local function _not(byteValue, name, sizeDescriptor, sizeInBytes)
@@ -536,12 +543,12 @@ local function _not(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-_not(41, "notByte", "byte", 1);
-_not(42, "notWord", "word", 2);
-_not(43, "notLong", "long", 4);
+_not(42, "notByte", "byte", 1);
+_not(43, "notWord", "word", 2);
+_not(44, "notLong", "long", 4);
 --TRAP-----------------------------------------------------
 apiEnv.trap = {
-    byteValue = 44,
+    byteValue = 45,
     numOperands = 1,
     verifyEach = function(operand)
         assert(operand.definition == operandTypes.immediateData, "trap: Operand must be immediate data.");
