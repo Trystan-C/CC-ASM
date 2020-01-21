@@ -37,8 +37,13 @@ end
 local function parseTokensFromCode(code)
     local parsedTokens = {};
 
-    for token in code:gmatch("[^%s\r\n\t,]+") do
-        table.insert(parsedTokens, token);
+    for line in code:gmatch("[^\n]+") do
+        for token in line:gmatch("[^%s\r\n\t,]+") do
+            if token:sub(1,1) == ";" then
+                break;
+            end
+            table.insert(parsedTokens, token);
+        end
     end
 
     return parsedTokens;
