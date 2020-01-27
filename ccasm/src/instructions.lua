@@ -589,8 +589,14 @@ apiEnv.trap = {
                     registers.dataRegisters[1].getLong()
                 )
             );
-        -- writeString
+        -- clearScreen
         elseif byte == 3 then
+            term.clear();
+        -- clearLine
+        elseif byte == 4 then
+            term.clearLine();
+        -- writeString
+        elseif byte == 5 then
             local absoluteAddress = integer.getIntegerFromBytes(registers.addressRegisters[0].getWord());
             local str = "";
             local offset = 0;
@@ -609,7 +615,7 @@ apiEnv.trap = {
             end
             term.write(str);
         -- readString
-        elseif byte == 4 then
+        elseif byte == 6 then
             local str = read();
             local strBytes = {};
             for char in str:gmatch(".") do
@@ -620,9 +626,9 @@ apiEnv.trap = {
                 integer.getIntegerFromBytes(registers.addressRegisters[0].getWord()),
                 strBytes
             );
-        elseif byte == 5 then
+        elseif byte == 7 then
             os.shutdown();
-        elseif byte == 6 then
+        elseif byte == 8 then
             os.reboot();
         else
             error("trap: Unsupporetd trap-byte(" .. tostring(byte) .. ").");

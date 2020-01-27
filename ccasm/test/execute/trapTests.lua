@@ -37,6 +37,54 @@ local testSuite = {
         term.setCursorPos(originalX, originalY);
     end,
 
+    clearScreen = function()
+        local cleared = false;
+        local originalTerm = _G.term;
+        local mockTerm = {
+            clear = function()
+                cleared = true;
+            end,
+        };
+        setmetatable(mockTerm, { __index = originalTerm });
+        _G.term = mockTerm;
+
+        local result, message = pcall(function()
+            fixture.assemble("trap #3")
+                .load()
+                .step();
+        end);
+        if not result then
+            logger.info("trapTests.clearScreen: Error during execution: %%", message);
+        end
+        
+        _G.term = originalTerm;
+        expect.value(cleared).toEqual(true);
+    end,
+
+    clearLine = function()
+        local cleared = false;
+        local originalTerm = _G.term;
+        local mockTerm = {
+            clearLine = function()
+                cleared = true;
+            end,
+        };
+        setmetatable(mockTerm, { __index = originalTerm });
+        _G.term = mockTerm;
+
+        local result, message = pcall(function()
+            fixture.assemble("trap #4")
+                .load()
+                .step();
+        end);
+        if not result then
+            logger.info("trapTests.clearLine: Error during execution: %%", message);
+        end
+
+        _G.term = originalTerm;
+        expect.value(cleared).toEqual(true);
+    end,
+
     writeString = function()
         local originalTerm = _G.term;
         local writtenStr = "set me";
@@ -51,7 +99,7 @@ local testSuite = {
         local result, message = pcall(function()
             fixture.assemble([[
                 moveLong #str, a0
-                trap #3
+                trap #5
                 str declareString "test"
             ]])
                 .load()
@@ -74,7 +122,7 @@ local testSuite = {
         local result, message = pcall(function()
             fixture.assemble([[
                 moveWord #h1000, a0
-                trap #4
+                trap #6
                 moveLong >h1000, d0
             ]])
                 .load()
@@ -95,7 +143,7 @@ local testSuite = {
         end
 
         local result, message = pcall(function()
-            fixture.assemble("trap #5")
+            fixture.assemble("trap #7")
                 .load()
                 .step();
         end);
@@ -113,7 +161,7 @@ local testSuite = {
         end
 
         local result, message = pcall(function()
-            fixture.assemble("trap #6")
+            fixture.assemble("trap #8")
                 .load()
                 .step();
         end);
