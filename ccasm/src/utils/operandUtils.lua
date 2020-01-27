@@ -14,6 +14,7 @@ function absoluteAddress(operand)
         operand.definition == operandTypes.symbolicAddress or
         operand.definition == operandTypes.absoluteSymbolicAddress or
         operand.definition == operandTypes.absoluteAddress or
+        operand.definition == operandTypes.indirectAddress or
         operand.definition == operandTypes.immediateData,
         "absoluteAddress: Expected absolute or symbolic address or immediate data operand."
     );
@@ -23,6 +24,8 @@ function absoluteAddress(operand)
         return symbolStartAddress;
     elseif operand.definition == operandTypes.absoluteAddress then
         return integer.getIntegerFromBytes(operand.valueBytes);
+    elseif operand.definition == operandTypes.indirectAddress then
+        return integer.getIntegerFromBytes(registers.addressRegisters[registerId(operand)].getWord());
     elseif operand.definition == operandTypes.immediateData then
         return integer.getIntegerFromBytes(word(operand).get());
     end
@@ -40,7 +43,7 @@ local function byteGetter(operand)
         getter = function() return memory.readBytes(absoluteAddress(operand), 1) end
     elseif operand.definition == operandTypes.absoluteSymbolicAddress then
         getter = function() return tableUtils.fitToSize(integer.getBytesForInteger(absoluteAddress(operand)), 1) end
-    elseif operand.definition == operandTypes.absoluteAddress then
+    elseif operand.definition == operandTypes.absoluteAddress or operand.definition == operandTypes.indirectAddress then
         getter = function() return memory.readBytes(absoluteAddress(operand), 1) end
     end
     return getter;
@@ -58,7 +61,7 @@ local function wordGetter(operand)
         getter = function() return memory.readBytes(absoluteAddress(operand), 2) end
     elseif operand.definition == operandTypes.absoluteSymbolicAddress then
         getter = function() return tableUtils.fitToSize(integer.getBytesForInteger(absoluteAddress(operand)), 2) end
-    elseif operand.definition == operandTypes.absoluteAddress then
+    elseif operand.definition == operandTypes.absoluteAddress or operand.definition == operandTypes.indirectAddress then
         getter = function() return memory.readBytes(absoluteAddress(operand), 2) end
     end
     return getter;
@@ -76,7 +79,7 @@ local function longGetter(operand)
         getter = function() return memory.readBytes(absoluteAddress(operand), 4) end
     elseif operand.definition == operandTypes.absoluteSymbolicAddress then
         getter = function() return tableUtils.fitToSize(integer.getBytesForInteger(absoluteAddress(operand)), 4) end
-    elseif operand.definition == operandTypes.absoluteAddress then
+    elseif operand.definition == operandTypes.absoluteAddress or operand.definition == operandTypes.indirectAddress then
         getter = function() return memory.readBytes(absoluteAddress(operand), 4) end
     end
     return getter;

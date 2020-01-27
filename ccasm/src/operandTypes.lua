@@ -234,6 +234,18 @@ absoluteAddress.parseValueAsBytes = function(token)
     -- Remove '>' prefix and add '#', so the token is parsable as immediate data.
     return immediateData.parseValueAsBytes('#' .. token:sub(2));
 end
+--INDIRECT ADDRESS-----------------------------------------
+indirectAddress = {
+    typeByte = 8,
+    match = function(token)
+        return token:match("^(#[Aa][0-7])$");
+    end,
+    sizeInBytes = 1,
+};
+
+indirectAddress.parseValueAsBytes = function(token)
+    return { tonumber(token:match("[0-7]")) };
+end
 --OPERAND TYPE LOOKUP--------------------------------------
 local function throwUnrecognizedOperandTypeError(token)
     local message = "Unrecognized operand type for token: " .. tostring(token);
@@ -254,6 +266,8 @@ function getType(token)
         return "dataRegister";
     elseif tokenTypeIs(addressRegister) then
         return "addressRegister";
+    elseif tokenTypeIs(indirectAddress) then
+        return "indirectAddress";
     elseif tokenTypeIs(immediateData) then
         return "immediateData";
     elseif tokenTypeIs(symbolicAddress) then

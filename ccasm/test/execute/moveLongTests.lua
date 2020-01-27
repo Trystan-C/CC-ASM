@@ -78,6 +78,17 @@ local testSuite = {
             .dataRegister(0).hasValue(0x1234ABCD);
     end,
 
+    moveLongIndirectAddress = function()
+        fixture.assemble([[
+            moveWord #var, a0
+            moveLong #a0, d0
+            var declareLong #h1234ABCD
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(0).hasValue(0x1234ABCD);
+    end,
+
     moveLongDirectlyBetweenAddressesThrowsError = function()
         expect.errorsToBeThrown(
             function()

@@ -35,18 +35,47 @@ local function insertBytesIntoBinaryOutputAt(index, ...)
 end
 
 local function parseTokensFromCode(code)
-    local parsedTokens = {};
+    local tokens = {};
 
     for line in code:gmatch("[^\n]+") do
-        for token in line:gmatch("[^%s\r\n\t,]+") do
-            if token:sub(1,1) == ";" then
-                break;
-            end
-            table.insert(parsedTokens, token);
+        local curToken = '';
+        local isBuildingString = false;
+
+        local function append(char)
+            curToken = curToken .. char;
         end
+        local function isNextToken()
+            return curToken == '';
+        end
+        local function nextToken()
+            if not isNextToken() then
+                table.insert(tokens, curToken);
+            end
+            curToken = '';
+        end
+
+        for char in line:gmatch('.') do
+            if char == ';' and not isBuildingString then
+                break;
+            elseif char == '"' then
+                if not isBuildingString and not isNextToken() then
+                    error('Unexpected character: "');
+                end
+                isBuildingString = not isBuildingString;
+                append(char);
+                if not isBuildingString then
+                    nextToken();
+                end
+            elseif (char:match("[%s,]") and isBuildingString) or not char:match("[%s\r\n\t,]") then
+                append(char);
+            else
+                nextToken();
+            end
+        end
+        nextToken();
     end
 
-    return parsedTokens;
+    return tokens;
 end
 
 local function peekNextToken()

@@ -81,6 +81,17 @@ local testSuite = {
             .dataRegister(0).hasValue(13);
     end,
 
+    moveByteIndirectAddress = function()
+        fixture.assemble([[
+            moveWord #var, a0
+            moveByte #a0, d0
+            var declareByte #hAB
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(0).hasValue(0xAB);
+    end,
+
     moveByteDirectlyBetweenAddressesThrowsError = function()
         expect.errorsToBeThrown(
             function()

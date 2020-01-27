@@ -95,6 +95,17 @@ local testSuite = {
             .dataRegister(0).hasValue(0x1234);
     end,
 
+    moveWordIndirectAddress = function()
+        fixture.assemble([[
+            moveWord #var, a0
+            moveWord #a0, d0
+            var declareWord #h1234
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(0).hasValue(0x1234);
+    end,
+
     moveWordDirectlyBetweenAddressesThrowsError = function()
         expect.errorsToBeThrown(
             function()
