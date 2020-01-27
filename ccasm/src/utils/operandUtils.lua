@@ -91,7 +91,10 @@ local function byteSetter(operand)
         setter = registers.dataRegisters[registerId(operand)].setByte;
     elseif operand.definition == operandTypes.addressRegister then
         setter = registers.addressRegisters[registerId(operand)].setByte;
-    elseif operand.definition == operandTypes.symbolicAddress or operand.definition == operandTypes.absoluteAddress then
+    elseif operand.definition == operandTypes.symbolicAddress or
+           operand.definition == operandTypes.absoluteAddress or
+           operand.definition == operandTypes.indirectAddress
+    then
         setter = function(byte) memory.writeBytes(absoluteAddress(operand), tableUtils.fitToSize(byte, 1)) end
     end
     return setter;
@@ -103,7 +106,10 @@ local function wordSetter(operand)
         setter = registers.dataRegisters[registerId(operand)].setWord;
     elseif operand.definition == operandTypes.addressRegister then
         setter = registers.addressRegisters[registerId(operand)].setWord;
-    elseif operand.definition == operandTypes.symbolicAddress or operand.definition == operandTypes.absoluteAddress then
+    elseif operand.definition == operandTypes.symbolicAddress or
+           operand.definition == operandTypes.absoluteAddress or
+           operand.definition == operandTypes.indirectAddress
+    then
         setter = function(word) memory.writeBytes(absoluteAddress(operand), tableUtils.trimToSize(word, 2)) end
     end
     return setter;
@@ -115,7 +121,10 @@ local function longSetter(operand)
         setter = registers.dataRegisters[registerId(operand)].setLong;
     elseif operand.definition == operandTypes.addressRegister then
         setter = registers.addressRegisters[registerId(operand)].setLong;
-    elseif operand.definition == operandTypes.symbolicAddress or operand.definition == operandTypes.absoluteAddress then
+    elseif operand.definition == operandTypes.symbolicAddress or
+           operand.definition == operandTypes.absoluteAddress or
+           operand.definition == operandTypes.indirectAddress
+    then
         setter = function(long) memory.writeBytes(absoluteAddress(operand), tableUtils.trimToSize(long, 4)) end
     end
     return setter;

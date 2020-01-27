@@ -95,7 +95,7 @@ local testSuite = {
             .dataRegister(0).hasValue(0x1234);
     end,
 
-    moveWordIndirectAddress = function()
+    moveWordFromIndirectAddress = function()
         fixture.assemble([[
             moveWord #var, a0
             moveWord #a0, d0
@@ -103,6 +103,17 @@ local testSuite = {
         ]])
             .load()
             .step(2)
+            .dataRegister(0).hasValue(0x1234);
+    end,
+
+    moveWordToIndirectAddress = function()
+        fixture.assemble([[
+            moveWord #h1000, a0
+            moveWord #h1234, #a0
+            moveWord #a0, d0
+        ]])
+            .load()
+            .step(3)
             .dataRegister(0).hasValue(0x1234);
     end,
 
@@ -126,6 +137,27 @@ local testSuite = {
                     moveWord >h1000, var1
                     var1 declareWord #h1234
                 ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveWord var, #a0
+                    var declareWord #h1234
+                ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveWord #a0, var
+                    var declareWord #h1234
+                ]]);
+            end,
+            function()
+                fixture.assemble("moveWord >h1000, #a0");
+            end,
+            function()
+                fixture.assemble("moveWord #a0, >h1000");
+            end,
+            function()
+                fixture.assemble("moveWord #a0, #a1");
             end,
             function()
                 fixture.assemble("moveWord >h1000, >h1002");

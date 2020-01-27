@@ -78,7 +78,7 @@ local testSuite = {
             .dataRegister(0).hasValue(0x1234ABCD);
     end,
 
-    moveLongIndirectAddress = function()
+    moveLongFromIndirectAddress = function()
         fixture.assemble([[
             moveWord #var, a0
             moveLong #a0, d0
@@ -86,6 +86,17 @@ local testSuite = {
         ]])
             .load()
             .step(2)
+            .dataRegister(0).hasValue(0x1234ABCD);
+    end,
+
+    moveLongToIndirectAddress = function()
+        fixture.assemble([[
+            moveWord #h1000, a0
+            moveLong #h1234ABCD, #a0
+            moveLong #a0, d0
+        ]])
+            .load()
+            .step(3)
             .dataRegister(0).hasValue(0x1234ABCD);
     end,
 
@@ -109,6 +120,27 @@ local testSuite = {
                     moveLong >h1000, var1
                     var1 declareLong #h1234ABCD
                 ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveLong var, #a0
+                    var declareLong #h1234ABCD
+                ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveLong #a0, var
+                    var declareLong #h1234
+                ]]);
+            end,
+            function()
+                fixture.assemble("moveLong >h1000, #a0");
+            end,
+            function()
+                fixture.assemble("moveLong #a0, >h1000");
+            end,
+            function()
+                fixture.assemble("moveLong #a0, #a1");
             end,
             function()
                 fixture.assemble("moveLong >h1000, >h1002");

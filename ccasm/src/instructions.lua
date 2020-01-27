@@ -30,9 +30,14 @@ local function move(byteValue, name, sizeDescriptor, sizeInBytes)
             assert(
                 not (from.definition == operandTypes.symbolicAddress and to.definition == operandTypes.symbolicAddress) and
                 not (from.definition == operandTypes.symbolicAddress and to.definition == operandTypes.absoluteAddress) and
+                not (from.definition == operandTypes.symbolicAddress and to.definition == operandTypes.indirectAddress) and
                 not (from.definition == operandTypes.absoluteAddress and to.definition == operandTypes.symbolicAddress) and
-                not (from.definition == operandTypes.absoluteAddress and to.definition == operandTypes.absoluteAddress),
-                name .. ": Cannot move directly between absolute or symbolic addresses."
+                not (from.definition == operandTypes.absoluteAddress and to.definition == operandTypes.absoluteAddress) and
+                not (from.definition == operandTypes.absoluteAddress and to.definition == operandTypes.indirectAddress) and
+                not (from.definition == operandTypes.indirectAddress and to.definition == operandTypes.symbolicAddress) and
+                not (from.definition == operandTypes.indirectAddress and to.definition == operandTypes.absoluteAddress) and
+                not (from.definition == operandTypes.indirectAddress and to.definition == operandTypes.indirectAddress),
+                name .. ": Cannot move directly between absolute, symbolic, or indirect addresses."
             );
         end,
         execute = function(from, to)

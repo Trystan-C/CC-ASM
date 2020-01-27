@@ -3,7 +3,6 @@
 * Update README.md with system overview, limitations, etc.
 
 ## Planned Work 
-* Indirect address writing with moveByte/Word/Long.
 * More terminal control, e.g., clear screen/line.
 * Demo program, maybe pong or something.
 * File-descriptor system for interacting with peripherals.

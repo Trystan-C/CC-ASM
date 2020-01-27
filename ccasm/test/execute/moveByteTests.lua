@@ -81,7 +81,7 @@ local testSuite = {
             .dataRegister(0).hasValue(13);
     end,
 
-    moveByteIndirectAddress = function()
+    moveByteFromIndirectAddress = function()
         fixture.assemble([[
             moveWord #var, a0
             moveByte #a0, d0
@@ -90,6 +90,17 @@ local testSuite = {
             .load()
             .step(2)
             .dataRegister(0).hasValue(0xAB);
+    end,
+
+    moveByteToIndirectAddress = function()
+        fixture.assemble([[
+            moveWord #h1000, a0
+            moveByte #25, #a0
+            moveByte #a0, d0
+        ]])
+            .load()
+            .step(3)
+            .dataRegister(0).hasValue(25);
     end,
 
     moveByteDirectlyBetweenAddressesThrowsError = function()
@@ -112,6 +123,27 @@ local testSuite = {
                     moveByte >h1000, var1
                     var1 declareByte #1
                 ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveByte var, #a0
+                    var declareByte #1
+                ]]);
+            end,
+            function()
+                fixture.assemble([[
+                    moveByte #a0, var
+                    var declareByte #1
+                ]]);
+            end,
+            function()
+                fixture.assemble("moveByte >h1000, #a0");
+            end,
+            function()
+                fixture.assemble("moveByte #a0, >h1000");
+            end,
+            function()
+                fixture.assemble("moveByte #a0, #a1");
             end,
             function()
                 fixture.assemble("moveByte >h1000, >h1001");
