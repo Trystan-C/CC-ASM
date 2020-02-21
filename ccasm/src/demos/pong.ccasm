@@ -1,0 +1,51 @@
+;----------------------------------------------------------
+; Pong Demo for CCASM                                     |
+;----------------------------------------------------------
+origin #h1000
+
+bsr init
+main:
+bsr draw
+bsr input
+bsr tick
+bra main
+
+draw:
+bsr drawBall
+bsr drawLeftPaddle
+bsr drawRightPaddle
+ret
+
+drawBall:
+moveByte #ball_pX, d0
+moveByte #ball_pY, d1
+trap #3
+ret
+
+drawLeftPaddle:
+ret
+
+drawRightPaddle:
+ret
+
+input:
+; read key at 0x0800
+; if e/f, move left up/down
+; if j/i, move right up/down
+ret
+
+tick:
+; check collision w/ paddle
+; redirect velocity
+ret
+
+ball_pX declareByte #0
+ball_pY declareByte #0
+ball_vX declareByte #0
+ball_vY declareByte #0
+
+leftPaddle_pY declareByte #0
+leftPaddle_vY declareByte #0
+
+rightPaddle_pY declareByte #0
+rightPaddle_vY declareByte #0

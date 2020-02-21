@@ -1,12 +1,13 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/memory.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/cpu.lua");
 
 local args = { ... };
-if #args ~= 2 then
-    print("run <start_address> <steps>");
+if #args ~= 1 then
+    print("run <start_address>");
     return;
 end
 
@@ -16,18 +17,34 @@ if startAddress == nil or not integer.isInteger(startAddress) or startAddress < 
     return;
 end
 
-local steps = tonumber(args[2]);
-if steps == nil or not integer.isInteger(steps) or steps < 0 then
-    print("Steps must be an integer greater than 0.");
-    return;
+local function writeKeyValueToMemory(key)
+    local bytes = integer.getBytesForInteger(1, key);
+    memory.writeBytes(0x0200, bytes);
+end
+
+local tickRateInSeconds = 1/30;
+local clock = nil;
+local function startNextClockCycle()
+    clock = os.startTimer(tickRateInSeconds);
 end
 
 registers.setProgramCounter(startAddress);
-local success, errorMessage = pcall(function()
-    for i = 1, steps do
-        cpu.step();
+startNextClockCycle();
+local function tick()
+    local eventArgs = { os.pullEvent() };
+    if eventArgs[1] == "key_up" then
+        writeKeyValueToMemory(string.byte(' '));
+    elseif eventArgs[1] == "key" then
+        writeKeyValueToMemory(keys.getName(eventArgs[2]):byte());
     end
-end);
-if not success then
-    print("[RUNTIME ERROR]> " .. errorMessage);
+    cpu.step();
+    startNextClockCycle();
+end
+
+while true do
+    local success, errorMessage = pcall(tick);
+    if not success then
+        print("[RUNTIME ERROR]> " .. errorMessage);
+        break;
+    end
 end

@@ -301,9 +301,24 @@ apiEnv.bge = {
         end
     end,
 };
+apiEnv.bra = {
+    byteValue = 25,
+    numOperands = 1,
+    verifyEach = function(operand)
+        assert(operand.sizeInBytes <= 2, "bra: Operand must be at most 2 bytes.");
+        assert(
+            operand.definition == operandTypes.symbolicAddress or
+            operand.definition == operandTypes.absoluteAddress,
+            "bra: Operand must be symbolic or absolute address."
+        );
+    end,
+    execute = function(operand)
+        registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+    end
+};
 --SUBROUTINES----------------------------------------------
 apiEnv.bsr = {
-    byteValue = 25,
+    byteValue = 26,
     numOperands = 1,
     verifyEach = function(operand)
         assert(operand.definition == operandTypes.symbolicAddress, "bsr: Operand must be symbolic address.");
@@ -315,7 +330,7 @@ apiEnv.bsr = {
     end,
 };
 apiEnv.ret = {
-    byteValue = 26,
+    byteValue = 27,
     numOperands = 0,
     execute = function()
         registers.setProgramCounter(integer.getIntegerFromBytes(registers.popStackWord()));
@@ -323,7 +338,7 @@ apiEnv.ret = {
 };
 --STACK----------------------------------------------------
 apiEnv.push = {
-    byteValue = 27,
+    byteValue = 28,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -349,7 +364,7 @@ apiEnv.push = {
     end,
 };
 apiEnv.pop = {
-    byteValue = 28,
+    byteValue = 29,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -377,7 +392,7 @@ apiEnv.pop = {
 }
 --SHIFT----------------------------------------------------
 apiEnv.lshiftByte = {
-    byteValue = 29,
+    byteValue = 30,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -393,7 +408,7 @@ apiEnv.lshiftByte = {
     end,
 };
 apiEnv.lshiftWord = {
-    byteValue = 30,
+    byteValue = 31,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -409,7 +424,7 @@ apiEnv.lshiftWord = {
     end,
 };
 apiEnv.rshiftByte = {
-    byteValue = 31,
+    byteValue = 32,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -425,7 +440,7 @@ apiEnv.rshiftByte = {
     end,
 };
 apiEnv.rshiftWord = {
-    byteValue = 32,
+    byteValue = 33,
     numOperands = 1,
     verifyEach = function(operand)
         assert(
@@ -467,9 +482,9 @@ local function _or(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-_or(33, "orByte", "byte", 1);
-_or(34, "orWord", "word", 2);
-_or(35, "orLong", "long", 4);
+_or(34, "orByte", "byte", 1);
+_or(35, "orWord", "word", 2);
+_or(36, "orLong", "long", 4);
 --AND------------------------------------------------------
 -- _and, since 'and' is a keyword.
 local function _and(byteValue, name, sizeDescriptor, sizeInBytes)
@@ -497,9 +512,9 @@ local function _and(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-_and(36, "andByte", "byte", 1);
-_and(37, "andWord", "word", 2);
-_and(38, "andLong", "long", 4);
+_and(37, "andByte", "byte", 1);
+_and(38, "andWord", "word", 2);
+_and(39, "andLong", "long", 4);
 --XOR------------------------------------------------------
 local function xor(byteValue, name, sizeDescriptor, sizeInBytes)
     apiEnv[name] = {
@@ -526,9 +541,9 @@ local function xor(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-xor(39, "xorByte", "byte", 1);
-xor(40, "xorWord", "word", 2);
-xor(41, "xorLong", "long", 4);
+xor(40, "xorByte", "byte", 1);
+xor(41, "xorWord", "word", 2);
+xor(42, "xorLong", "long", 4);
 --NOT------------------------------------------------------
 -- _not, since 'not' is a keyword.
 local function _not(byteValue, name, sizeDescriptor, sizeInBytes)
@@ -548,12 +563,12 @@ local function _not(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
     };
 end
-_not(42, "notByte", "byte", 1);
-_not(43, "notWord", "word", 2);
-_not(44, "notLong", "long", 4);
+_not(43, "notByte", "byte", 1);
+_not(44, "notWord", "word", 2);
+_not(45, "notLong", "long", 4);
 --TRAP-----------------------------------------------------
 apiEnv.trap = {
-    byteValue = 45,
+    byteValue = 46,
     numOperands = 1,
     verifyEach = function(operand)
         assert(operand.definition == operandTypes.immediateData, "trap: Operand must be immediate data.");
@@ -611,7 +626,7 @@ apiEnv.trap = {
                 end
             end
             if offset >= limit then
-                error("trap(#3): Read " .. limit .. " bytes before stopping string read.");
+                error("trap(#5): Read " .. limit .. " bytes before stopping string read.");
             end
             term.write(str);
         -- readString

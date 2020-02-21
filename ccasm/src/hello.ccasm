@@ -1,4 +1,0 @@
-origin #h0
-moveLong #h12340000, d0
-moveLong #h0000ABCD, d1
-notLong d1

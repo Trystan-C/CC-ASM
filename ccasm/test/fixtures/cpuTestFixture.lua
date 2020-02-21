@@ -11,6 +11,16 @@ apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 local objectCode;
 local apiEnv = {};
 
+apiEnv.printProgramCounter = function()
+    logger.info("PROGRAM_COUNTER=%%", registers.getProgramCounter());
+    return {
+        step = apiEnv.step;
+        dataRegister = apiEnv.dataRegister;
+        addressRegister = apiEnv.addressRegister;
+        statusRegister = apiEnv.statusRegister;
+    };
+end
+
 apiEnv.statusRegister = function()
     local next = {
         step = apiEnv.step;
@@ -117,6 +127,7 @@ apiEnv.step = function(steps)
         dataRegister = apiEnv.dataRegister;
         addressRegister = apiEnv.addressRegister;
         statusRegister = apiEnv.statusRegister;
+        printProgramCounter = apiEnv.printProgramCounter;
     };
 end
 
@@ -138,6 +149,7 @@ local function load()
 
     return {
         programCounterIsAt = apiEnv.programCounterIsAt;
+        printProgramCounter = apiEnv.printProgramCounter;
         step = apiEnv.step;
     };
 end

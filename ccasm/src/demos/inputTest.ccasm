@@ -1,0 +1,22 @@
+origin #h1000
+
+trap #3             ; Clear screen.
+bsr drawUsage
+moveWord #h200, a0  ; Load address of key input byte for writing later.
+
+loop_start:
+moveByte #14, d0    ; Load X cursor position.
+moveByte #1, d1     ; Load Y cursor position.
+trap #2             ; Set cursor position to (d0, d1).
+trap #5             ; Write byte to terminal.
+bra loop_start      ; Restart loop.
+
+drawUsage:
+moveByte #1, d0
+moveByte #1, d1
+trap #2
+moveWord #label, a0
+trap #5
+ret
+
+label declareString "Key pressed: "
