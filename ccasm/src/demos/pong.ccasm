@@ -1,6 +1,15 @@
-;----------------------------------------------------------
+;---------------------------------------------------------+
 ; Pong Demo for CCASM                                     |
-;----------------------------------------------------------
+;---------------------------------------------------------+
+; Trap Code Cheat Sheet:                                  |
+;   0: term.getSize() in D6, D7                           |
+;   1: term.getCursorPos() in D6, D7                      |
+;   2: term.setCursorPos(D0, D1)                          |
+;   3: term.clear()                                       |
+;   4: term.clearLine()                                   |
+;   5: writeString at A0                                  |
+;   6: readString into A0                                 |
+;---------------------------------------------------------+
 origin #h1000
 
 bsr init
@@ -11,41 +20,198 @@ bsr tick
 bra main
 
 draw:
+trap #3
 bsr drawBall
 bsr drawLeftPaddle
 bsr drawRightPaddle
 ret
 
 drawBall:
-moveByte #ball_pX, d0
-moveByte #ball_pY, d1
-trap #3
+bsr setCursorAtBall
+moveWord #ballStr, a0
+trap #5
+ret
+
+setCursorAtBall:
+moveByte ball_pX, d0
+moveByte ball_pY, d1
+trap #2
 ret
 
 drawLeftPaddle:
+bsr setCursorAtLeftPaddle
+moveWord #paddleStr, a0
+trap #5
 ret
 
+setCursorAtLeftPaddle:
+moveByte leftPaddle_pX, d0
+moveByte leftPaddle_pY, d1
+trap #2
+ret
+
+
 drawRightPaddle:
+bsr setCursorAtRightPaddle
+moveWord #paddleStr, a0
+trap #5
+ret
+
+setCursorAtRightPaddle:
+moveByte rightPaddle_pX, d0
+moveByte rightPaddle_pY, d1
+trap #2
 ret
 
 input:
-; read key at 0x0800
-; if e/f, move left up/down
-; if j/i, move right up/down
+moveWord #h200, a0  ; Load address of key input into A0.
+moveByte #a0, d0    ; Read key input into D0.
+cmpByte #101, d0    ; case 'e'
+beq moveLeftUp
+cmpByte #102, d0    ; case 'f'
+beq moveLeftDown
+cmpByte #105, d0    ; case 'i'
+beq moveRightUp
+cmpByte #106, d0    ; case 'j'
+beq moveRightDown
+bra inputEnd
+
+moveLeftUp:
+moveByte leftPaddle_pY, d0
+cmpByte #1, d0
+beq inputEnd
+subByte #1, d0
+moveByte d0, leftPaddle_pY
+bra inputEnd
+
+moveLeftDown:
+trap #0
+moveByte leftPaddle_pY, d0
+cmpByte d7, d0
+beq inputEnd
+addByte #1, d0
+moveByte d0, leftPaddle_pY
+bra inputEnd
+
+moveRightUp:
+moveByte rightPaddle_pY, d0
+cmpByte #1, d0
+beq inputEnd
+subByte #1, d0
+moveByte d0, rightPaddle_pY
+bra inputEnd
+
+
+moveRightDown:
+trap #0
+moveByte rightPaddle_pY, d0
+cmpByte d7, d0
+beq inputEnd
+addByte #1, d0
+moveByte d0, rightPaddle_pY
+bra inputEnd
+
+inputEnd:
 ret
 
 tick:
-; check collision w/ paddle
-; redirect velocity
+moveByte ball_pX, d0
+moveByte ball_pY, d1
+moveByte leftPaddle_pX, d2
+moveByte leftPaddle_pY, d3
+moveByte rightPaddle_pX, d4
+moveByte rightPaddle_pY, d5
+cmpByte d2, d0
+beq checkCollideLeftY
+cmpByte d4, d0
+beq checkCollideRightY
+bra updateBall
+
+checkCollideLeftY:
+cmpByte d1, d3
+beq redirectBallRight
+bne scoreRight
+
+redirectBallRight:
+moveByte #1, ball_vX
+moveByte #0, ball_vY
+bra updateBall
+
+scoreRight:
+; increment right paddle's score
+bsr resetBall
+bra updateBall
+
+checkCollideRightY:
+cmpByte d1, d5
+beq redirectBallLeft
+bne scoreLeft
+
+redirectBallLeft:
+moveByte #hFF, ball_vX
+moveByte #0, ball_vY
+bra updateBall
+
+scoreLeft:
+; increment left paddle's score
+bsr resetBall
+bra updateBall
+
+updateBall:
+moveByte ball_vX, d0
+moveByte ball_vY, d1
+moveByte ball_pX, d2
+moveByte ball_pY, d3
+addByte d0, d2
+addByte d1, d3
+moveByte d2, ball_pX
+moveByte d3, ball_pY
 ret
+
+init:
+trap #0
+moveByte d6, screenWidth
+moveByte d7, screenHeight
+moveByte d6, d0
+moveByte d7, d1
+divByte #2, d0  ; Store screenWidth / 2 in D0.
+divByte #2, d1  ; Store screenHeight / 2 in D1.
+moveByte d0, midScreenX
+moveByte d1, midScreenY
+; Left paddle starts on the left side in the middle.
+moveByte #1, leftPaddle_pX
+moveByte d1, leftPaddle_pY
+; Right paddle starts on the right side in the middle.
+moveByte d6, rightPaddle_pX
+moveByte d1, rightPaddle_pY
+bsr resetBall
+ret
+
+resetBall:
+moveByte midScreenX, d0
+moveByte midScreenY, d1
+moveByte d0, ball_pX
+moveByte d1, ball_pY
+moveByte #hFF, ball_vX
+moveByte #0, ball_vY
+ret
+
+screenWidth declareByte #0
+midScreenX declareByte #0
+screenHeight declareByte #0
+midScreenY declareByte #0
 
 ball_pX declareByte #0
 ball_pY declareByte #0
 ball_vX declareByte #0
 ball_vY declareByte #0
+ballStr declareString "o"
 
+leftPaddle_pX declareByte #0
 leftPaddle_pY declareByte #0
 leftPaddle_vY declareByte #0
 
+rightPaddle_pX declareByte #0
 rightPaddle_pY declareByte #0
 rightPaddle_vY declareByte #0
+paddleStr declareString "|"
