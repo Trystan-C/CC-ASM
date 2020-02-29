@@ -14,21 +14,74 @@ origin #h1000
 
 bsr init
 main:
-bsr draw
 bsr input
 bsr tick
+trap #3
+bsr draw
 bra main
 
+gameOver:
+bra gameOver
+ret
+
 draw:
-trap #3
+bsr drawScore
 bsr drawBall
 bsr drawLeftPaddle
 bsr drawRightPaddle
 ret
 
+drawScore:
+bsr drawLeftPaddleScore
+bsr drawRightPaddleScore
+ret
+
+drawLeftPaddleScore:
+bsr setCursorAtLeftPaddleScore
+moveWord #0, d2
+moveByte leftPaddle_score, d2
+addByte #48, d2 ; Convert score to ASCII.
+lshiftByte d2
+moveWord d2, scoreBuffer
+bsr drawScoreBuffer
+ret
+
+setCursorAtLeftPaddleScore:
+moveByte #2, d0
+moveByte #1, d1
+trap #2
+ret
+
+drawRightPaddleScore:
+bsr setCursorAtRightPaddleScore
+moveWord #0, d2
+moveByte rightPaddle_score, d2
+addByte #48, d2 ; Convert score to ASCII.
+lshiftByte d2
+moveWord d2, scoreBuffer
+bsr drawScoreBuffer
+ret
+
+setCursorAtRightPaddleScore:
+moveByte screenWidth, d0
+subByte #1, d0
+moveByte #1, d1
+trap #2
+ret
+
+drawScoreBuffer:
+moveWord #scoreBuffer, a0
+trap #5
+ret
+
 drawBall:
 bsr setCursorAtBall
 moveWord #ballStr, a0
+trap #5
+ret
+
+drawBlank:
+moveWord #blankStr, a0
 trap #5
 ret
 
@@ -50,7 +103,6 @@ moveByte leftPaddle_pY, d1
 trap #2
 ret
 
-
 drawRightPaddle:
 bsr setCursorAtRightPaddle
 moveWord #paddleStr, a0
@@ -67,96 +119,96 @@ input:
 moveWord #h200, a0  ; Load address of key input into A0.
 moveByte #a0, d0    ; Read key input into D0.
 cmpByte #101, d0    ; case 'e'
-beq moveLeftUp
+beq directLeftUp
 cmpByte #102, d0    ; case 'f'
-beq moveLeftDown
+beq directLeftDown
+moveByte #0, leftPaddle_vY  ; Otherwise, left paddle is not moving.
 cmpByte #105, d0    ; case 'i'
-beq moveRightUp
+beq directRightUp
 cmpByte #106, d0    ; case 'j'
-beq moveRightDown
+beq directRightDown
+moveByte #0, rightPaddle_vY ; Otherwise, right paddle is not moving.
 bra inputEnd
-
-moveLeftUp:
-moveByte leftPaddle_pY, d0
-cmpByte #1, d0
-beq inputEnd
-subByte #1, d0
-moveByte d0, leftPaddle_pY
+directLeftUp:
+moveByte #hFF, leftPaddle_vY
 bra inputEnd
-
-moveLeftDown:
-trap #0
-moveByte leftPaddle_pY, d0
-cmpByte d7, d0
-beq inputEnd
-addByte #1, d0
-moveByte d0, leftPaddle_pY
+directLeftDown:
+moveByte #1, leftPaddle_vY
 bra inputEnd
-
-moveRightUp:
-moveByte rightPaddle_pY, d0
-cmpByte #1, d0
-beq inputEnd
-subByte #1, d0
-moveByte d0, rightPaddle_pY
+directRightUp:
+moveByte #hFF, rightPaddle_vY
 bra inputEnd
-
-
-moveRightDown:
-trap #0
-moveByte rightPaddle_pY, d0
-cmpByte d7, d0
-beq inputEnd
-addByte #1, d0
-moveByte d0, rightPaddle_pY
+directRightDown:
+moveByte #1, rightPaddle_vY
 bra inputEnd
-
 inputEnd:
 ret
 
 tick:
-moveByte ball_pX, d0
-moveByte ball_pY, d1
-moveByte leftPaddle_pX, d2
-moveByte leftPaddle_pY, d3
-moveByte rightPaddle_pX, d4
-moveByte rightPaddle_pY, d5
-cmpByte d2, d0
-beq checkCollideLeftY
-cmpByte d4, d0
-beq checkCollideRightY
-bra updateBall
+bsr applyCollision
+bsr updatePaddles
+ret
 
+applyCollision:
+moveByte screenWidth, d0
+moveByte screenHeight, d1
+moveByte ball_pX, d2
+moveByte ball_pY, d3
+moveByte leftPaddle_pX, d4
+moveByte leftPaddle_pY, d5
+moveByte rightPaddle_pX, d6
+moveByte rightPaddle_pY, d7
+cmpByte d2, #1
+beq checkCollideLeftY
+cmpByte d2, d0
+beq checkCollideRightY
+cmpByte d3, #1
+ble redirectBallDown
+cmpByte d3, d1
+bge redirectBallUp
+bra updateBall
 checkCollideLeftY:
-cmpByte d1, d3
+cmpByte d3, d5
 beq redirectBallRight
 bne scoreRight
-
 redirectBallRight:
 moveByte #1, ball_vX
 moveByte #0, ball_vY
+moveByte leftPaddle_vY, d0
+cmpByte #0, d0
+bgt redirectBallRightUp
+blt redirectBallRightDown
 bra updateBall
-
-scoreRight:
-; increment right paddle's score
-bsr resetBall
+redirectBallRightUp:
+moveByte #hFF, ball_vY
 bra updateBall
-
+redirectBallRightDown:
+moveByte #1, ball_vY
+bra updateBall
 checkCollideRightY:
-cmpByte d1, d5
+cmpByte d3, d7
 beq redirectBallLeft
 bne scoreLeft
-
 redirectBallLeft:
 moveByte #hFF, ball_vX
 moveByte #0, ball_vY
+moveByte rightPaddle_vY, d0
+cmpByte #0, d0
+bgt redirectBallLeftUp
+blt redirectBallLeftDown
 bra updateBall
-
-scoreLeft:
-; increment left paddle's score
-bsr resetBall
+redirectBallLeftUp:
+moveByte #hFF, ball_vY
 bra updateBall
-
+redirectBallLeftDown:
+moveByte #1, ball_vY
+bra updateBall
+redirectBallUp:
+moveByte #hFF, ball_vY
+bra updateBall
+redirectBallDown:
+moveByte #1, ball_vY
+bra updateBall
 updateBall:
 moveByte ball_vX, d0
 moveByte ball_vY, d1
@@ -167,6 +219,84 @@ addByte d1, d3
 moveByte d2, ball_pX
 moveByte d3, ball_pY
 ret
+scoreLeft:
+moveByte leftPaddle_score, d0
+addByte #1, d0
+cmpByte #5, d0
+ble leftPaddleWin
+moveByte d0, leftPaddle_score
+bsr resetBall
+bra updateBall
+leftPaddleWin:
+moveByte midScreenX, d0
+moveByte midScreenY, d1
+trap #2
+moveWord #leftPaddleWinPrompt, a0
+trap #3
+trap #5
+bra gameOver
+scoreRight:
+moveByte rightPaddle_score, d0
+addByte #1, d0
+cmpByte #5, d0
+ble rightPaddleWin
+moveByte d0, rightPaddle_score
+bsr resetBall
+bra updateBall
+rightPaddleWin:
+moveByte midScreenX, d0
+moveByte midScreenY, d1
+trap #2
+moveWord #rightPaddleWinPrompt, a0
+trap #3
+trap #5
+bra gameOver
+
+updatePaddles:
+moveByte screenHeight, d0
+moveByte leftPaddle_vY, d1
+moveByte leftPaddle_pY, d2
+addByte d1, d2
+moveByte d2, leftPaddle_pY
+bsr correctLeftPaddle
+moveByte rightPaddle_vY, d3
+moveByte rightPaddle_pY, d4
+addByte d3, d4
+moveByte d4, rightPaddle_pY
+bsr correctRightPaddle
+ret
+correctLeftPaddle:
+moveByte leftPaddle_pY, d0
+cmpByte #1, d0
+bgt lockLeftPaddleAtTop
+moveByte screenHeight, d1
+cmpByte d1, d0
+blt lockLeftPaddleAtBottom
+correctLeftPaddleEnd:
+ret
+lockLeftPaddleAtTop:
+moveByte #1, leftPaddle_pY
+bra correctLeftPaddleEnd
+lockLeftPaddleAtBottom:
+moveByte screenHeight, d0
+moveByte d0, leftPaddle_pY
+bra correctLeftPaddleEnd
+correctRightPaddle:
+moveByte rightPaddle_pY, d0
+cmpByte #1, d0
+bgt lockRightPaddleAtTop
+moveByte screenHeight, d1
+cmpByte d1, d0
+blt lockRightPaddleAtBottom
+correctRightPaddleEnd:
+ret
+lockRightPaddleAtTop:
+moveByte #1, rightPaddle_pY
+bra correctRightPaddleEnd
+lockRightPaddleAtBottom:
+moveByte screenHeight, d0
+moveByte d0, rightPaddle_pY
+bra correctRightPaddleEnd
 
 init:
 trap #0
@@ -192,7 +322,7 @@ moveByte midScreenX, d0
 moveByte midScreenY, d1
 moveByte d0, ball_pX
 moveByte d1, ball_pY
-moveByte #hFF, ball_vX
+moveByte #1, ball_vX
 moveByte #0, ball_vY
 ret
 
@@ -210,8 +340,16 @@ ballStr declareString "o"
 leftPaddle_pX declareByte #0
 leftPaddle_pY declareByte #0
 leftPaddle_vY declareByte #0
+leftPaddle_score declareByte #0
+leftPaddleWinPrompt declareString "Left player wins!"
 
 rightPaddle_pX declareByte #0
 rightPaddle_pY declareByte #0
 rightPaddle_vY declareByte #0
+rightPaddle_score declareByte #0
+rightPaddleWinPrompt declareString "Right player wins!"
+
 paddleStr declareString "|"
+scoreBuffer declareWord #0
+
+blankStr declareString " "

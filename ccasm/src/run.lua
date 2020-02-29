@@ -22,23 +22,18 @@ local function writeKeyValueToMemory(key)
     memory.writeBytes(0x0200, bytes);
 end
 
-local tickRateInSeconds = 1/30;
-local clock = nil;
-local function startNextClockCycle()
-    clock = os.startTimer(tickRateInSeconds);
-end
-
 registers.setProgramCounter(startAddress);
-startNextClockCycle();
 local function tick()
+    local loopEventType = "CCASM_LOOP";
+    os.queueEvent(loopEventType);
     local eventArgs = { os.pullEvent() };
     if eventArgs[1] == "key_up" then
         writeKeyValueToMemory(string.byte(' '));
     elseif eventArgs[1] == "key" then
         writeKeyValueToMemory(keys.getName(eventArgs[2]):byte());
+    elseif eventArgs[1] == loopEventType then
+        cpu.step();
     end
-    cpu.step();
-    startNextClockCycle();
 end
 
 while true do
