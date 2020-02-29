@@ -228,10 +228,14 @@ moveByte d0, leftPaddle_score
 bsr resetBall
 bra updateBall
 leftPaddleWin:
+moveWord #leftPaddleWinPrompt, a0
+trap #7
+moveByte d0, d2
+divByte #2, d2
 moveByte midScreenX, d0
+subByte d2, d0
 moveByte midScreenY, d1
 trap #2
-moveWord #leftPaddleWinPrompt, a0
 trap #3
 trap #5
 bra gameOver
@@ -244,10 +248,14 @@ moveByte d0, rightPaddle_score
 bsr resetBall
 bra updateBall
 rightPaddleWin:
+moveWord #rightPaddleWinPrompt, a0
+trap #7
+moveByte d0, d2
+divByte #2, d2
 moveByte midScreenX, d0
+subByte d2, d0
 moveByte midScreenY, d1
 trap #2
-moveWord #rightPaddleWinPrompt, a0
 trap #3
 trap #5
 bra gameOver
