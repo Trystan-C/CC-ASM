@@ -567,6 +567,25 @@ _not(43, "notByte", "byte", 1);
 _not(44, "notWord", "word", 2);
 _not(45, "notLong", "long", 4);
 --TRAP-----------------------------------------------------
+local function readStringFromMemory(absoluteAddress)
+    local str = "";
+    local offset = 0;
+    local limit = 1024;
+    while offset <= limit do
+        local byte = (memory.readBytes(absoluteAddress + offset, 1))[1];
+        offset = offset + 1;
+        if byte == 0 then
+            break;
+        else
+            str = str .. string.char(byte);
+        end
+    end
+    if offset >= limit then
+        error("readStringFromMemory: Read " .. limit .. " bytes before stopping string read.");
+    end
+    return str;
+end
+
 apiEnv.trap = {
     byteValue = 46,
     numOperands = 1,
@@ -613,21 +632,7 @@ apiEnv.trap = {
         -- writeString
         elseif byte == 5 then
             local absoluteAddress = integer.getIntegerFromBytes(registers.addressRegisters[0].getWord());
-            local str = "";
-            local offset = 0;
-            local limit = 1024;
-            while offset <= limit do
-                local byte = (memory.readBytes(absoluteAddress + offset, 1))[1];
-                offset = offset + 1;
-                if byte == 0 then
-                    break;
-                else
-                    str = str .. string.char(byte);
-                end
-            end
-            if offset >= limit then
-                error("trap(#5): Read " .. limit .. " bytes before stopping string read.");
-            end
+            local str = readStringFromMemory(absoluteAddress);
             term.write(str);
         -- readString
         elseif byte == 6 then
@@ -641,9 +646,14 @@ apiEnv.trap = {
                 integer.getIntegerFromBytes(registers.addressRegisters[0].getWord()),
                 strBytes
             );
+        -- getStringLength not including null terminator
         elseif byte == 7 then
-            os.shutdown();
+            local absoluteAddress = integer.getIntegerFromBytes(registers.addressRegisters[0].getWord());
+            local str = readStringFromMemory(absoluteAddress);
+            registers.dataRegisters[0].setLong(integer.getBytesForInteger(4, str:len()));
         elseif byte == 8 then
+            os.shutdown();
+        elseif byte == 9 then
             os.reboot();
         else
             error("trap: Unsupporetd trap-byte(" .. tostring(byte) .. ").");

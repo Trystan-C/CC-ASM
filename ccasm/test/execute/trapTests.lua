@@ -135,6 +135,17 @@ local testSuite = {
         end
     end,
 
+    getStringLength = function()
+        fixture.assemble([[
+            moveWord #str, a0
+            trap #7
+            str declareString "12345"
+        ]])
+            .load()
+            .step(2)
+            .dataRegister(0).hasValue(5);
+    end,
+
     shutdown = function()
         local oldShutdown = _G.os.shutdown;
         local called = false;
@@ -143,7 +154,7 @@ local testSuite = {
         end
 
         local result, message = pcall(function()
-            fixture.assemble("trap #7")
+            fixture.assemble("trap #8")
                 .load()
                 .step();
         end);
@@ -161,7 +172,7 @@ local testSuite = {
         end
 
         local result, message = pcall(function()
-            fixture.assemble("trap #8")
+            fixture.assemble("trap #9")
                 .load()
                 .step();
         end);
