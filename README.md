@@ -1,57 +1,67 @@
 # CC-ASM
 
-This project implements a simple assembly-like language for Computer Craft to
-enable learning lower-level computer architecture concepts.
-
-## Backstory
-
-When I first got into programming, Computer Craft made learning fun and, most
-importantly, accessible. This project is my way of paying it forward while also
-having a good bit of fun along the way.
+This project implements a simple assembly-like language for Computer Craft.
 
 ## Features
 
-No features are currently implemented. Working on that.
-
-The features listed below are planned for implementation:
 * Compiled 68k-esque assembly language for Computer Craft.
 * API for compiling and running CC-ASM programs.
 * API for adding your own ccasm.instructions.
-* Standalone memory viewer for all CC-ASM programs.
 * Standalone CC-ASM program debugger.
 * XUnit-inspired test runner for Computer Craft.
 
-## Usage
+## Running Programs
 
-CC-ASM provides two methods of compiling and executing CC-ASM programs:
-* *Shell*: Build and run programs directly on the Computer Craft shell.
-* *API*: Build and execute programs using a built-in functions from your own
-Lua scripts.
+### Compilation
+Compile your CC-ASM source files by running: `ccasm> assemble <file1> <file2> ... <fileN>`
 
-### Shell Usage
-1. Compile your CC-ASM source files by running `assemble <file1> <file2> ... <fileN>
---output-file <output-file-name>`
-at the shell.
-2. Execute the compiled output using `ccasm <output-file-name>.out`.
+This will create an output file of the same name in the same directory with
+the `.cco` extension.
 
-### API Usage
+### Loading
+Load the assembled program using: `ccasm> load <outFile>`
 
-TODO
+The start address, or origin, at which the program is loaded can be changed by
+passing an additional argument to `load`: `ccasm> load <outFile> <origin?>`
+
+### Execution
+Execute the compiled output using: `ccasm> src/run <start_address>`
+
+## Debugger
+
+CC-ASM comes with a visual debugger that can be used to view memory, view registers,
+and step the cpu.
+
+To use the debugger, load an assembled program and run `debug`.
+
+## Demos
+
+To show that you can do some neat things with CC-ASM, I've written a really, really
+simple pong clone in the language.
 
 ## Installation
 
-CC-ASM can be installed in two different scopes: locally and globally.
+To install, clone this repo to any computer's root directory, so all the project code
+is located at `/ccasm/`.
 
-### Local Installation
+## Testing
+This section covers running the existing CC-ASM test suite. For guidance on writing
+additional tests for yourself, seeing the `CONTRUBITNG.md` in the `test` subdirectory.
 
-To install CC-ASM locally, clone this repository and copy the contents
-of the `ccasm` folder to your computer's local directory. This location varies
-between operating systems.
+To run the existing test suite, run the following from the project root:
 
-### Global Installation
+`ccasm> test/testRunner . -r`
 
-To install CC-ASM globally, clone this repository and copy the `ccasm` directory
-into your Computer Craft installation's `rom` directory.
+## Global State
+CC-ASM relies on some global state. All of this state resides at `_G.ccasm`. To reset the
+state use the following:
 
-Then, move the `assemble.lua` file from the `ccasm/src` directory into the root
-`rom` directory.
+`ccasm> ccasm`
+
+This will reload all of the APIs and clear memory, registers, etc.
+
+## Limitations
+
+* CC-ASM is **slow**. If you want to stuff quickly, don't use this. It's a novelty project.
+* Memory is restricted to 1K, i.e., a 16-bit address space.
+* Data sizes are limited to 1, 2, or 4 bytes (byte, word, long).
