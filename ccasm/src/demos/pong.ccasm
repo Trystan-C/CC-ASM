@@ -92,27 +92,39 @@ trap #2
 ret
 
 drawLeftPaddle:
-bsr setCursorAtLeftPaddle
+push a0
+push d0-1
 moveWord #paddleStr, a0
-trap #5
-ret
-
-setCursorAtLeftPaddle:
 moveByte leftPaddle_pX, d0
 moveByte leftPaddle_pY, d1
 trap #2
+trap #5
+addByte #1, d1
+trap #2
+trap #5
+addByte #1, d1
+trap #2
+trap #5
+pop d0-1
+pop a0
 ret
 
 drawRightPaddle:
-bsr setCursorAtRightPaddle
+push a0
+push d0-1
 moveWord #paddleStr, a0
-trap #5
-ret
-
-setCursorAtRightPaddle:
 moveByte rightPaddle_pX, d0
 moveByte rightPaddle_pY, d1
 trap #2
+trap #5
+addByte #1, d1
+trap #2
+trap #5
+addByte #1, d1
+trap #2
+trap #5
+pop d0-1
+pop a0
 ret
 
 input:
@@ -170,6 +182,12 @@ bra updateBall
 checkCollideLeftY:
 cmpByte d3, d5
 beq redirectBallRight
+addByte #1, d5
+cmpByte d3, d5
+beq redirectBallRight
+addByte #1, d5
+cmpByte d3, d5
+beq redirectBallRight
 bne scoreRight
 redirectBallRight:
 moveByte #1, ball_vX
@@ -186,6 +204,12 @@ redirectBallRightDown:
 moveByte #1, ball_vY
 bra updateBall
 checkCollideRightY:
+cmpByte d3, d7
+beq redirectBallLeft
+addByte #1, d7
+cmpByte d3, d7
+beq redirectBallLeft
+addByte #1, d7
 cmpByte d3, d7
 beq redirectBallLeft
 bne scoreLeft
@@ -278,6 +302,7 @@ moveByte leftPaddle_pY, d0
 cmpByte #1, d0
 bgt lockLeftPaddleAtTop
 moveByte screenHeight, d1
+subByte #2, d1
 cmpByte d1, d0
 blt lockLeftPaddleAtBottom
 correctLeftPaddleEnd:
@@ -287,6 +312,7 @@ moveByte #1, leftPaddle_pY
 bra correctLeftPaddleEnd
 lockLeftPaddleAtBottom:
 moveByte screenHeight, d0
+subByte #2, d0
 moveByte d0, leftPaddle_pY
 bra correctLeftPaddleEnd
 correctRightPaddle:
@@ -294,6 +320,7 @@ moveByte rightPaddle_pY, d0
 cmpByte #1, d0
 bgt lockRightPaddleAtTop
 moveByte screenHeight, d1
+subByte #2, d1
 cmpByte d1, d0
 blt lockRightPaddleAtBottom
 correctRightPaddleEnd:
@@ -303,6 +330,7 @@ moveByte #1, rightPaddle_pY
 bra correctRightPaddleEnd
 lockRightPaddleAtBottom:
 moveByte screenHeight, d0
+subByte #2, d0
 moveByte d0, rightPaddle_pY
 bra correctRightPaddleEnd
 
