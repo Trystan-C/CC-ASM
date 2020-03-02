@@ -16,7 +16,7 @@ No features are currently implemented. Working on that.
 The features listed below are planned for implementation:
 * Compiled 68k-esque assembly language for Computer Craft.
 * API for compiling and running CC-ASM programs.
-* API for adding your own instructions.
+* API for adding your own ccasm.instructions.
 * Standalone memory viewer for all CC-ASM programs.
 * Standalone CC-ASM program debugger.
 * XUnit-inspired test runner for Computer Craft.

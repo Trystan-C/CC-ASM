@@ -17,8 +17,8 @@ if not outFilePath:match("%.cco$") then
 end
 
 local origin = tonumber(args[2]);
-if #args == 2 and (origin == nil or origin < 0 or origin >= #memory.bytes or not integer.isInteger(origin)) then
-    print("Origin must be an integer between 0 and " .. tostring(#memory.bytes) .. ".");
+if #args == 2 and (origin == nil or origin < 0 or origin >= #ccasm.memory.bytes or not ccasm.integer.isInteger(origin)) then
+    print("Origin must be an integer between 0 and " .. tostring(#ccasm.memory.bytes) .. ".");
     return;
 end
 
@@ -41,8 +41,8 @@ outFile.close();
 
 local shouldOverrideOrigin = origin ~= nil;
 if not shouldOverrideOrigin then
-    origin = integer.getIntegerFromBytes(byteCodeOrigin);
+    origin = ccasm.integer.getIntegerFromBytes(byteCodeOrigin);
 end
 
-memory.load(origin, byteCode);
+ccasm.memory.load(origin, byteCode);
 print(string.format("%d bytes loaded at 0x%X.", #byteCode, origin));

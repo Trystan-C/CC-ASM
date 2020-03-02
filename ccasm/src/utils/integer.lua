@@ -63,7 +63,7 @@ end
 
 -- TODO: Limits on integer size? Byte table can arbitrarily long.
 function getIntegerFromBytes(bytes)
-    assertIsValidByteTable("integer.getIntegerFromBytes", bytes);
+    assertIsValidByteTable("ccasm.integer.getIntegerFromBytes", bytes);
     local val = 0;
     local i, bitShift = #bytes, 0;
     while i >= 1 do
@@ -78,7 +78,7 @@ function getIntegerFromBytes(bytes)
 end
 
 function getSignedIntegerFromBytes(bytes)
-    assertIsValidByteTable("integer.getSignedIntegerFromBytes", bytes);
+    assertIsValidByteTable("ccasm.integer.getSignedIntegerFromBytes", bytes);
     local val = getIntegerFromBytes(bytes);
     if val > 0 and bit.band(bytes[1], 0x80) ~= 0 then
         val = val - math.pow(2, 8*#bytes);
@@ -114,8 +114,8 @@ function divideBytes(byteTable1, byteTable2)
 end
 
 function leftShiftBytes(byteTable, shiftCount)
-    assertIsValidByteTable("integer.leftShiftBytes", byteTable);
-    assert(shiftCount >= 0, "integer.leftShiftBytes: Expected shift value to be >= 0.");
+    assertIsValidByteTable("ccasm.integer.leftShiftBytes", byteTable);
+    assert(shiftCount >= 0, "ccasm.integer.leftShiftBytes: Expected shift value to be >= 0.");
     local result = { 0, 0, 0, 0 };
     for i = shiftCount + 1, #byteTable do
         result[i - shiftCount] = byteTable[i];
@@ -124,8 +124,8 @@ function leftShiftBytes(byteTable, shiftCount)
 end
 
 function rightShiftBytes(byteTable, shiftCount)
-    assertIsValidByteTable("integer.rightShiftBytes", byteTable);
-    assert(shiftCount >= 0, "integer.rightShiftBytes: Expected shift value to be >= 0.");
+    assertIsValidByteTable("ccasm.integer.rightShiftBytes", byteTable);
+    assert(shiftCount >= 0, "ccasm.integer.rightShiftBytes: Expected shift value to be >= 0.");
     local result = { 0, 0, 0, 0 };
     for i = 1, #byteTable - shiftCount do
         result[i + shiftCount] = byteTable[i];
@@ -134,8 +134,8 @@ function rightShiftBytes(byteTable, shiftCount)
 end
 
 function orBytes(byteTable1, byteTable2)
-    assertIsValidByteTable("integer.orBytes", byteTable1);
-    assertIsValidByteTable("integer.orBytes", byteTable2);
+    assertIsValidByteTable("ccasm.integer.orBytes", byteTable1);
+    assertIsValidByteTable("ccasm.integer.orBytes", byteTable2);
     local result = {};
     for i = 1, math.max(#byteTable1, #byteTable2) do
         result[i] = bit.bor(byteTable1[i] or 0, byteTable2[i] or 0);
@@ -144,8 +144,8 @@ function orBytes(byteTable1, byteTable2)
 end
 
 function andBytes(byteTable1, byteTable2)
-    assertIsValidByteTable("integer.andBytes", byteTable1);
-    assertIsValidByteTable("integer.andBytes", byteTable2);
+    assertIsValidByteTable("ccasm.integer.andBytes", byteTable1);
+    assertIsValidByteTable("ccasm.integer.andBytes", byteTable2);
     local result = {};
     for i = 1, math.max(#byteTable1, #byteTable2) do
         result[i] = bit.band(byteTable1[i] or 0, byteTable2[i] or 0);
@@ -154,8 +154,8 @@ function andBytes(byteTable1, byteTable2)
 end
 
 function xorBytes(byteTable1, byteTable2)
-    assertIsValidByteTable("integer.xorBytes", byteTable1);
-    assertIsValidByteTable("integer.xorBytes", byteTable2);
+    assertIsValidByteTable("ccasm.integer.xorBytes", byteTable1);
+    assertIsValidByteTable("ccasm.integer.xorBytes", byteTable2);
     local result = {};
     for i = 1, math.max(#byteTable1, #byteTable2) do
         result[i] = bit.bxor(byteTable1[i] or 0, byteTable2[i] or 0);
@@ -164,7 +164,7 @@ function xorBytes(byteTable1, byteTable2)
 end
 
 function notBytes(byteTable)
-    assertIsValidByteTable("integer.notBytes", byteTable);
+    assertIsValidByteTable("ccasm.integer.notBytes", byteTable);
     local result = {};
     for i = 1, #byteTable do
         result[i] = bit.band(0xFF, bit.bnot(byteTable[i]));

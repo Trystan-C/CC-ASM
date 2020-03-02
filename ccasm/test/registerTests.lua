@@ -1,103 +1,103 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
-apiLoader.loadIfNotPresent("/ccasm/test/assert/expect.lua");
+assert(os.loadAPI("/ccasm/test/assert/expect.lua"));
 
 local testSuite = {
 
     beforeEach = function()
-        registers.clear();
+        ccasm.registers.clear();
     end,
 
     clearRegisters = function()
-        for _, dataRegister in ipairs(registers.dataRegisters) do
+        for _, dataRegister in ipairs(ccasm.registers.dataRegisters) do
             dataRegister.setLong({ 0x12, 0x23, 0xAB, 0xCD });
         end
-        for _, addressRegister in ipairs(registers.addressRegisters) do
+        for _, addressRegister in ipairs(ccasm.registers.addressRegisters) do
             addressRegister.setLong({ 0x12, 0x23, 0xAB, 0xCD });
         end
-        registers.setStatusRegister(0xFF);
+        ccasm.registers.setStatusRegister(0xFF);
 
-        registers.clear();
+        ccasm.registers.clear();
 
-        for _, dataRegister in ipairs(registers.dataRegisters) do
+        for _, dataRegister in ipairs(ccasm.registers.dataRegisters) do
             expect.value(dataRegister.value).toDeepEqual({ 0, 0, 0, 0 });
         end
-        for _, addressRegister in ipairs(registers.addressRegisters) do
+        for _, addressRegister in ipairs(ccasm.registers.addressRegisters) do
             expect.value(addressRegister.value).toDeepEqual({ 0, 0, 0, 0 });
         end
-        expect.value(registers.getStatusRegister()).toEqual(0);
+        expect.value(ccasm.registers.getStatusRegister()).toEqual(0);
     end,
 
     getAndSetDataRegisterByte = function()
         local byte = { 0xFF };
-        registers.dataRegisters[0].setByte(byte);
-        expect.value(registers.dataRegisters[0].getByte()).toDeepEqual(byte);
+        ccasm.registers.dataRegisters[0].setByte(byte);
+        expect.value(ccasm.registers.dataRegisters[0].getByte()).toDeepEqual(byte);
     end,
 
     getAndSetDataRegisterWord  = function()
         local word = { 0xA3, 25 };
-        registers.dataRegisters[2].setWord(word);
-        expect.value(registers.dataRegisters[2].getWord()).toDeepEqual(word);
+        ccasm.registers.dataRegisters[2].setWord(word);
+        expect.value(ccasm.registers.dataRegisters[2].getWord()).toDeepEqual(word);
     end,
 
     getAndSetDataRegisterLong = function()
         local long = { 0xb1, 0xa5, 255, 0x32 };
-        registers.dataRegisters[3].setLong(long);
-        expect.value(registers.dataRegisters[3].getLong()).toDeepEqual(long);
+        ccasm.registers.dataRegisters[3].setLong(long);
+        expect.value(ccasm.registers.dataRegisters[3].getLong()).toDeepEqual(long);
     end,
 
     getAndSetAddressRegisterByte = function()
         local byte = { 0xB2 };
-        registers.addressRegisters[1].setByte(byte);
-        expect.value(registers.addressRegisters[1].getByte()).toDeepEqual(byte);
+        ccasm.registers.addressRegisters[1].setByte(byte);
+        expect.value(ccasm.registers.addressRegisters[1].getByte()).toDeepEqual(byte);
     end,
 
     getAndSetAddressRegisterWord  = function()
         local word = { 0xF0, 0x12 };
-        registers.addressRegisters[2].setWord(word);
-        expect.value(registers.addressRegisters[2].getWord()).toDeepEqual(word);
+        ccasm.registers.addressRegisters[2].setWord(word);
+        expect.value(ccasm.registers.addressRegisters[2].getWord()).toDeepEqual(word);
     end,
 
     getAndSetAddressRegisterLong = function()
         local long = { 0xb1, 0xa5, 255, 0x32 };
-        registers.addressRegisters[3].setLong(long);
-        expect.value(registers.addressRegisters[3].getLong()).toDeepEqual(long);
+        ccasm.registers.addressRegisters[3].setLong(long);
+        expect.value(ccasm.registers.addressRegisters[3].getLong()).toDeepEqual(long);
     end,
 
     popAtStackBaseThrowsError = function()
         expect.errorToBeThrown(function()
-            registers.popStackByte();
+            ccasm.registers.popStackByte();
         end);
 
-        registers.clear();
+        ccasm.registers.clear();
         expect.errorToBeThrown(function()
-            registers.popStackWord();
+            ccasm.registers.popStackWord();
         end);
         
-        registers.clear();
+        ccasm.registers.clear();
         expect.errorToBeThrown(function()
-            registers.popStackLong();
+            ccasm.registers.popStackLong();
         end);
     end,
 
     pushOverStackLimitThrowsError = function()
         local bytes = {};
-        for i = 1, registers.STACK_SIZE_IN_BYTES do
+        for i = 1, ccasm.registers.STACK_SIZE_IN_BYTES do
             table.insert(bytes, 0);
         end
-        registers.pushStack(bytes);
+        ccasm.registers.pushStack(bytes);
         expect.errorToBeThrown(function()
-            registers.pushStack({ 0 });
+            ccasm.registers.pushStack({ 0 });
         end);
     end,
 
     stack = function()
-        registers.pushStack({ 0x12 });
-        registers.pushStack({ 0x12, 0x34 });
-        registers.pushStack({ 0x12, 0x34, 0xAB, 0xCD });
-        expect.value(registers.popStackLong()).toDeepEqual({ 0x12, 0x34, 0xAB, 0xCD });
-        expect.value(registers.popStackWord()).toDeepEqual({ 0x12, 0x34 });
-        expect.value(registers.popStackByte()).toDeepEqual({ 0x12 });
+        ccasm.registers.pushStack({ 0x12 });
+        ccasm.registers.pushStack({ 0x12, 0x34 });
+        ccasm.registers.pushStack({ 0x12, 0x34, 0xAB, 0xCD });
+        expect.value(ccasm.registers.popStackLong()).toDeepEqual({ 0x12, 0x34, 0xAB, 0xCD });
+        expect.value(ccasm.registers.popStackWord()).toDeepEqual({ 0x12, 0x34 });
+        expect.value(ccasm.registers.popStackByte()).toDeepEqual({ 0x12 });
     end,
 
 };

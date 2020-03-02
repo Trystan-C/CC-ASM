@@ -235,18 +235,28 @@ local function runTestsInFile(absoluteFilePath)
     printTestReport(report);
 end
 
+local function loadNewCCASMInstance()
+    shell.run("/ccasm/ccasm.lua");
+end
+
 local function main(testsDirectoryPath, recurse)
     if testsDirectoryPath ~= nil then
         local absoluteTestPath = shell.resolve(testsDirectoryPath);
+        local runnerFunction = nil;
 
         if isDirectoryPathValid(absoluteTestPath) then
             if recurse then
-                return recursivelyRunTestsInDirectory(absoluteTestPath)
+                runnerFunction = recursivelyRunTestsInDirectory;
             else
-                return runTestsInDirectory(absoluteTestPath);
+                runnerFunction = runTestsInDirectory;
             end
         elseif isFilePathValid(absoluteTestPath) then
-            return runTestsInFile(absoluteTestPath);
+            runnerFunction = runTestsInFile;
+        end
+
+        if runnerFunction ~= nil then
+            loadNewCCASMInstance();
+            return runnerFunction(absoluteTestPath);
         end
     end
     printUsage();

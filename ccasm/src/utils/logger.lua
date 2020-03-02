@@ -15,7 +15,7 @@ end
 
 local function serializeObject(object)
     if type(object) == "table" then
-        return tableUtils.recursivelySerializeTable(object);
+        return ccasm.ccasm.tableUtils.recursivelySerializeTable(object);
     else
         return tostring(object);
     end

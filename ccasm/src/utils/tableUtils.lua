@@ -43,7 +43,7 @@ function assertTableSizesAreEqual(...)
     local size = nil;
 
     for _, tbl in ipairs(tables) do
-        local tblSize = tableUtils.countKeys(tbl);
+        local tblSize = countKeys(tbl);
         if not size then
             size = tblSize;
         else

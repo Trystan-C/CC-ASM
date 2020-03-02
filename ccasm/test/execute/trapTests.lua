@@ -1,5 +1,5 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
-apiLoader.loadIfNotPresent("/ccasm/test/fixtures/cpuTestFixture.lua");
+assert(os.loadAPI("/ccasm/test/fixtures/cpuTestFixture.lua"));
 local fixture = cpuTestFixture;
 
 local testSuite = {
@@ -54,7 +54,7 @@ local testSuite = {
                 .step();
         end);
         if not result then
-            logger.info("trapTests.clearScreen: Error during execution: %%", message);
+            ccasm.logger.info("trapTests.clearScreen: Error during execution: %%", message);
         end
         
         _G.term = originalTerm;
@@ -78,7 +78,7 @@ local testSuite = {
                 .step();
         end);
         if not result then
-            logger.info("trapTests.clearLine: Error during execution: %%", message);
+            ccasm.logger.info("trapTests.clearLine: Error during execution: %%", message);
         end
 
         _G.term = originalTerm;
@@ -106,7 +106,7 @@ local testSuite = {
                 .step(2);
         end);
         if not result then
-            logger.info("trapTests.writeString: Error during execution: %%", message);
+            ccasm.logger.info("trapTests.writeString: Error during execution: %%", message);
         end
         _G.term = originalTerm;
 

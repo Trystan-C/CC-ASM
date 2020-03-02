@@ -5,14 +5,14 @@ apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/instructions.lua");
 
 local function readNextByte()
-    local byte = memory.bytes[registers.getProgramCounter()];
-    registers.setProgramCounter(registers.getProgramCounter() + 1);
+    local byte = ccasm.memory.bytes[ccasm.registers.getProgramCounter()];
+    ccasm.registers.setProgramCounter(ccasm.registers.getProgramCounter() + 1);
     return byte;
 end
 
 local function loadInstruction()
     local byte = readNextByte();
-    local definition = instructions.definitionFromByte(byte);
+    local definition = ccasm.instructions.definitionFromByte(byte);
 
     if definition == nil then
         error("cpu: Unsupported instruction byte: " .. tostring(byte) .. ".");
@@ -24,13 +24,13 @@ end
 local function loadOperand()
     local typeByte = readNextByte();
     local sizeInBytes = readNextByte();
-    local operandValueStartAddress = registers.getProgramCounter();
+    local operandValueStartAddress = ccasm.registers.getProgramCounter();
     local valueBytes = {};
     for i = 1, sizeInBytes do
         valueBytes[i] = readNextByte();
     end
 
-    local definition = operandTypes.getDefinition(typeByte);
+    local definition = ccasm.operandTypes.getDefinition(typeByte);
     return {
         definition = definition;
         sizeInBytes = sizeInBytes;

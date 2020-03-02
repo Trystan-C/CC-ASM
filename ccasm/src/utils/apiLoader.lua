@@ -5,7 +5,7 @@ local function assertAbsoluteApiPathIsValid(absoluteApiPath)
 end
 
 local function isApiLoaded(apiName)
-    return _G[apiName] ~= nil;
+    return _G.ccasm[apiName] ~= nil;
 end
 
 function loadIfNotPresent(absoluteApiPath)
@@ -18,8 +18,12 @@ function loadIfNotPresent(absoluteApiPath)
         apiName = absoluteApiPath:match(".*/(%w+)$");
     end
 
-    if not isApiLoaded(apiName) and not os.loadAPI(absoluteApiPath) then
-        local message = "Failed to load API " .. apiName .. " at " .. absoluteApiPath;
-        error(message);
+    if not isApiLoaded(apiName) then
+        local success = os.loadAPI(absoluteApiPath)
+        if not success then
+            error("Failed to load API " .. apiName .. " at " .. absoluteApiPath);
+        end
+        _G.ccasm[apiName] = _G[apiName];
+        _G[apiName] = nil;
     end
 end

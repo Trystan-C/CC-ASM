@@ -20,28 +20,28 @@ local function move(byteValue, name, sizeDescriptor, sizeInBytes)
         byteValue = byteValue,
         numOperands = 2,
         verifyEach = function(operand)
-            if operand.definition ~= operandTypes.symbolicAddress and
-            operand.definition ~= operandTypes.absoluteSymbolicAddress and
-            operand.definition ~= operandTypes.absoluteAddress then
+            if operand.definition ~= ccasm.operandTypes.symbolicAddress and
+            operand.definition ~= ccasm.operandTypes.absoluteSymbolicAddress and
+            operand.definition ~= ccasm.operandTypes.absoluteAddress then
                 assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
             end
         end,
         verifyAll = function(from, to)
             assert(
-                not (from.definition == operandTypes.symbolicAddress and to.definition == operandTypes.symbolicAddress) and
-                not (from.definition == operandTypes.symbolicAddress and to.definition == operandTypes.absoluteAddress) and
-                not (from.definition == operandTypes.symbolicAddress and to.definition == operandTypes.indirectAddress) and
-                not (from.definition == operandTypes.absoluteAddress and to.definition == operandTypes.symbolicAddress) and
-                not (from.definition == operandTypes.absoluteAddress and to.definition == operandTypes.absoluteAddress) and
-                not (from.definition == operandTypes.absoluteAddress and to.definition == operandTypes.indirectAddress) and
-                not (from.definition == operandTypes.indirectAddress and to.definition == operandTypes.symbolicAddress) and
-                not (from.definition == operandTypes.indirectAddress and to.definition == operandTypes.absoluteAddress) and
-                not (from.definition == operandTypes.indirectAddress and to.definition == operandTypes.indirectAddress),
+                not (from.definition == ccasm.operandTypes.symbolicAddress and to.definition == ccasm.operandTypes.symbolicAddress) and
+                not (from.definition == ccasm.operandTypes.symbolicAddress and to.definition == ccasm.operandTypes.absoluteAddress) and
+                not (from.definition == ccasm.operandTypes.symbolicAddress and to.definition == ccasm.operandTypes.indirectAddress) and
+                not (from.definition == ccasm.operandTypes.absoluteAddress and to.definition == ccasm.operandTypes.symbolicAddress) and
+                not (from.definition == ccasm.operandTypes.absoluteAddress and to.definition == ccasm.operandTypes.absoluteAddress) and
+                not (from.definition == ccasm.operandTypes.absoluteAddress and to.definition == ccasm.operandTypes.indirectAddress) and
+                not (from.definition == ccasm.operandTypes.indirectAddress and to.definition == ccasm.operandTypes.symbolicAddress) and
+                not (from.definition == ccasm.operandTypes.indirectAddress and to.definition == ccasm.operandTypes.absoluteAddress) and
+                not (from.definition == ccasm.operandTypes.indirectAddress and to.definition == ccasm.operandTypes.indirectAddress),
                 name .. ": Cannot move directly between absolute, symbolic, or indirect addresses."
             );
         end,
         execute = function(from, to)
-            operandUtils[sizeDescriptor](to).set(operandUtils[sizeDescriptor](from).get());
+            ccasm.operandUtils[sizeDescriptor](to).set(ccasm.operandUtils[sizeDescriptor](from).get());
         end,
     };
 end
@@ -58,21 +58,21 @@ local function add(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
         verifyAll = function(from, to)
             assert(
-                from.definition == operandTypes.dataRegister or
-                from.definition == operandTypes.immediateData,
+                from.definition == ccasm.operandTypes.dataRegister or
+                from.definition == ccasm.operandTypes.immediateData,
                 name .. ": source must be data register."
             );
             assert(
-                to.definition == operandTypes.dataRegister,
+                to.definition == ccasm.operandTypes.dataRegister,
                 name .. ": destination must be a data register."
             );
         end,
         execute = function(from, to)
-            local sum = integer.addBytes(
-                operandUtils[sizeDescriptor](from).get(),
-                operandUtils[sizeDescriptor](to).get()
+            local sum = ccasm.integer.addBytes(
+                ccasm.operandUtils[sizeDescriptor](from).get(),
+                ccasm.operandUtils[sizeDescriptor](to).get()
             );
-            operandUtils[sizeDescriptor](to).set(tableUtils.fitToSize(sum, sizeInBytes));
+            ccasm.operandUtils[sizeDescriptor](to).set(ccasm.tableUtils.fitToSize(sum, sizeInBytes));
         end,
     };
 end
@@ -89,18 +89,18 @@ local function sub(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
         verifyAll = function(from, to)
             assert(
-                from.definition == operandTypes.immediateData or
-                from.definition == operandTypes.dataRegister,
+                from.definition == ccasm.operandTypes.immediateData or
+                from.definition == ccasm.operandTypes.dataRegister,
                 name .. ": Source must be immediate data or data reigster."
             );
-            assert(to.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
+            assert(to.definition == ccasm.operandTypes.dataRegister, name .. ": Destination must be data register.");
         end,
         execute = function(from, to)
-            local difference = integer.subtractBytes(
-                operandUtils[sizeDescriptor](to).get(),
-                operandUtils[sizeDescriptor](from).get()
+            local difference = ccasm.integer.subtractBytes(
+                ccasm.operandUtils[sizeDescriptor](to).get(),
+                ccasm.operandUtils[sizeDescriptor](from).get()
             );
-            operandUtils[sizeDescriptor](to).set(tableUtils.fitToSize(difference, sizeInBytes));
+            ccasm.operandUtils[sizeDescriptor](to).set(ccasm.tableUtils.fitToSize(difference, sizeInBytes));
         end,
     };
 end
@@ -117,18 +117,18 @@ local function mul(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
         verifyAll = function(from, to)
             assert(
-                from.definition == operandTypes.dataRegister or
-                from.definition == operandTypes.immediateData,
+                from.definition == ccasm.operandTypes.dataRegister or
+                from.definition == ccasm.operandTypes.immediateData,
                 name .. ": Source must be data register or immediate data."
             );
-            assert(to.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
+            assert(to.definition == ccasm.operandTypes.dataRegister, name .. ": Destination must be data register.");
         end,
         execute = function(from, to)
-            local product = integer.multiplyBytes(
-                operandUtils[sizeDescriptor](from).get(),
-                operandUtils[sizeDescriptor](to).get()
+            local product = ccasm.integer.multiplyBytes(
+                ccasm.operandUtils[sizeDescriptor](from).get(),
+                ccasm.operandUtils[sizeDescriptor](to).get()
             );
-            operandUtils[sizeDescriptor](to).set(tableUtils.fitToSize(product, sizeInBytes));
+            ccasm.operandUtils[sizeDescriptor](to).set(ccasm.tableUtils.fitToSize(product, sizeInBytes));
         end,
     };
 end
@@ -145,18 +145,18 @@ local function div(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
         verifyAll = function(from, to)
             assert(
-                from.definition == operandTypes.immediateData or
-                from.definition == operandTypes.dataRegister,
+                from.definition == ccasm.operandTypes.immediateData or
+                from.definition == ccasm.operandTypes.dataRegister,
                 name .. ": Source must be immediate data or data register."
             );
-            assert(to.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
+            assert(to.definition == ccasm.operandTypes.dataRegister, name .. ": Destination must be data register.");
         end,
         execute = function(from, to)
-            local quotient = integer.divideBytes(
-                operandUtils[sizeDescriptor](from).get(),
-                operandUtils[sizeDescriptor](to).get()
+            local quotient = ccasm.integer.divideBytes(
+                ccasm.operandUtils[sizeDescriptor](from).get(),
+                ccasm.operandUtils[sizeDescriptor](to).get()
             );
-            operandUtils[sizeDescriptor](to).set(tableUtils.fitToSize(quotient, sizeInBytes));
+            ccasm.operandUtils[sizeDescriptor](to).set(ccasm.tableUtils.fitToSize(quotient, sizeInBytes));
         end,
     };
 end
@@ -173,20 +173,20 @@ local function cmp(byteValue, name, sizeDescriptor, sizeInBytes)
         end,
         verifyAll = function(left, right)
             assert(
-                left.definition == operandTypes.dataRegister or
-                left.definition == operandTypes.immediateData,
+                left.definition == ccasm.operandTypes.dataRegister or
+                left.definition == ccasm.operandTypes.immediateData,
                 name .. ": Left operand must be immediate data or data register."
             );
             assert(
-                right.definition == operandTypes.immediateData or
-                right.definition == operandTypes.dataRegister,
+                right.definition == ccasm.operandTypes.immediateData or
+                right.definition == ccasm.operandTypes.dataRegister,
                 name .. "cmpByte: Right operand must be immediate data or data register."
             );
         end,
         execute = function(left, right)
-            registers.compare(
-                integer.getSignedIntegerFromBytes(operandUtils[sizeDescriptor](left).get()),
-                integer.getSignedIntegerFromBytes(operandUtils[sizeDescriptor](right).get())
+            ccasm.registers.compare(
+                ccasm.integer.getSignedIntegerFromBytes(ccasm.operandUtils[sizeDescriptor](left).get()),
+                ccasm.integer.getSignedIntegerFromBytes(ccasm.operandUtils[sizeDescriptor](right).get())
             );
         end,
     };
@@ -201,14 +201,14 @@ apiEnv.beq = {
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "beq: Operand must be at most 2 bytes.");
         assert(
-            operand.definition == operandTypes.symbolicAddress or
-            operand.definition == operandTypes.immediateData,
+            operand.definition == ccasm.operandTypes.symbolicAddress or
+            operand.definition == ccasm.operandTypes.immediateData,
             "beq: Operand must be a symbolic address or immediate data."
         );
     end,
     execute = function(operand)
-        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 1 then
-            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        if ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_COMPARISON) == 1 then
+            ccasm.registers.setProgramCounter(ccasm.operandUtils.absoluteAddress(operand));
         end
     end,
 };
@@ -218,14 +218,14 @@ apiEnv.bne = {
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "bne: Operand must be at most 2 bytes.");
         assert(
-            operand.definition == operandTypes.symbolicAddress or
-            operand.definition == operandTypes.immediateData,
+            operand.definition == ccasm.operandTypes.symbolicAddress or
+            operand.definition == ccasm.operandTypes.immediateData,
             "bne: Operand must be a symbolic address or immediate data."
         );
     end,
     execute = function(operand)
-        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 0 then
-            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        if ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_COMPARISON) == 0 then
+            ccasm.registers.setProgramCounter(ccasm.operandUtils.absoluteAddress(operand));
         end
     end,
 };
@@ -235,15 +235,15 @@ apiEnv.blt = {
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "blt: Operand must be at most 2 bytes.");
         assert(
-            operand.definition == operandTypes.symbolicAddress or
-            operand.definition == operandTypes.immediateData,
+            operand.definition == ccasm.operandTypes.symbolicAddress or
+            operand.definition == ccasm.operandTypes.immediateData,
             "blt: Operand must be a symbolic address or immediate data."
         );
     end,
     execute = function(operand)
-        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 0 and 
-        bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_NEGATIVE) == 1 then
-            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        if ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_COMPARISON) == 0 and 
+        ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_NEGATIVE) == 1 then
+            ccasm.registers.setProgramCounter(ccasm.operandUtils.absoluteAddress(operand));
         end
     end,
 };
@@ -253,15 +253,15 @@ apiEnv.ble = {
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "blt: Operand must be at most 2 bytes.");
         assert(
-            operand.definition == operandTypes.symbolicAddress or
-            operand.definition == operandTypes.immediateData,
+            operand.definition == ccasm.operandTypes.symbolicAddress or
+            operand.definition == ccasm.operandTypes.immediateData,
             "ble: Operand must be a symbolic address or immediate data."
         );
     end,
     execute = function(operand)
-        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 1 or
-        bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_NEGATIVE) == 1 then
-            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        if ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_COMPARISON) == 1 or
+        ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_NEGATIVE) == 1 then
+            ccasm.registers.setProgramCounter(ccasm.operandUtils.absoluteAddress(operand));
         end
     end,
 };
@@ -271,15 +271,15 @@ apiEnv.bgt = {
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "bgt: Operand must be at most 2 bytes.");
         assert(
-            operand.definition == operandTypes.symbolicAddress or
-            operand.definition == operandTypes.immediateData,
+            operand.definition == ccasm.operandTypes.symbolicAddress or
+            operand.definition == ccasm.operandTypes.immediateData,
             "bgt: Operand must be a symbolic address or immediate data."
         );
     end,
     execute = function(operand)
-        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 0 and
-        bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_NEGATIVE) == 0 then
-            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        if ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_COMPARISON) == 0 and
+        ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_NEGATIVE) == 0 then
+            ccasm.registers.setProgramCounter(ccasm.operandUtils.absoluteAddress(operand));
         end
     end,
 };
@@ -289,15 +289,15 @@ apiEnv.bge = {
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "bge: Operand must be at most 2 bytes.");
         assert(
-            operand.definition == operandTypes.symbolicAddress or
-            operand.definition == operandTypes.immediateData,
+            operand.definition == ccasm.operandTypes.symbolicAddress or
+            operand.definition == ccasm.operandTypes.immediateData,
             "bge: Operand must be a symbolic address or immediate data."
         );
     end,
     execute = function(operand)
-        if bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON) == 1 or
-        bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_NEGATIVE) == 0 then
-            registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        if ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_COMPARISON) == 1 or
+        ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_NEGATIVE) == 0 then
+            ccasm.registers.setProgramCounter(ccasm.operandUtils.absoluteAddress(operand));
         end
     end,
 };
@@ -307,13 +307,13 @@ apiEnv.bra = {
     verifyEach = function(operand)
         assert(operand.sizeInBytes <= 2, "bra: Operand must be at most 2 bytes.");
         assert(
-            operand.definition == operandTypes.symbolicAddress or
-            operand.definition == operandTypes.absoluteAddress,
+            operand.definition == ccasm.operandTypes.symbolicAddress or
+            operand.definition == ccasm.operandTypes.absoluteAddress,
             "bra: Operand must be symbolic or absolute address."
         );
     end,
     execute = function(operand)
-        registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        ccasm.registers.setProgramCounter(ccasm.operandUtils.absoluteAddress(operand));
     end
 };
 --SUBROUTINES----------------------------------------------
@@ -321,19 +321,19 @@ apiEnv.bsr = {
     byteValue = 26,
     numOperands = 1,
     verifyEach = function(operand)
-        assert(operand.definition == operandTypes.symbolicAddress, "bsr: Operand must be symbolic address.");
+        assert(operand.definition == ccasm.operandTypes.symbolicAddress, "bsr: Operand must be symbolic address.");
     end,
     execute = function(operand)
         -- Program counter will be at the next instruction, since cpu will read the instruction and operand before executing.
-        registers.pushStack(integer.getBytesForInteger(2, registers.getProgramCounter()));
-        registers.setProgramCounter(operandUtils.absoluteAddress(operand));
+        ccasm.registers.pushStack(ccasm.integer.getBytesForInteger(2, ccasm.registers.getProgramCounter()));
+        ccasm.registers.setProgramCounter(ccasm.operandUtils.absoluteAddress(operand));
     end,
 };
 apiEnv.ret = {
     byteValue = 27,
     numOperands = 0,
     execute = function()
-        registers.setProgramCounter(integer.getIntegerFromBytes(registers.popStackWord()));
+        ccasm.registers.setProgramCounter(ccasm.integer.getIntegerFromBytes(ccasm.registers.popStackWord()));
     end,
 };
 --STACK----------------------------------------------------
@@ -342,24 +342,24 @@ apiEnv.push = {
     numOperands = 1,
     verifyEach = function(operand)
         assert(
-            operand.definition == operandTypes.registerRange or
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.addressRegister,
+            operand.definition == ccasm.operandTypes.registerRange or
+            operand.definition == ccasm.operandTypes.dataRegister or
+            operand.definition == ccasm.operandTypes.addressRegister,
             "push: Operand must be a data/address register or register range.");
     end,
     execute = function(operand)
-        if operand.definition == operandTypes.registerRange then
-            local dataRegisterIds = operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[1]);
+        if operand.definition == ccasm.operandTypes.registerRange then
+            local dataRegisterIds = ccasm.operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[1]);
             for _, dataRegisterId in ipairs(dataRegisterIds) do
-                registers.pushStack(registers.dataRegisters[dataRegisterId].value);
+                ccasm.registers.pushStack(ccasm.registers.dataRegisters[dataRegisterId].value);
             end
 
-            local addressRegisterIds = operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[2]);
+            local addressRegisterIds = ccasm.operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[2]);
             for _, addressRegisterId in ipairs(addressRegisterIds) do
-                registers.pushStack(registers.addressRegisters[addressRegisterId].value);
+                ccasm.registers.pushStack(ccasm.registers.addressRegisters[addressRegisterId].value);
             end
         else
-            registers.pushStack(operandUtils.long(operand).get());
+            ccasm.registers.pushStack(ccasm.operandUtils.long(operand).get());
         end
     end,
 };
@@ -368,25 +368,25 @@ apiEnv.pop = {
     numOperands = 1,
     verifyEach = function(operand)
         assert(
-            operand.definition == operandTypes.registerRange or
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.addressRegister,
+            operand.definition == ccasm.operandTypes.registerRange or
+            operand.definition == ccasm.operandTypes.dataRegister or
+            operand.definition == ccasm.operandTypes.addressRegister,
             "pop: Operand must be data/address register or register range."
         );
     end,
     execute = function(operand)
-        if operand.definition == operandTypes.registerRange then
-            local dataRegisterIds = operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[1]);
+        if operand.definition == ccasm.operandTypes.registerRange then
+            local dataRegisterIds = ccasm.operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[1]);
             for i = #dataRegisterIds, 1, -1 do
-                registers.dataRegisters[dataRegisterIds[i]].setLong(registers.popStackLong());
+                ccasm.registers.dataRegisters[dataRegisterIds[i]].setLong(ccasm.registers.popStackLong());
             end
 
-            local addressRegisterIds = operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[2]);
+            local addressRegisterIds = ccasm.operandTypes.registerRange.registerIdsFromByte(operand.valueBytes[2]);
             for i = #addressRegisterIds, 1, -1 do
-                registers.addressRegisters[addressRegisterIds[i]].setLong(registers.popStackLong());
+                ccasm.registers.addressRegisters[addressRegisterIds[i]].setLong(ccasm.registers.popStackLong());
             end
         else
-            operandUtils.long(operand).set(registers.popStackLong());
+            ccasm.operandUtils.long(operand).set(ccasm.registers.popStackLong());
         end
     end,
 }
@@ -396,14 +396,14 @@ apiEnv.lshiftByte = {
     numOperands = 1,
     verifyEach = function(operand)
         assert(
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.addressRegister,
+            operand.definition == ccasm.operandTypes.dataRegister or
+            operand.definition == ccasm.operandTypes.addressRegister,
             "lshiftByte: Operand must be data or address register."
         );
     end,
     execute = function(operand)
-        operandUtils.long(operand).set(
-            integer.leftShiftBytes(operandUtils.long(operand).get(), 1)
+        ccasm.operandUtils.long(operand).set(
+            ccasm.integer.leftShiftBytes(ccasm.operandUtils.long(operand).get(), 1)
         );
     end,
 };
@@ -412,14 +412,14 @@ apiEnv.lshiftWord = {
     numOperands = 1,
     verifyEach = function(operand)
         assert(
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.addressRegister,
+            operand.definition == ccasm.operandTypes.dataRegister or
+            operand.definition == ccasm.operandTypes.addressRegister,
             "lshiftWord: Operand must be data or address register."
         );
     end,
     execute = function(operand)
-        operandUtils.long(operand).set(
-            integer.leftShiftBytes(operandUtils.long(operand).get(), 2)
+        ccasm.operandUtils.long(operand).set(
+            ccasm.integer.leftShiftBytes(ccasm.operandUtils.long(operand).get(), 2)
         );
     end,
 };
@@ -428,14 +428,14 @@ apiEnv.rshiftByte = {
     numOperands = 1,
     verifyEach = function(operand)
         assert(
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.addressRegister,
+            operand.definition == ccasm.operandTypes.dataRegister or
+            operand.definition == ccasm.operandTypes.addressRegister,
             "rshiftByte: Operand must be data or address register."
         );
     end,
     execute = function(operand)
-        operandUtils.long(operand).set(
-            integer.rightShiftBytes(operandUtils.long(operand).get(), 1)
+        ccasm.operandUtils.long(operand).set(
+            ccasm.integer.rightShiftBytes(ccasm.operandUtils.long(operand).get(), 1)
         );
     end,
 };
@@ -444,14 +444,14 @@ apiEnv.rshiftWord = {
     numOperands = 1,
     verifyEach = function(operand)
         assert(
-            operand.definition == operandTypes.dataRegister or
-            operand.definition == operandTypes.addressRegister,
+            operand.definition == ccasm.operandTypes.dataRegister or
+            operand.definition == ccasm.operandTypes.addressRegister,
             "rshiftWord: Operand must be data or address register."
         );
     end,
     execute = function(operand)
-        operandUtils.long(operand).set(
-            integer.rightShiftBytes(operandUtils.long(operand).get(), 2)
+        ccasm.operandUtils.long(operand).set(
+            ccasm.integer.rightShiftBytes(ccasm.operandUtils.long(operand).get(), 2)
         );
     end,
 };
@@ -464,19 +464,19 @@ local function _or(byteValue, name, sizeDescriptor, sizeInBytes)
         verifyEach = function(operand)
             assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
             assert(
-                operand.definition == operandTypes.dataRegister or
-                operand.definition == operandTypes.immediateData,
+                operand.definition == ccasm.operandTypes.dataRegister or
+                operand.definition == ccasm.operandTypes.immediateData,
                 name .. ": Operand must be data register or immediate data."
             );
         end,
         verifyAll = function(source, destination)
-            assert(destination.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
+            assert(destination.definition == ccasm.operandTypes.dataRegister, name .. ": Destination must be data register.");
         end,
         execute = function(source, destination)
-            operandUtils[sizeDescriptor](destination).set(
-                integer.orBytes(
-                    operandUtils[sizeDescriptor](source).get(),
-                    operandUtils[sizeDescriptor](destination).get()
+            ccasm.operandUtils[sizeDescriptor](destination).set(
+                ccasm.integer.orBytes(
+                    ccasm.operandUtils[sizeDescriptor](source).get(),
+                    ccasm.operandUtils[sizeDescriptor](destination).get()
                 )
             );
         end,
@@ -494,19 +494,19 @@ local function _and(byteValue, name, sizeDescriptor, sizeInBytes)
         verifyEach = function(operand)
             assert(operand.sizeInBytes <= sizeInBytes, string.format("%s: Operand must be at most %d byte(s).", name, sizeInBytes));
             assert(
-                operand.definition == operandTypes.dataRegister or
-                operand.definition == operandTypes.immediateData,
+                operand.definition == ccasm.operandTypes.dataRegister or
+                operand.definition == ccasm.operandTypes.immediateData,
                 name .. ": Operand must be data register or immediate data."
             );
         end,
         verifyAll = function(source, destination)
-            assert(destination.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
+            assert(destination.definition == ccasm.operandTypes.dataRegister, name .. ": Destination must be data register.");
         end,
         execute = function(source, destination)
-            operandUtils[sizeDescriptor](destination).set(
-                integer.andBytes(
-                    operandUtils[sizeDescriptor](source).get(),
-                    operandUtils[sizeDescriptor](destination).get()
+            ccasm.operandUtils[sizeDescriptor](destination).set(
+                ccasm.integer.andBytes(
+                    ccasm.operandUtils[sizeDescriptor](source).get(),
+                    ccasm.operandUtils[sizeDescriptor](destination).get()
                 )
             );
         end,
@@ -523,19 +523,19 @@ local function xor(byteValue, name, sizeDescriptor, sizeInBytes)
         verifyEach = function(operand)
             assert(operand.sizeInBytes <= sizeInBytes, name .. ": Operand must be at most " .. sizeInBytes .. " byte(s).");
             assert(
-                operand.definition == operandTypes.immediateData or
-                operand.definition == operandTypes.dataRegister,
+                operand.definition == ccasm.operandTypes.immediateData or
+                operand.definition == ccasm.operandTypes.dataRegister,
                 name .. ": Operand must be immediate data or data register."
             );
         end,
         verifyAll = function(source, destination)
-            assert(destination.definition == operandTypes.dataRegister, name .. ": Destination must be data register.");
+            assert(destination.definition == ccasm.operandTypes.dataRegister, name .. ": Destination must be data register.");
         end,
         execute = function(source, destination)
-            operandUtils[sizeDescriptor](destination).set(
-                integer.xorBytes(
-                    operandUtils[sizeDescriptor](source).get(),
-                    operandUtils[sizeDescriptor](destination).get()
+            ccasm.operandUtils[sizeDescriptor](destination).set(
+                ccasm.integer.xorBytes(
+                    ccasm.operandUtils[sizeDescriptor](source).get(),
+                    ccasm.operandUtils[sizeDescriptor](destination).get()
                 )
             );
         end,
@@ -552,12 +552,12 @@ local function _not(byteValue, name, sizeDescriptor, sizeInBytes)
         numOperands = 1,
         verifyEach = function(operand)
             assert(operand.sizeInBytes <= 1, name .. ": Operand must be at most " .. sizeInBytes .. " byte(s).");
-            assert(operand.definition == operandTypes.dataRegister, name .. ": Operand must be data register.");
+            assert(operand.definition == ccasm.operandTypes.dataRegister, name .. ": Operand must be data register.");
         end,
         execute = function(operand)
-            operandUtils[sizeDescriptor](operand).set(
-                integer.notBytes(
-                    operandUtils[sizeDescriptor](operand).get()
+            ccasm.operandUtils[sizeDescriptor](operand).set(
+                ccasm.integer.notBytes(
+                    ccasm.operandUtils[sizeDescriptor](operand).get()
                 )
             );
         end,
@@ -572,7 +572,7 @@ local function readStringFromMemory(absoluteAddress)
     local offset = 0;
     local limit = 1024;
     while offset <= limit do
-        local byte = (memory.readBytes(absoluteAddress + offset, 1))[1];
+        local byte = (ccasm.memory.readBytes(absoluteAddress + offset, 1))[1];
         offset = offset + 1;
         if byte == 0 then
             break;
@@ -590,37 +590,37 @@ apiEnv.trap = {
     byteValue = 46,
     numOperands = 1,
     verifyEach = function(operand)
-        assert(operand.definition == operandTypes.immediateData, "trap: Operand must be immediate data.");
+        assert(operand.definition == ccasm.operandTypes.immediateData, "trap: Operand must be immediate data.");
         assert(operand.sizeInBytes == 1, "trap: Operand must be at most 1 byte.");
     end,
     execute = function(operand)
-        local byte = (operandUtils.byte(operand).get())[1];
+        local byte = (ccasm.operandUtils.byte(operand).get())[1];
         -- getTerminalDimensions
         if byte == 0 then
             local width, height = term.getSize();
-            registers.dataRegisters[6].setLong(
-                tableUtils.fitToSize(integer.getBytesForInteger(width), 4)
+            ccasm.registers.dataRegisters[6].setLong(
+                ccasm.tableUtils.fitToSize(ccasm.integer.getBytesForInteger(width), 4)
             );
-            registers.dataRegisters[7].setLong(
-                tableUtils.fitToSize(integer.getBytesForInteger(height), 4)
+            ccasm.registers.dataRegisters[7].setLong(
+                ccasm.tableUtils.fitToSize(ccasm.integer.getBytesForInteger(height), 4)
             );
         -- getCursorPosition
         elseif byte == 1 then
             local cursorX, cursorY = term.getCursorPos();
-            registers.dataRegisters[6].setLong(
-                tableUtils.fitToSize(integer.getBytesForInteger(cursorX), 4)
+            ccasm.registers.dataRegisters[6].setLong(
+                ccasm.tableUtils.fitToSize(ccasm.integer.getBytesForInteger(cursorX), 4)
             );
-            registers.dataRegisters[7].setLong(
-                tableUtils.fitToSize(integer.getBytesForInteger(cursorY), 4)
+            ccasm.registers.dataRegisters[7].setLong(
+                ccasm.tableUtils.fitToSize(ccasm.integer.getBytesForInteger(cursorY), 4)
             );
         -- setCursorPosition
         elseif byte == 2 then
             term.setCursorPos(
-                integer.getSignedIntegerFromBytes(
-                    registers.dataRegisters[0].getLong()
+                ccasm.integer.getSignedIntegerFromBytes(
+                    ccasm.registers.dataRegisters[0].getLong()
                 ),
-                integer.getSignedIntegerFromBytes(
-                    registers.dataRegisters[1].getLong()
+                ccasm.integer.getSignedIntegerFromBytes(
+                    ccasm.registers.dataRegisters[1].getLong()
                 )
             );
         -- clearScreen
@@ -631,7 +631,7 @@ apiEnv.trap = {
             term.clearLine();
         -- writeString
         elseif byte == 5 then
-            local absoluteAddress = integer.getIntegerFromBytes(registers.addressRegisters[0].getWord());
+            local absoluteAddress = ccasm.integer.getIntegerFromBytes(ccasm.registers.addressRegisters[0].getWord());
             local str = readStringFromMemory(absoluteAddress);
             term.write(str);
         -- readString
@@ -642,15 +642,15 @@ apiEnv.trap = {
                 table.insert(strBytes, string.byte(char));
             end
             table.insert(strBytes, 0); -- Append null-terminator.
-            memory.writeBytes(
-                integer.getIntegerFromBytes(registers.addressRegisters[0].getWord()),
+            ccasm.memory.writeBytes(
+                ccasm.integer.getIntegerFromBytes(ccasm.registers.addressRegisters[0].getWord()),
                 strBytes
             );
         -- getStringLength not including null terminator
         elseif byte == 7 then
-            local absoluteAddress = integer.getIntegerFromBytes(registers.addressRegisters[0].getWord());
+            local absoluteAddress = ccasm.integer.getIntegerFromBytes(ccasm.registers.addressRegisters[0].getWord());
             local str = readStringFromMemory(absoluteAddress);
-            registers.dataRegisters[0].setLong(integer.getBytesForInteger(4, str:len()));
+            ccasm.registers.dataRegisters[0].setLong(ccasm.integer.getBytesForInteger(4, str:len()));
         elseif byte == 8 then
             os.shutdown();
         elseif byte == 9 then

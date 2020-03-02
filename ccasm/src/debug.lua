@@ -26,7 +26,7 @@ local function draw()
         return ({ term.getCursorPos() })[2];
     end
     local function formatBytesAsHex(bytes)
-        return "0x" .. string.format("%" .. (#bytes * 2) .. "X", integer.getIntegerFromBytes(bytes)):gsub("%s", "0");
+        return "0x" .. string.format("%" .. (#bytes * 2) .. "X", ccasm.integer.getIntegerFromBytes(bytes)):gsub("%s", "0");
     end
     local function drawRegister(prefix, bytes)
         local info = prefix .. ": " .. formatBytesAsHex(bytes);
@@ -44,7 +44,7 @@ local function draw()
         drawCenteredHeader(startX, startY, label);
         term.setCursorPos(1, startY + 1);
         term.write("| ");
-        for i = 0, tableUtils.countKeys(registers) - 1 do
+        for i = 0, ccasm.tableUtils.countKeys(registers) - 1 do
             drawRegister(prefix .. i, registers[i].value);
         end
         term.setCursorPos(screenWidth, curY());
@@ -55,9 +55,9 @@ local function draw()
         drawCenteredHeader(startX, startY, "SPECIAL REGISTERS");
         term.setCursorPos(1, startY + 1);
         term.write("| ");
-        drawRegister("SP", integer.getBytesForInteger(4, registers.getStackPointer()));
-        drawRegister("SR", integer.getBytesForInteger(4, registers.getStatusRegister()));
-        drawRegister("PC", integer.getBytesForInteger(4, registers.getProgramCounter()));
+        drawRegister("SP", ccasm.integer.getBytesForInteger(4, ccasm.registers.getStackPointer()));
+        drawRegister("SR", ccasm.integer.getBytesForInteger(4, ccasm.registers.getStatusRegister()));
+        drawRegister("PC", ccasm.integer.getBytesForInteger(4, ccasm.registers.getProgramCounter()));
         term.setCursorPos(screenWidth, curY());
         term.write("|");
     end
@@ -66,9 +66,9 @@ local function draw()
         local memoryWidth, memoryHeight = 0, 0;
         while curY() <= screenHeight do
             memoryHeight = memoryHeight + 1;
-            term.write(formatBytesAsHex(integer.getBytesForInteger(2, address)) .. " | ");
-            while curX() + 2 <= screenWidth and address <= #memory.bytes do
-                local byte = string.format("%2X", integer.getIntegerFromBytes(memory.readBytes(address, 1))):gsub("%s", "0");
+            term.write(formatBytesAsHex(ccasm.integer.getBytesForInteger(2, address)) .. " | ");
+            while curX() + 2 <= screenWidth and address <= #ccasm.memory.bytes do
+                local byte = string.format("%2X", ccasm.integer.getIntegerFromBytes(ccasm.memory.readBytes(address, 1))):gsub("%s", "0");
                 term.write(byte .. " ");
                 address = address + 1;
             end
@@ -82,11 +82,11 @@ local function draw()
 
     term.clear();
     term.setCursorPos(1, 1);
-    drawRegisterBlock("DATA REGISTERS", "D", registers.dataRegisters);
+    drawRegisterBlock("DATA REGISTERS", "D", ccasm.registers.dataRegisters);
     term.setCursorPos(3, 1);
     term.write("[h]");
     term.setCursorPos(1, curY() + 1);
-    drawRegisterBlock("ADDRESS REGISTERS", "A", registers.addressRegisters);
+    drawRegisterBlock("ADDRESS REGISTERS", "A", ccasm.registers.addressRegisters);
     drawStatusRegisters();
     term.setCursorPos(1, curY() + 1);
     term.write("+" .. string.rep("-", screenWidth - 2) .. "+");
@@ -98,7 +98,7 @@ local function drawHelp()
     term.clear();
     drawCenteredHeader(1, 1, "DEBUGGER COMMANDS");
     term.setCursorPos(1, 2);
-    print(" - s: Step the CPU.");
+    print(" - s: Step the ccasm.cpu.");
     print(" - k: Scroll up.");
     print(" - j: Scroll down.");
     print(" - m: Jump to address.");
@@ -109,7 +109,7 @@ local function drawHelp()
 end
 
 local function tryStep()
-    local success, message = pcall(cpu.step);
+    local success, message = pcall(ccasm.cpu.step);
     if not success then
         term.setCursorPos(1, screenHeight);
         term.clearLine();
@@ -133,7 +133,7 @@ local function readJumpToAddress()
     else
         addr = tonumber(addr);
     end
-    if addr == nil or not memory.isAddressValid(addr) then
+    if addr == nil or not ccasm.memory.isAddressValid(addr) then
         term.setCursorPos(1, screenHeight - 1);
         term.clearLine();
         term.write("Invalid address.");
@@ -145,7 +145,7 @@ end
 
 local key;
 local i = 0;
-registers.setProgramCounter(0);
+ccasm.registers.setProgramCounter(0);
 repeat
     local memoryWidth, memoryHeight = draw();
     key = ({ os.pullEvent("key") })[2];
@@ -165,7 +165,7 @@ repeat
         baseAddress = readJumpToAddress();
     end
     baseAddress = math.max(baseAddress, 0);
-    baseAddress = math.min(baseAddress, #memory.bytes - memoryWidth * memoryHeight);
+    baseAddress = math.min(baseAddress, #ccasm.memory.bytes - memoryWidth * memoryHeight);
 until key == keys.e;
 
 -- Swallow char event following key event, so

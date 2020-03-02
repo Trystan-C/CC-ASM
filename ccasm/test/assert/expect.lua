@@ -32,9 +32,9 @@ local function equals(val1, val2)
 end
 
 local function deepEquals(tbl1, tbl2)
-    tableUtils.assertIsTable(tbl1);
-    tableUtils.assertIsTable(tbl2);
-    tableUtils.assertTableSizesAreEqual(tbl1, tbl2);
+    ccasm.tableUtils.assertIsTable(tbl1);
+    ccasm.tableUtils.assertIsTable(tbl2);
+    ccasm.tableUtils.assertTableSizesAreEqual(tbl1, tbl2);
 
     for key, value in pairs(tbl1) do
         assertHasKey(tbl2, key);

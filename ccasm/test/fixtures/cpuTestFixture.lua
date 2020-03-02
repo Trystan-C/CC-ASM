@@ -1,18 +1,18 @@
 assert(os.loadAPI("/ccasm/src/utils/apiLoader.lua"));
+assert(os.loadAPI("/ccasm/test/assert/expect.lua"));
 apiLoader.loadIfNotPresent("/ccasm/src/assembler.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/memory.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/registers.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/cpu.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/integer.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/bitUtils.lua");
-apiLoader.loadIfNotPresent("/ccasm/test/assert/expect.lua");
 apiLoader.loadIfNotPresent("/ccasm/src/utils/logger.lua");
 
 local objectCode;
 local apiEnv = {};
 
 apiEnv.printProgramCounter = function()
-    logger.info("PROGRAM_COUNTER=%%", registers.getProgramCounter());
+    ccasm.logger.info("PROGRAM_COUNTER=%%", ccasm.registers.getProgramCounter());
     return {
         step = apiEnv.step;
         dataRegister = apiEnv.dataRegister;
@@ -33,16 +33,16 @@ apiEnv.statusRegister = function()
     end
     return {
         printValue = function()
-            logger.info("STATUS_REGISTER=%%", registers.statusRegister);
+            ccasm.logger.info("STATUS_REGISTER=%%", ccasm.registers.statusRegister);
             return next;
         end,
         comparisonFlagIs = function(value)
-            local actual = bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_COMPARISON);
+            local actual = ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_COMPARISON);
             assert(actual == value, errorMessage("comparisonFlag", value, actual));
             return next;
         end,
         negativeFlagIs = function(value)
-            local actual = bitUtils.getAt(registers.getStatusRegister(), registers.STATUS_NEGATIVE);
+            local actual = ccasm.bitUtils.getAt(ccasm.registers.getStatusRegister(), ccasm.registers.STATUS_NEGATIVE);
             assert(actual == value, errorMessage("negativeFlag", value, actual));
             return next;
         end,
@@ -50,8 +50,8 @@ apiEnv.statusRegister = function()
 end
 
 apiEnv.assertAddressRegisterValueIs = function(id, value)
-    expect.value(registers.addressRegisters[id].value)
-            .toDeepEqual(integer.getBytesForInteger(registers.registerWidthInBytes, value));
+    expect.value(ccasm.registers.addressRegisters[id].value)
+            .toDeepEqual(ccasm.integer.getBytesForInteger(ccasm.registers.registerWidthInBytes, value));
 
     return {
         step = apiEnv.step;
@@ -61,8 +61,8 @@ apiEnv.assertAddressRegisterValueIs = function(id, value)
 end
 
 apiEnv.assertDataRegisterValueIs = function(id, value)
-    expect.value(registers.dataRegisters[id].value)
-        .toDeepEqual(integer.getBytesForInteger(registers.registerWidthInBytes, value));
+    expect.value(ccasm.registers.dataRegisters[id].value)
+        .toDeepEqual(ccasm.integer.getBytesForInteger(ccasm.registers.registerWidthInBytes, value));
 
     return {
         step = apiEnv.step;
@@ -72,7 +72,7 @@ apiEnv.assertDataRegisterValueIs = function(id, value)
 end
 
 apiEnv.printAddressRegisterValue = function(id)
-    logger.info("ADDRESS_REGISTER[%%]=%%", id, registers.addressRegisters[id].value);
+    ccasm.logger.info("ADDRESS_REGISTER[%%]=%%", id, ccasm.registers.addressRegisters[id].value);
 
     return {
         step = apiEnv.step;
@@ -82,7 +82,7 @@ apiEnv.printAddressRegisterValue = function(id)
 end
 
 apiEnv.printDataRegisterValue = function(id)
-    logger.info("DATA_REGISTER[%%]=%%", id, registers.dataRegisters[id].value);
+    ccasm.logger.info("DATA_REGISTER[%%]=%%", id, ccasm.registers.dataRegisters[id].value);
 
     return {
         step = apiEnv.step;
@@ -119,7 +119,7 @@ apiEnv.step = function(steps)
     end
 
     for _ = 1, steps do
-        cpu.step();
+        ccasm.cpu.step();
     end
 
     return {
@@ -132,8 +132,8 @@ apiEnv.step = function(steps)
 end
 
 apiEnv.programCounterIsAt = function(address)
-    local condition = address == registers.getProgramCounter();
-    local message = "Expected program counter to be at address 0x" .. string.format("%X", address) .. " but was 0x" .. string.format("%X", registers.getProgramCounter());
+    local condition = address == ccasm.registers.getProgramCounter();
+    local message = "Expected program counter to be at address 0x" .. string.format("%X", address) .. " but was 0x" .. string.format("%X", ccasm.registers.getProgramCounter());
     assert(condition, message);
 
     return {
@@ -142,10 +142,10 @@ apiEnv.programCounterIsAt = function(address)
 end
 
 local function load()
-    registers.clear();
-    memory.clear();
-    memory.load(objectCode.origin, objectCode.binaryOutput);
-    registers.setProgramCounter(objectCode.origin);
+    ccasm.registers.clear();
+    ccasm.memory.clear();
+    ccasm.memory.load(objectCode.origin, objectCode.binaryOutput);
+    ccasm.registers.setProgramCounter(objectCode.origin);
 
     return {
         programCounterIsAt = apiEnv.programCounterIsAt;
@@ -155,7 +155,7 @@ local function load()
 end
 
 local function logBinary()
-    logger.info("[bindump]\nsize=%%\nbytes=%%", #objectCode.binaryOutput, objectCode.binaryOutput);
+    ccasm.logger.info("[bindump]\nsize=%%\nbytes=%%", #objectCode.binaryOutput, objectCode.binaryOutput);
 
     return {
         load = load;
@@ -163,7 +163,7 @@ local function logBinary()
 end
 
 function assemble(code)
-    objectCode = assembler.assemble(code);
+    objectCode = ccasm.assembler.assemble(code);
 
     return {
         load = load;

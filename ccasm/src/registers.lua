@@ -13,14 +13,14 @@ STATUS_NEGATIVE = 1;
 function compare(a, b)
     local diff = a - b;
     if diff == 0 then
-        statusRegister = bitUtils.setOnAt(statusRegister, STATUS_COMPARISON);
+        statusRegister = ccasm.bitUtils.setOnAt(statusRegister, STATUS_COMPARISON);
     else
-        statusRegister = bitUtils.setOffAt(statusRegister, STATUS_COMPARISON);
+        statusRegister = ccasm.bitUtils.setOffAt(statusRegister, STATUS_COMPARISON);
     end
     if diff < 0 then
-        statusRegister = bitUtils.setOnAt(statusRegister, STATUS_NEGATIVE);
+        statusRegister = ccasm.bitUtils.setOnAt(statusRegister, STATUS_NEGATIVE);
     else
-        statusRegister = bitUtils.setOffAt(statusRegister, STATUS_NEGATIVE);
+        statusRegister = ccasm.bitUtils.setOffAt(statusRegister, STATUS_NEGATIVE);
     end
 end
 
@@ -108,11 +108,11 @@ addressRegisters = {};
 for i = 0, 7 do
     dataRegisters[i] = {
         id = i;
-        value = tableUtils.zeros(registerWidthInBytes);
+        value = ccasm.tableUtils.zeros(registerWidthInBytes);
     };
     addressRegisters[i] = {
         id = i;
-        value = tableUtils.zeros(registerWidthInBytes);
+        value = ccasm.tableUtils.zeros(registerWidthInBytes);
     };
     setmetatable(dataRegisters[i], registerMetatable);
     setmetatable(addressRegisters[i], registerMetatable);
@@ -131,31 +131,31 @@ function getStackPointer()
 end
 
 function pushStack(byteTable)
-    local numBytes = tableUtils.countKeys(byteTable);
+    local numBytes = ccasm.tableUtils.countKeys(byteTable);
     if not isAddressInStackRegion(stackPointer + numBytes) then
         error("pushStack: Stack write exceeds max address.");
     end
-    memory.writeBytes(stackPointer, byteTable);
+    ccasm.memory.writeBytes(stackPointer, byteTable);
     stackPointer = stackPointer + numBytes;
 end
 
 function popStackByte()
     assert(isAddressInStackRegion(stackPointer - 1), "popStackByte: Illegal pop below stack base.");
-    local byte = memory.readBytes(stackPointer - 1, 1);
+    local byte = ccasm.memory.readBytes(stackPointer - 1, 1);
     stackPointer = stackPointer - 1;
     return byte;
 end
 
 function popStackWord()
     assert(isAddressInStackRegion(stackPointer - 2), "popStackWord: Illegal pop below stack base.");
-    local word = memory.readBytes(stackPointer - 2, 2);
+    local word = ccasm.memory.readBytes(stackPointer - 2, 2);
     stackPointer = stackPointer - 2;
     return word;
 end
 
 function popStackLong()
     assert(isAddressInStackRegion(stackPointer - 4), "popStackLong: Illegal pop below stack base.");
-    local long = memory.readBytes(stackPointer - 4, 4);
+    local long = ccasm.memory.readBytes(stackPointer - 4, 4);
     stackPointer = stackPointer - 4;
     return long;
 end
@@ -167,7 +167,7 @@ function getProgramCounter()
 end
 
 function setProgramCounter(address)
-    if memory.isAddressValid(address) then
+    if ccasm.memory.isAddressValid(address) then
         programCounter = address;
     else
         error("registers: Expected program counter to be a valid address, was " .. tostring(address));
@@ -177,8 +177,8 @@ end
 --COMMON---------------------------------------------------
 function clear()
     for i = 0, 7 do
-        dataRegisters[i].setLong(tableUtils.zeros(registerWidthInBytes));
-        addressRegisters[i].setLong(tableUtils.zeros(registerWidthInBytes));
+        dataRegisters[i].setLong(ccasm.tableUtils.zeros(registerWidthInBytes));
+        addressRegisters[i].setLong(ccasm.tableUtils.zeros(registerWidthInBytes));
     end
     statusRegister = 0;
     stackPointer = STACK_START_ADDRESS;

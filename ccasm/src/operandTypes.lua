@@ -86,9 +86,9 @@ immediateData.parseValueAsBytes = function(token)
     end
 
     local value = tonumber(rawValue, base);
-    integer.assertValueIsInteger(value);
-    local size = integer.getSizeInBytesForInteger(value);
-    return integer.getBytesForInteger(size, value);
+    ccasm.integer.assertValueIsInteger(value);
+    local size = ccasm.integer.getSizeInBytesForInteger(value);
+    return ccasm.integer.getBytesForInteger(size, value);
 end
 
 --SYMBOLIC ADDRESS-----------------------------------------
@@ -158,7 +158,7 @@ registerRange.byteFromMatch = function(range)
         assert(interval[1] <= interval[2], "Register range (" .. range .. ") must be increasing.");
     end
     for i = interval[1], interval[2] or interval[1] do
-        byte = bitUtils.setOnAt(byte, i);
+        byte = ccasm.bitUtils.setOnAt(byte, i);
     end
 
     return byte;
@@ -167,7 +167,7 @@ end
 registerRange.registerIdsFromByte = function(byte)
     local ids = {};
     for i = 0, 7 do
-        if bitUtils.getAt(byte, i) == 1 then
+        if ccasm.bitUtils.getAt(byte, i) == 1 then
             table.insert(ids, i);
         end
     end

@@ -109,11 +109,11 @@ local function throwSymbolRedefinitionError(symbol)
 end
 
 local function isNextTokenAnInstruction()
-    return instructions[peekNextToken()] ~= nil;
+    return ccasm.instructions[peekNextToken()] ~= nil;
 end
 
 local function isNextTokenAnOperand()
-    return operandTypes.getType(peekNextToken()) ~= operandTypes.invalidType;
+    return ccasm.operandTypes.getType(peekNextToken()) ~= ccasm.operandTypes.invalidType;
 end
 
 local function appendOperandAsBinary(typeByte, sizeByte, valueBytes)
@@ -152,9 +152,9 @@ local function parseOperandFromNextToken(verify)
     end
 
     local token = dequeueNextToken();
-    local definition = operandTypes[operandTypes.getType(token)]
+    local definition = ccasm.operandTypes[ccasm.operandTypes.getType(token)]
 
-    if definition == operandTypes.symbolicAddress or definition == operandTypes.absoluteSymbolicAddress then
+    if definition == ccasm.operandTypes.symbolicAddress or definition == ccasm.operandTypes.absoluteSymbolicAddress then
         markSymbolicAddressFillIndex(definition.match(token));
     end
 
@@ -184,7 +184,7 @@ local function appendInstructionAsBinary(instructionByte)
 end
 
 local function assembleNextTokenAsInstruction()
-    local definition = instructions[dequeueNextToken()];
+    local definition = ccasm.instructions[dequeueNextToken()];
     local numOperands = definition.numOperands;
     local operands = {};
 
@@ -202,7 +202,7 @@ local function assembleNextTokenAsInstruction()
 end
 
 local function assembleNextTokenAsMacro()
-    local definition = macros[dequeueNextToken()];
+    local definition = ccasm.macros[dequeueNextToken()];
     local operands = {};
 
     for _ = 1, definition.numOperands do
@@ -214,7 +214,7 @@ local function assembleNextTokenAsMacro()
 end
 
 local function isNextTokenMacro()
-    return macros[peekNextToken()] ~= nil;
+    return ccasm.macros[peekNextToken()] ~= nil;
 end
 
 local function fillReferencesForSymbol(definition)
@@ -222,7 +222,7 @@ local function fillReferencesForSymbol(definition)
 
     for _, fillIndex in ipairs(definition.fillIndices) do
         local offset = indexInBinaryOutput - fillIndex;
-        local offsetBytes = integer.getBytesForInteger(operandTypes.symbolicAddress.sizeInBytes, offset);
+        local offsetBytes = ccasm.integer.getBytesForInteger(ccasm.operandTypes.symbolicAddress.sizeInBytes, offset);
         insertBytesIntoBinaryOutputAt(fillIndex, unpack(offsetBytes));
     end
 end
@@ -246,7 +246,7 @@ local function addSymbolicAddress(symbol)
 end
 
 local function assembleNextTokenAsSymbol()
-    local symbol = operandTypes.symbolicAddress.match(dequeueNextToken());
+    local symbol = ccasm.operandTypes.symbolicAddress.match(dequeueNextToken());
 
     if symbolIsDeclared(symbol) then
         throwSymbolRedefinitionError(symbol);
@@ -257,7 +257,7 @@ end
 
 local function isNextTokenSymbol()
     local token = peekNextToken();
-    return operandTypes.getType(token) == "symbolicAddress";
+    return ccasm.operandTypes.getType(token) == "symbolicAddress";
 end
 
 local function reset()
@@ -290,5 +290,5 @@ function assemble(code)
 
     fillSymbolAddressReferences();
 
-    return tableUtils.deepCopy(objectCode);
+    return ccasm.tableUtils.deepCopy(objectCode);
 end
