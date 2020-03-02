@@ -56,6 +56,8 @@ To run the existing test suite, run the following from the project root:
 
 `ccasm> test/testRunner . -r`
 
+![alt text](https://i.imgur.com/DAcEQzF.gif "Test Demo")
+
 ## Global State
 CC-ASM relies on some global state. All of this state resides at `_G.ccasm`. To reset the
 state use the following:
