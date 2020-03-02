@@ -311,6 +311,8 @@ function assembleFile(filePath)
             outFile.write(byte);
         end
         outFile.close();
+
+        return objectFilePath;
     else
         error("assembleFile(" .. filePath .. "): No .ccasm extension or file does not exist.");
     end

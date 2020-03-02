@@ -14,7 +14,7 @@ for _, filePath in ipairs(args) do
     if filePath:match("%.ccasm$") and fs.exists(filePath) then
         print("Assembling " .. filePath .. "...");
         local result, errorMessage = pcall(function()
-            ccasm.assembler.assembleFile(filePath);
+            local objectFilePath = ccasm.assembler.assembleFile(filePath);
             print("Wrote object file " .. objectFilePath .. ".");
         end);
         if not result then
