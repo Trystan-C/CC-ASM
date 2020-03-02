@@ -14,22 +14,7 @@ for _, filePath in ipairs(args) do
     if filePath:match("%.ccasm$") and fs.exists(filePath) then
         print("Assembling " .. filePath .. "...");
         local result, errorMessage = pcall(function()
-            local inFile = fs.open(filePath, "r");
-            local code = inFile.readAll();
-            inFile.close();
-
-            local objectCode = ccasm.assembler.assemble(code);
-            local objectFilePath = filePath:match("^(.+)%.ccasm$") .. ".cco";
-            local outFile = fs.open(objectFilePath, "wb");
-            -- Write origin as first word.
-            local originBytes = ccasm.tableUtils.fitToSize(ccasm.integer.getBytesForInteger(objectCode.origin), 2);
-            outFile.write(originBytes[1]);
-            outFile.write(originBytes[2]);
-            -- Write binary output as remaining code.
-            for _, byte in ipairs(objectCode.binaryOutput) do
-                outFile.write(byte);
-            end
-            outFile.close();
+            ccasm.assembler.assembleFile(filePath);
             print("Wrote object file " .. objectFilePath .. ".");
         end);
         if not result then
