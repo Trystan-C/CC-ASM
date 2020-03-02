@@ -6,7 +6,7 @@ This project implements a simple assembly-like language for Computer Craft.
 
 * Compiled 68k-esque assembly language for Computer Craft.
 * API for compiling and running CC-ASM programs.
-* API for adding your own ccasm.instructions.
+* API for adding your own instructions.
 * Standalone CC-ASM program debugger.
 * XUnit-inspired test runner for Computer Craft.
 
