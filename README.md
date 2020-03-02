@@ -34,10 +34,14 @@ and step the cpu.
 
 To use the debugger, load an assembled program and run `debug`.
 
+![alt text](https://i.imgur.com/g05Umc3.png "Debugger")
+
 ## Demos
 
 To show that you can do some neat things with CC-ASM, I've written a really, really
-simple pong clone in the language.
+simple pong clone in the language. It flickers a lot, but it works.
+
+![alt text](https://i.imgur.com/yHYa7Cq.gif "Pong Demo")
 
 ## Installation
 
@@ -46,7 +50,7 @@ is located at `/ccasm/`.
 
 ## Testing
 This section covers running the existing CC-ASM test suite. For guidance on writing
-additional tests for yourself, seeing the `CONTRUBITNG.md` in the `test` subdirectory.
+additional tests for yourself, see the `CONTRUBITNG.md` in the `test` subdirectory.
 
 To run the existing test suite, run the following from the project root:
 
@@ -62,6 +66,6 @@ This will reload all of the APIs and clear memory, registers, etc.
 
 ## Limitations
 
-* CC-ASM is **slow**. If you want to stuff quickly, don't use this. It's a novelty project.
+* CC-ASM is **slow**. If you want to do stuff quickly, don't use this. It's a novelty project.
 * Memory is restricted to 1K, i.e., a 16-bit address space.
 * Data sizes are limited to 1, 2, or 4 bytes (byte, word, long).
