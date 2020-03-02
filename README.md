@@ -69,5 +69,5 @@ This will reload all of the APIs and clear memory, registers, etc.
 ## Limitations
 
 * CC-ASM is **slow**. If you want to do stuff quickly, don't use this. It's a novelty project.
-* Memory is restricted to 1K, i.e., a 16-bit address space.
+* Memory is restricted to 64K, i.e., a 16-bit address space.
 * Data sizes are limited to 1, 2, or 4 bytes (byte, word, long).
