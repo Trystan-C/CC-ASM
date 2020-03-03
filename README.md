@@ -34,7 +34,7 @@ and step the cpu.
 
 To use the debugger, load an assembled program and run `debug`.
 
-![alt text](https://i.imgur.com/g05Umc3.png "Debugger")
+![alt text](https://i.imgur.com/DauIhz2.png "Debugger")
 
 ## Demos
 

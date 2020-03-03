@@ -83,15 +83,18 @@ local function draw()
     term.clear();
     term.setCursorPos(1, 1);
     drawRegisterBlock("DATA REGISTERS", "D", ccasm.registers.dataRegisters);
-    term.setCursorPos(3, 1);
-    term.write("[h]");
     term.setCursorPos(1, curY() + 1);
     drawRegisterBlock("ADDRESS REGISTERS", "A", ccasm.registers.addressRegisters);
+    term.setCursorPos(1, curY() + 1);
     drawStatusRegisters();
     term.setCursorPos(1, curY() + 1);
     term.write("+" .. string.rep("-", screenWidth - 2) .. "+");
     term.setCursorPos(1, curY() + 1);
-    return drawMemory();
+    local memoryWidth, memoryHeight = drawMemory();
+    term.setCursorPos(3, 1);
+    term.write("[h]");
+
+    return memoryWidth, memoryHeight;
 end
 
 local function drawHelp()
