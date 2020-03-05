@@ -10,6 +10,10 @@ This project implements a simple assembly-like language for Computer Craft.
 * Standalone CC-ASM program debugger.
 * XUnit-inspired test runner for Computer Craft.
 
+## Documentation
+
+See the documentation for an overview of the system at `/docs`.
+
 ## Running Programs
 
 ### Compilation
