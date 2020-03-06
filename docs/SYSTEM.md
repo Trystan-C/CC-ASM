@@ -87,7 +87,8 @@ Subroutine calls using the `bsr` instruction store the address jumped from on th
 to the next word on the stack.
 
 CC-ASM programs can also directly write/read to/from the stack using the `push/pop` instructions. There is no size granualarity provided
-with these instructions, however, so every `push/pop` stores a long. If a program tries to push a long onto the stack that will push
+with these instructions, however, so every `push/pop` stores a long. If a program tries to push a long onto the stack that will exceed
+the maximum stack address, a runtime error is thrown and the program crashes.
 
 ### User Input
 
